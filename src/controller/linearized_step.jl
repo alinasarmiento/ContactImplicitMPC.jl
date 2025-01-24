@@ -21,7 +21,7 @@ function LinearizedStep(s::Simulation, z::Vector{T}, θ::Vector{T}, κ::T) where
 	rz0 = zeros(nz, nz)
 	rθ0 = zeros(nz, nθ)
 
-	s.res.r!(r0, z0, θ0, κ0)
+	s.res.r!(r0, z0, θ0, κ0[1])
 	s.res.rz!(rz0, z0, θ0)
 	s.res.rθ!(rθ0, z0, θ0)
 
@@ -48,7 +48,7 @@ end
 function update!(lin::LinearizedStep{T}, s::Simulation{T}, z::Vector{T}, θ::Vector{T}) where T
 	lin.z .= z
 	lin.θ .= θ
-	s.res.r!(lin.r, z, θ, lin.κ)
+	s.res.r!(lin.r, z, θ, lin.κ[1])
 	s.res.rz!(lin.rz, z, θ)
 	s.res.rθ!(lin.rθ, z, θ)
 	return nothing
