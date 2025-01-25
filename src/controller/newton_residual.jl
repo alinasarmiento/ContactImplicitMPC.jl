@@ -111,7 +111,7 @@ end
 
 
 function residual!(res::NewtonResidual, core::Newton,
-    ν::Vector{Nν}, im_traj::ImplicitTrajectory, traj::ContactTraj, ref_traj::ContactTraj, window::Vector{Int}) where Nν
+    ν::Vector{Nν}, im_traj::ImplicitTrajectory, traj::ContactTraj, ref_traj::ContactTraj) where Nν
 
     # unpack
     opts = core.opts
@@ -121,17 +121,17 @@ function residual!(res::NewtonResidual, core::Newton,
     # Objective
     gradient!(res, obj, core, traj, ref_traj)
 
-    for (i, t) in enumerate(window[1:end-2])
+    for t in eachindex(ν)
         # Lagrangian
-        i >= 3 && mul!(res.q2[i-2], transpose(im_traj.δq0[t]), ν[i], 1.0, 1.0)
-        i >= 2 && mul!(res.q2[i-1], transpose(im_traj.δq1[t]), ν[i], 1.0, 1.0)
-        mul!(res.u1[i], transpose(im_traj.δu1[t]), ν[i], 1.0, 1.0)
-
+        t >= 3 && mul!(res.q2[t-2], transpose(im_traj.δq0[t]), ν[t], 1.0, 1.0)
+        t >= 2 && mul!(res.q2[t-1], transpose(im_traj.δq1[t]), ν[t], 1.0, 1.0)
+        mul!(res.u1[t], transpose(im_traj.δu1[t]), ν[t], 1.0, 1.0)
+        
         # Implicit dynamics
-        res.rd[i] .+= im_traj.d[t]
+        res.rd[t] .+= im_traj.d[t]
 
         # Minus Identity term #∇qk1, ∇γk, ∇bk
-        res.rI[i] .-= ν[i]
+        res.rI[t] .-= ν[t]
     end
 
     return nothing
@@ -175,12 +175,7 @@ function update_traj!(traj_cand::ContactTraj, traj::ContactTraj,
     return nothing
 end
 
-function gradient!(res::NewtonResidualConfigurationForce{T,vq2,vu1,vγ1,vb1,vd,vI,vq0,vq1},
-        obj::TrackingObjective{Q,U,C,B},
-        core::Newton{T,nq,nu,nw,nc,nb,nz,nθ,nν,NJ,NR,NI,O,LS},
-        traj::ContactTraj{T,nq,nu,nw,nc,nb,nz,nθ},
-        ref_traj::ContactTraj{T,nq,nu,nw,nc,nb,nz,nθ}) where {T,vq2,vu1,vγ1,vb1,vd,vI,vq0,vq1,Q,U,C,B,nq,nu,nw,nc,nb,nz,nθ,nν,NJ,NR,NI,O,LS}
-
+function gradient!(res::NewtonResidualConfigurationForce{T,vq2,vu1,vγ1,vb1,vd,vI,vq0,vq1}, obj::TrackingObjective{Q,U,C,B}, core::Newton{T,nq,nu,nw,nc,nb,nz,nθ,nν,NJ,NR,NI,O,LS}, traj::ContactTraj{T,nq,nu,nw,nc,nb,nz,nθ}, ref_traj::ContactTraj{T,nq,nu,nw,nc,nb,nz,nθ}) where {T,vq2,vu1,vγ1,vb1,vd,vI,vq0,vq1,Q,U,C,B,nq,nu,nw,nc,nb,nz,nθ,nν,NJ,NR,NI,O,LS}
     for t = 1:traj.H
         # Cost function
         delta!(core.Δq[t], traj.q[t+2], ref_traj.q[t+2])
@@ -191,7 +186,7 @@ function gradient!(res::NewtonResidualConfigurationForce{T,vq2,vu1,vγ1,vb1,vd,v
         # res.q2[t] .+= obj.q[t] * core.Δq[t]
         mul!(res.q2[t], obj.q[t], core.Δq[t], 1.0, 1.0)
         # res.u1[t] .+= obj.u[t] * core.Δu[t]
-        mul!(res.u1[t], obj.u[t], core.Δu[t], 1.0, 1.0)
+        mul!(res.u1[t], obj.u[t], core.Δu[t], 1.0, 1.0) 
         # res.γ1[t] .+= obj.γ[t] * core.Δγ[t]
         mul!(res.γ1[t], obj.γ[t], core.Δγ[t], 1.0, 1.0)
         # res.b1[t] .+= obj.b[t] * core.Δb[t]
@@ -200,12 +195,7 @@ function gradient!(res::NewtonResidualConfigurationForce{T,vq2,vu1,vγ1,vb1,vd,v
 end
 
 
-function gradient!(res::NewtonResidualConfiguration{T,vq2,vu1,vd,vI,vq0,vq1},
-        obj::TrackingObjective{Q,U,C,B},
-        core::Newton{T,nq,nu,nw,nc,nb,nz,nθ,nν,NJ,NR,NI,O,LS},
-        traj::ContactTraj{T,nq,nu,nw,nc,nb,nz,nθ},
-        ref_traj::ContactTraj{T,nq,nu,nw,nc,nb,nz,nθ}) where {T,vq2,vu1,vd,vI,vq0,vq1,Q,U,C,B,nq,nu,nw,nc,nb,nz,nθ,nν,NJ,NR,NI,O,LS}
-
+function gradient!(res::NewtonResidualConfiguration{T,vq2,vu1,vd,vI,vq0,vq1}, obj::TrackingObjective{Q,U,C,B}, core::Newton{T,nq,nu,nw,nc,nb,nz,nθ,nν,NJ,NR,NI,O,LS}, traj::ContactTraj{T,nq,nu,nw,nc,nb,nz,nθ}, ref_traj::ContactTraj{T,nq,nu,nw,nc,nb,nz,nθ}) where {T,vq2,vu1,vd,vI,vq0,vq1,Q,U,C,B,nq,nu,nw,nc,nb,nz,nθ,nν,NJ,NR,NI,O,LS}
     for t = 1:traj.H
         # Cost function
         delta!(core.Δq[t], traj.q[t+2], ref_traj.q[t+2])
@@ -218,16 +208,10 @@ function gradient!(res::NewtonResidualConfiguration{T,vq2,vu1,vd,vI,vq0,vq1},
     end
 end
 
-function gradient!(res::NewtonResidualConfigurationForce{T,vq2,vu1,vγ1,vb1,vd,vI,vq0,vq1},
-        obj::TrackingVelocityObjective{Q,V,U,C,B},
-        core::Newton{T,nq,nu,nw,nc,nb,nz,nθ,nν,NJ,NR,NI,O,LS},
-        traj::ContactTraj{T,nq,nu,nw,nc,nb,nz,nθ},
-        ref_traj::ContactTraj{T,nq,nu,nw,nc,nb,nz,nθ}) where {T,vq2,vu1,vγ1,vb1,vd,vI,vq0,vq1,Q,V,U,C,B,nq,nu,nw,nc,nb,nz,nθ,nν,NJ,NR,NI,O,LS}
-
+function gradient!(res::NewtonResidualConfigurationForce{T,vq2,vu1,vγ1,vb1,vd,vI,vq0,vq1}, obj::TrackingVelocityObjective{Q,V,U,C,B}, core::Newton{T,nq,nu,nw,nc,nb,nz,nθ,nν,NJ,NR,NI,O,LS}, traj::ContactTraj{T,nq,nu,nw,nc,nb,nz,nθ}, ref_traj::ContactTraj{T,nq,nu,nw,nc,nb,nz,nθ}) where {T,vq2,vu1,vγ1,vb1,vd,vI,vq0,vq1,Q,V,U,C,B,nq,nu,nw,nc,nb,nz,nθ,nν,NJ,NR,NI,O,LS}
     for t = 1:traj.H
         # Cost function
-        delta!(core.Δq[t], traj.q[t+2], ref_traj.q[t+2] + obj.q_target[t])
-        # delta!(core.Δq[t], traj.q[t+2], ref_traj.q[t+2])
+        delta!(core.Δq[t], traj.q[t+2], ref_traj.q[t+2])
         delta!(core.Δu[t], traj.u[t], ref_traj.u[t])
         delta!(core.Δγ[t], traj.γ[t], ref_traj.γ[t])
         delta!(core.Δb[t], traj.b[t], ref_traj.b[t])
@@ -235,7 +219,7 @@ function gradient!(res::NewtonResidualConfigurationForce{T,vq2,vu1,vγ1,vb1,vd,v
         # res.q2[t] .+= obj.q[t] * core.Δq[t]
         mul!(res.q2[t], obj.q[t], core.Δq[t], 1.0, 1.0)
         # res.u1[t] .+= obj.u[t] * core.Δu[t]
-        mul!(res.u1[t], obj.u[t], core.Δu[t], 1.0, 1.0)
+        mul!(res.u1[t], obj.u[t], core.Δu[t], 1.0, 1.0) 
         # res.γ1[t] .+= obj.γ[t] * core.Δγ[t]
         mul!(res.γ1[t], obj.γ[t], core.Δγ[t], 1.0, 1.0)
         # res.b1[t] .+= obj.b[t] * core.Δb[t]
@@ -243,39 +227,31 @@ function gradient!(res::NewtonResidualConfigurationForce{T,vq2,vu1,vγ1,vb1,vd,v
 
         # velocity
         # res.q2[t] .+= obj.v[t] * (traj.q[t+2] - traj.q[t+1])
-        mul!(res.q2[t], obj.v[t], traj.q[t+2], 1.0, 1.0)
+        mul!(res.q2[t], obj.v[t], traj.q[t+2], 1.0, 1.0) 
         mul!(res.q2[t], obj.v[t], traj.q[t+1], -1.0, 1.0)
 
         t == 1 && continue
         # res.q2[t-1] .-= obj.v[t] * (traj.q[t+2] - traj.q[t+1])
-        mul!(res.q2[t-1], obj.v[t], traj.q[t+2], -1.0, 1.0)
+        mul!(res.q2[t-1], obj.v[t], traj.q[t+2], -1.0, 1.0) 
         mul!(res.q2[t-1], obj.v[t], traj.q[t+1], 1.0, 1.0)
     end
 end
 
-function gradient!(res::NewtonResidualConfiguration{T,vq2,vu1,vd,vI,vq0,vq1},
-    obj::TrackingVelocityObjective{Q,V,U,C,B},
-    core::Newton{T,nq,nu,nw,nc,nb,nz,nθ,nν,NJ,NR,NI,O,LS},
-    traj::ContactTraj{T,nq,nu,nw,nc,nb,nz,nθ},
-    ref_traj::ContactTraj{T,nq,nu,nw,nc,nb,nz,nθ}) where {T,vq2,vu1,vd,vI,vq0,vq1,Q,V,U,C,B,nq,nu,nw,nc,nb,nz,nθ,nν,NJ,NR,NI,O,LS}
-
+function gradient!(res::NewtonResidualConfiguration{T,vq2,vu1,vd,vI,vq0,vq1}, obj::TrackingVelocityObjective{Q,V,U,C,B}, core::Newton{T,nq,nu,nw,nc,nb,nz,nθ,nν,NJ,NR,NI,O,LS}, traj::ContactTraj{T,nq,nu,nw,nc,nb,nz,nθ}, ref_traj::ContactTraj{T,nq,nu,nw,nc,nb,nz,nθ}) where {T,vq2,vu1,vd,vI,vq0,vq1,Q,V,U,C,B,nq,nu,nw,nc,nb,nz,nθ,nν,NJ,NR,NI,O,LS}
     for t = 1:traj.H
         # Cost function
-        delta!(core.Δq[t], traj.q[t+2], ref_traj.q[t+2] + obj.q_target[t])
-        # delta!(core.Δq[t], traj.q[t+2], ref_traj.q[t+2])
+        delta!(core.Δq[t], traj.q[t+2], ref_traj.q[t+2])
         delta!(core.Δu[t], traj.u[t], ref_traj.u[t])
 
         mul!(res.q2[t], obj.q[t], core.Δq[t], 1.0, 1.0)
         mul!(res.u1[t], obj.u[t], core.Δu[t], 1.0, 1.0)
 
         # velocity
-        mul!(res.q2[t], obj.v[t], traj.q[t+2], 1.0, 1.0)
+        mul!(res.q2[t], obj.v[t], traj.q[t+2], 1.0, 1.0) 
         mul!(res.q2[t], obj.v[t], traj.q[t+1], -1.0, 1.0)
-        mul!(res.q2[t], obj.v[t], obj.v_target[t], -1.0, 1.0)
 
         t == 1 && continue
-        mul!(res.q2[t-1], obj.v[t], traj.q[t+2], -1.0, 1.0)
+        mul!(res.q2[t-1], obj.v[t], traj.q[t+2], -1.0, 1.0) 
         mul!(res.q2[t-1], obj.v[t], traj.q[t+1], 1.0, 1.0)
-        mul!(res.q2[t-1], obj.v[t], obj.v_target[t], 1.0, 1.0)
     end
 end

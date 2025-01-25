@@ -3,7 +3,7 @@
 # PKG_SETUP
 
 # ## Setup
-
+ 
 using ContactImplicitMPC
 using LinearAlgebra
 
@@ -24,7 +24,7 @@ h = ref_traj.h
 N_sample = 5
 H_mpc = 15
 h_sim = h / N_sample
-H_sim = 1000
+H_sim = 1000 
 κ_mpc = 2.0e-4
 
 obj = TrackingVelocityObjective(model, env, H_mpc,
@@ -48,10 +48,7 @@ p = ci_mpc_policy(ref_traj, s, obj,
 					max_time = 1e5),
     n_opts = NewtonOptions(
         r_tol = 3e-4,
-        max_iter = 5,
-        threads=true,
-        solver=:ldl_solver,
-        verbose=false),
+        max_iter = 5),
     mpc_opts = CIMPCOptions());
 
 # ## Initial conditions
@@ -61,7 +58,7 @@ q1_sim, v1_sim = initial_conditions(ref_traj);
 sim = simulator(s, H_sim, h=h_sim, policy=p);
 
 # ## Simulate
-@time simulate!(sim, q1_sim, v1_sim)
+simulate!(sim, q1_sim, v1_sim);
 
 # ## Visualizer
 vis = ContactImplicitMPC.Visualizer()

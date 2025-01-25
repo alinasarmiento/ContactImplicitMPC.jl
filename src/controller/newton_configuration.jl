@@ -192,9 +192,8 @@ function Newton(s::Simulation, H::Int, h::T,
     jac = NewtonJacobian(model, env, H)
 
     # precompute Jacobian for pre-factorization
-    window = collect(1:(H + 2))
-    implicit_dynamics!(im_traj, traj, window=window) #@@@
-    jacobian!(jac, im_traj, obj, H, opts.β_init, window)
+    implicit_dynamics!(im_traj, traj) #@@@
+    jacobian!(jac, im_traj, obj, H, opts.β_init)
 
     res = NewtonResidual(model, env, H)
     res_cand = NewtonResidual(model, env, H)
@@ -221,12 +220,12 @@ function Newton(s::Simulation, H::Int, h::T,
         Δq, Δu, ind, obj, solver, β, opts)
 end
 
-function initialize_jacobian!(jac::NewtonJacobian, obj::Objective, H::Int; update_hessian::Bool=true)
+function initialize_jacobian!(jac::NewtonJacobian, obj::Objective, H::Int)
 
     fill!(jac.R, 0.0)
 
     # Objective
-    update_hessian && hessian!(jac, obj)
+    hessian!(jac, obj)
 
     for t = 1:H
         # Implicit dynamics
@@ -238,7 +237,8 @@ function initialize_jacobian!(jac::NewtonJacobian, obj::Objective, H::Int; updat
 end
 
 function update_jacobian!(jac::NewtonJacobian, im_traj::ImplicitTrajectory, obj::Objective,
-    H::Int, β::T, window::Vector{Int}) where T
+    H::Int, β::T) where T
+
 
     # reset
     for t = 1:H
@@ -261,39 +261,38 @@ function update_jacobian!(jac::NewtonJacobian, im_traj::ImplicitTrajectory, obj:
 
     nq = size(jac.q0[1])[1]
 
-    for (i, t) in enumerate(window[1:end-2])
-        if i >= 3
-            jac.q0[i-2]  .+= im_traj.δq0[t][1:nq, :]
-            jac.q0T[i-2] .+= im_traj.δq0[t][1:nq, :]'
+    for t = 1:H
+        if t >= 3
+            jac.q0[t-2]  .+= im_traj.δq0[t][1:nq, :]
+            jac.q0T[t-2] .+= im_traj.δq0[t][1:nq, :]'
         end
 
-        if i >= 2
-            jac.q1[i-1]  .+= im_traj.δq1[t][1:nq, :]
-            jac.q1T[i-1] .+= im_traj.δq1[t][1:nq, :]'
+        if t >= 2
+            jac.q1[t-1]  .+= im_traj.δq1[t][1:nq, :]
+            jac.q1T[t-1] .+= im_traj.δq1[t][1:nq, :]'
         end
 
-        jac.u1[i]  .+= im_traj.δu1[t][1:nq, :]
-        jac.u1T[i] .+= im_traj.δu1[t][1:nq, :]'
+        jac.u1[t]  .+= im_traj.δu1[t][1:nq, :]
+        jac.u1T[t] .+= im_traj.δu1[t][1:nq, :]'
 
         # Dual regularization
-        jac.reg[i] .-= 1.0 * β * im_traj.ip[t].κ # TODO sort the κ stuff, maybe make it a prameter of this function
+        jac.reg[t] .-= 1.0 * β * im_traj.ip[t].κ # TODO sort the κ stuff, maybe make it a prameter of this function
     end
 
     return nothing
 end
 
 function jacobian!(jac::NewtonJacobian, im_traj::ImplicitTrajectory, obj::Objective,
-    H::Int, β::T, window) where T
+    H::Int, β::T) where T
 
     initialize_jacobian!(jac, obj, H)
-    update_jacobian!(jac, im_traj, obj, H, β, window)
+    update_jacobian!(jac, im_traj, obj, H, β)
 
     return nothing
 end
 
 function residual!(res::NewtonResidual, core::Newton,
-    ν::Vector, im_traj::ImplicitTrajectory, traj::ContactTraj, ref_traj::ContactTraj,
-    window::Vector{Int})
+    ν::Vector, im_traj::ImplicitTrajectory, traj::ContactTraj, ref_traj::ContactTraj)
 
     # unpack
     opts = core.opts
@@ -304,21 +303,22 @@ function residual!(res::NewtonResidual, core::Newton,
 
     # Objective
     gradient!(res, obj, core, traj, ref_traj)
-
-    for (i, t) in enumerate(window[1:end-2])
+    for t in eachindex(ν)
         # Implicit dynamics
-        res.rd[i] .+= im_traj.d[t][1:nq]
+        res.rd[t] .+= im_traj.d[t][1:nq]
 
         # Minus Identity term #∇qk1, ∇γk, ∇bk
-        res.rI[i] .-= ν[i]
+        res.rI[t] .-= ν[t]
 
-        i >= 3 ? res.q0[i-2] .+= im_traj.δq0[t][1:nq, :]' * ν[i] : nothing
-        i >= 2 ? res.q1[i-1] .+= im_traj.δq1[t][1:nq, :]' * ν[i] : nothing
-        res.u1[i] .+= im_traj.δu1[t][1:nq, :]' * ν[i]
+        t >= 3 ? res.q0[t-2] .+= im_traj.δq0[t][1:nq, :]' * ν[t] : nothing
+        t >= 2 ? res.q1[t-1] .+= im_traj.δq1[t][1:nq, :]' * ν[t] : nothing
+        res.u1[t] .+= im_traj.δu1[t][1:nq, :]' * ν[t]
     end
 
     return nothing
 end
+
+
 
 function delta!(Δx::SizedArray{Tuple{nx},T,1,1}, x, x_ref) where {nx,T}
     Δx .= x
@@ -331,19 +331,19 @@ end
 function update_traj!(traj_cand::ContactTraj, traj::ContactTraj,
         ν_cand::Vector, ν::Vector, Δ::NewtonResidual{T}, α::T) where T
 
-    # H = traj_cand.H
+    H = traj_cand.H
 
-    # for t = 1:H
-    #     traj_cand.q[t+2] .= traj.q[t+2] .- α .* Δ.q2[t]
-    #     traj_cand.u[t] .= traj.u[t] .- α .* Δ.u1[t]
+    for t = 1:H
+        traj_cand.q[t+2] .= traj.q[t+2] .- α .* Δ.q2[t]
+        traj_cand.u[t] .= traj.u[t] .- α .* Δ.u1[t]
 
-    #     ν_cand[t]  .= ν[t] .- α .* Δ.rd[t]
-    # end
+        ν_cand[t]  .= ν[t] .- α .* Δ.rd[t]
+    end
 
-    # update_z!(traj_cand)
-    # update_θ!(traj_cand)
+    update_z!(traj_cand)
+    update_θ!(traj_cand)
 
-    # return nothing
+    return nothing
 end
 
 function copy_traj!(traj::ContactTraj, traj_cand::ContactTraj, H::Int)
@@ -414,19 +414,19 @@ function reset!(core::Newton, ref_traj::ContactTraj;
 end
 
 function newton_solve!(core::Newton, s::Simulation,
-    window::Vector{Int},
     im_traj::ImplicitTrajectory, ref_traj::ContactTraj;
     warm_start::Bool = false, initial_offset::Bool = false,
     q0 = ref_traj.q[1], q1 = ref_traj.q[2])
 
+    # @show "newton_solve!" #@@@
 	reset!(core, ref_traj, warm_start = warm_start,
         initial_offset = initial_offset, q0 = q0, q1 = q1)
 
     # Compute implicit dynamics about traj
-	implicit_dynamics!(im_traj, core.traj, window=window)
+	implicit_dynamics!(im_traj, core.traj)
 
     # Compute residual
-    residual!(core.res, core, core.ν, im_traj, core.traj, ref_traj, window)
+    residual!(core.res, core, core.ν, im_traj, core.traj, ref_traj)
 
     r_norm = norm(core.res.r, 1)
 
@@ -435,7 +435,7 @@ function newton_solve!(core::Newton, s::Simulation,
         # println("lbefor = ", l, "  norm = ", r_norm / length(core.res.r)) #@@@
         r_norm / length(core.res.r) < core.opts.r_tol && break
         # Compute NewtonJacobian
-        update_jacobian!(core.jac, im_traj, core.obj, core.traj.H, core.β, window)
+        update_jacobian!(core.jac, im_traj, core.obj, core.traj.H, core.β)
 
         # Compute Search Direction
         linear_solve!(core.solver, core.Δ.r, core.jac.R, core.res.r)
@@ -448,10 +448,10 @@ function newton_solve!(core::Newton, s::Simulation,
         update_traj!(core.traj_cand, core.traj, core.ν_cand, core.ν, core.Δ, α)
 
         # Compute implicit dynamics for candidate
-		implicit_dynamics!(im_traj, core.traj_cand, window=window)
+		implicit_dynamics!(im_traj, core.traj_cand)
 
         # Compute residual for candidate
-        residual!(core.res_cand, core, core.ν_cand, im_traj, core.traj_cand, ref_traj, window)
+        residual!(core.res_cand, core, core.ν_cand, im_traj, core.traj_cand, ref_traj)
         r_cand_norm = norm(core.res_cand.r, 1)
 
         while r_cand_norm^2.0 >= (1.0 - 0.001 * α) * r_norm^2.0
@@ -465,9 +465,9 @@ function newton_solve!(core::Newton, s::Simulation,
             update_traj!(core.traj_cand, core.traj, core.ν_cand, core.ν, core.Δ, α)
 
             # Compute implicit dynamics about trial_traj
-			implicit_dynamics!(im_traj, core.traj_cand, window=window)
+			implicit_dynamics!(im_traj, core.traj_cand)
 
-            residual!(core.res_cand, core, core.ν_cand, im_traj, core.traj_cand, ref_traj, window)
+            residual!(core.res_cand, core, core.ν_cand, im_traj, core.traj_cand, ref_traj)
             r_cand_norm = norm(core.res_cand.r, 1)
         end
 

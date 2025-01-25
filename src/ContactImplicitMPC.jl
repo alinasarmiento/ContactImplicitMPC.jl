@@ -30,14 +30,12 @@ import Scratch: get_scratch!
 using Test
 using RoboDojo
 import RoboDojo: LinearSolver, LUSolver, Model, ResidualMethods, Space, Disturbances, IndicesZ, InteriorPoint, EmptySolver, Policy, Trajectory, GradientTrajectory, InteriorPointOptions, IndicesOptimization, interior_point, interior_point_solve!, bilinear_violation, residual_violation, general_correction_term!, r!, rz!, rθ!, linear_solve!, lu_solver, empty_policy, empty_disturbances, friction_coefficients, SimulatorStatistics, SimulatorOptions, indices_θ, num_data, initialize_z!, initialize_θ!, indices_z, indices_θ, simulate!, policy, process!, Simulator
-using DirectTrajectoryOptimization
 
 # Utilities
 include("utils.jl")
 
 # Solver
 include("solver/lu.jl") # sparse arrays
-include("solver/ldl.jl")
 
 include("solver/qr.jl")
 include("solver/schur.jl")
@@ -71,11 +69,6 @@ include("dynamics/quadruped/model.jl")
 include("dynamics/flamingo/model.jl")
 include("dynamics/pushbot/model.jl")
 include("dynamics/walledcartpole/model.jl")
-include("dynamics/centroidal_quadruped/model.jl")
-include("dynamics/centroidal_quadruped_box/model.jl")
-include("dynamics/point_foot_quadruped/model.jl")
-include("dynamics/centroidal_quadruped_wall/model.jl")
-
 
 # Simulator
 include("simulator/policy.jl")
@@ -107,12 +100,10 @@ include("controller/newton_jacobian.jl")
 include("controller/mpc_utils.jl")
 include("controller/policy.jl")
 include("controller/newton_structure_solver/methods.jl")
-include("controller/gains.jl")
 
 # Visuals
 include("dynamics/visuals.jl")
 include("dynamics/visual_utils.jl")
-include("visuals.jl")
 
 include("dynamics/particle_2D/visuals.jl")
 include("dynamics/particle/visuals.jl")
@@ -122,10 +113,6 @@ include("dynamics/quadruped/visuals.jl")
 include("dynamics/flamingo/visuals.jl")
 include("dynamics/pushbot/visuals.jl")
 include("dynamics/walledcartpole/visuals.jl")
-include("dynamics/centroidal_quadruped/visuals.jl")
-include("dynamics/centroidal_quadruped_box/visuals.jl")
-include("dynamics/point_foot_quadruped/visuals.jl")
-include("dynamics/centroidal_quadruped_wall/visuals.jl")
 
 export
     initial_conditions,
@@ -215,8 +202,6 @@ export
     LinearSolver,
     LUSolver,
     lu_solver,
-    ldl_solver,
-    LDLSolver,
     factorize!,
     linear_solve!,
     IndicesOptimization,
@@ -271,9 +256,6 @@ export
     flamingo,
     pushbot,
     walledcartpole,
-    centroidal_quadruped,
-    centroidal_quadruped_box,
-    centroidal_quadruped_wall,
     flat_3D_lc,
     flat_3D_nc,
     quadratic_bowl_3D_lc,

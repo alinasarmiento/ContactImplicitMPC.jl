@@ -1,6 +1,7 @@
 # Configurations and forces
 struct NewtonJacobianConfigurationForce{T,Vq,Vu,Vγ,Vb,VI,VIT,Vq0,Vq0T,Vq1,Vq1T,Vu1,Vu1T,Vpr,Vdu} <: NewtonJacobian
     R::SparseMatrixCSC{T,Int}                 # jacobian
+    # R::RR
     obj_q2::Vector{Vq}                          # obj views
     obj_u1::Vector{Vu}                          # obj views
     obj_γ1::Vector{Vγ}                          # obj views
@@ -72,6 +73,7 @@ end
 # Configurations
 struct NewtonJacobianConfiguration{T,Vq,Vu,VI,VIT,Vq0,Vq0T,Vq1,Vq1T,Vu1,Vu1T,Vpr,Vdu} <: NewtonJacobian
     R::SparseMatrixCSC{T,Int}                 # jacobian
+    # R::RR
     obj_q2::Vector{Vq}                          # obj views
     obj_u1::Vector{Vu}                          # obj views
 
@@ -145,14 +147,12 @@ function NewtonJacobian(model::Model, env::Environment, H::Int;
     end
 end
 
-function initialize_jacobian!(jac::NewtonJacobian, obj::Objective, H::Int; update_hessian::Bool=true)
+function initialize_jacobian!(jac::NewtonJacobian, obj::Objective, H::Int)
 
     fill!(jac.R, 0.0)
-    # fill!(jac.R[301:480,:], 0.0)
-    # fill!(jac.R[:,301:480], 0.0)
 
     # Objective
-    update_hessian && hessian!(jac, obj)
+    hessian!(jac, obj)
 
     for t = 1:H
         # Implicit dynamics
@@ -164,85 +164,84 @@ function initialize_jacobian!(jac::NewtonJacobian, obj::Objective, H::Int; updat
 end
 
 function update_jacobian!(jac::NewtonJacobian, im_traj::ImplicitTrajectory, obj::Objective,
-    H::Int, β::T, window::Vector{Int}) where T
+    H::Int, β::T) where T
 
-    for (i, t) in enumerate(window[1:end-2])
-        if i >= 3
-            jac.q0[i-2]  .+= im_traj.δq0[t]
-            jac.q0T[i-2] .+= transpose(im_traj.δq0[t])
+    for t = 1:H
+        if t >= 3
+            jac.q0[t-2]  .+= im_traj.δq0[t]
+            jac.q0T[t-2] .+= transpose(im_traj.δq0[t])
         end
 
-        if i >= 2
-            jac.q1[i-1]  .+= im_traj.δq1[t]
-            jac.q1T[i-1] .+= transpose(im_traj.δq1[t])
+        if t >= 2
+            jac.q1[t-1]  .+= im_traj.δq1[t]
+            jac.q1T[t-1] .+= transpose(im_traj.δq1[t])
         end
 
-        jac.u1[i]  .+= im_traj.δu1[t]
-        jac.u1T[i] .+= transpose(im_traj.δu1[t])
+        jac.u1[t]  .+= im_traj.δu1[t]
+        jac.u1T[t] .+= transpose(im_traj.δu1[t])
 
         # Dual regularization
-        # jac.reg_pr .+= 1.0 * β * im_traj.ip[t].κ[1]
-        jac.reg_du .-= β * im_traj.ip[t].κ[1]
+        # jac.reg_pr .+= 1.0 * β * im_traj.ip[t].κ[1] 
+        jac.reg_du .-= β * im_traj.ip[t].κ[1] 
     end
 
     return nothing
 end
 
 function jacobian!(jac::NewtonJacobian, im_traj::ImplicitTrajectory, obj::Objective,
-        H::Int, β::T, window::Vector{Int}; update_hessian::Bool=true) where T
-
-    initialize_jacobian!(jac, obj, H; update_hessian=update_hessian)
-    update_jacobian!(jac, im_traj, obj, H, β, window)
+    H::Int, β::T) where T
+    initialize_jacobian!(jac, obj, H)
+    update_jacobian!(jac, im_traj, obj, H, β)
 
     return nothing
 end
 
-function hessian!(jac::NewtonJacobianConfigurationForce, obj::TrackingObjective)
+function hessian!(hess::NewtonJacobianConfigurationForce, obj::TrackingObjective)
     for t = 1:length(obj.u)
         # Cost function
-        jac.obj_q2[t] .+= obj.q[t]
-        jac.obj_u1[t] .+= obj.u[t]
-        jac.obj_γ1[t] .+= obj.γ[t]
-        jac.obj_b1[t] .+= obj.b[t]
+        hess.obj_q2[t] .+= obj.q[t]
+        hess.obj_u1[t] .+= obj.u[t]
+        hess.obj_γ1[t] .+= obj.γ[t]
+        hess.obj_b1[t] .+= obj.b[t]
     end
 end
 
-function hessian!(jac::NewtonJacobianConfiguration, obj::TrackingObjective)
+function hessian!(hess::NewtonJacobianConfiguration, obj::TrackingObjective)
     for t = 1:length(obj.u)
         # Cost function
-        jac.obj_q2[t] .+= obj.q[t]
-        jac.obj_u1[t] .+= obj.u[t]
+        hess.obj_q2[t] .+= obj.q[t]
+        hess.obj_u1[t] .+= obj.u[t]
     end
 end
 
-function hessian!(jac::NewtonJacobianConfigurationForce, obj::TrackingVelocityObjective)
+function hessian!(hess::NewtonJacobianConfigurationForce, obj::TrackingVelocityObjective)
     for t = 1:length(obj.u)
         # Cost function
-        jac.obj_q2[t] .+= obj.q[t]
-        jac.obj_u1[t] .+= obj.u[t]
-        jac.obj_γ1[t] .+= obj.γ[t]
-        jac.obj_b1[t] .+= obj.b[t]
+        hess.obj_q2[t] .+= obj.q[t]
+        hess.obj_u1[t] .+= obj.u[t]
+        hess.obj_γ1[t] .+= obj.γ[t]
+        hess.obj_b1[t] .+= obj.b[t]
 
         # velocity
-        jac.obj_q2[t] .+= obj.v[t]
+        hess.obj_q2[t] .+= obj.v[t]
         t == 1 && continue
-        jac.obj_q2[t-1] .+= obj.v[t]
-        jac.obj_q1q2[t-1] .-= 1.0*obj.v[t]
-        jac.obj_q2q1[t-1] .-= 1.0*obj.v[t]
+        hess.obj_q2[t-1] .+= obj.v[t]
+        hess.obj_q1q2[t-1] .-= obj.v[t]
+        hess.obj_q2q1[t-1] .-= obj.v[t]
     end
 end
 
-function hessian!(jac::NewtonJacobianConfiguration, obj::TrackingVelocityObjective)
+function hessian!(hess::NewtonJacobianConfiguration, obj::TrackingVelocityObjective)
     for t = 1:length(obj.u)
         # Cost function
-        jac.obj_q2[t] .+= obj.q[t]
-        jac.obj_u1[t] .+= obj.u[t]
+        hess.obj_q2[t] .+= obj.q[t]
+        hess.obj_u1[t] .+= obj.u[t]
 
         # velocity
-        jac.obj_q2[t] .+= obj.v[t]
+        hess.obj_q2[t] .+= obj.v[t]
         t == 1 && continue
-        jac.obj_q2[t-1] .+= obj.v[t]
-        jac.obj_q1q2[t-1] .-= 1.0*obj.v[t]
-        jac.obj_q2q1[t-1] .-= 1.0*obj.v[t]
+        hess.obj_q2[t-1] .+= obj.v[t]
+        hess.obj_q1q2[t-1] .-= obj.v[t]
+        hess.obj_q2q1[t-1] .-= obj.v[t]
     end
 end

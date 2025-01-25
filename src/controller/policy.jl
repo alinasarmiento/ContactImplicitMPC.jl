@@ -8,9 +8,6 @@
 	altitude_verbose::Bool = false
     ip_max_time::T = 1e5     # maximum time allowed for an InteriorPoint solve
     live_plotting::Bool=false # Use the live plotting tool to debug
-	gains::Bool=false
-	control_gain_scaling::T=100.0 # control gain scaling (larger -> less agressive behavior)
-	velocity_gain_scaling::T=100.0 # velocity gains scaling (larger -> less agressive behavior)
 end
 
 mutable struct CIMPC{T,NQ,NU,NW,NC,NB,NZ,Nθ,R,RZ,Rθ,Nν,W,FC,NQQ,NJ,NR,NI,OB,LS,NV} <: Policy{T}
@@ -31,12 +28,7 @@ mutable struct CIMPC{T,NQ,NU,NW,NC,NB,NZ,Nθ,R,RZ,Rθ,Nν,W,FC,NQQ,NJ,NR,NI,OB,L
 	q0::Vector{T}
 	N_sample::Int
 	cnt::Vector{Int}
-	window::Vector{Int}
 	opts::CIMPCOptions{T}
-	buffer_time::T
-	next_time_update::T
-	times_reference::Vector{T}
-	total_time_reference::T
 end
 
 function ci_mpc_policy(traj::ContactTraj, s::Simulation{T}, obj::Objective;
@@ -71,7 +63,7 @@ function ci_mpc_policy(traj::ContactTraj, s::Simulation{T}, obj::Objective;
 		mode = mode)
 
 	im_traj_cache = deepcopy(im_traj)
-
+	 
 	stride = get_stride(s.model, traj)
 	altitude = zeros(s.model.nc)
 	ϕ = zeros(s.model.nc)
@@ -83,16 +75,9 @@ function ci_mpc_policy(traj::ContactTraj, s::Simulation{T}, obj::Objective;
 		@error "invalid Newton solver specified"
 	end
 
-	window = zeros(Int, H_mpc + 2)
-
-	total_time_reference = traj.h * (traj.H - 1)
-	times_reference = Array(range(0, stop=total_time_reference, length=traj.H))
-
-	CIMPC(zeros(s.model.nu), traj, traj_cache, ref_traj, im_traj, im_traj_cache,
+	CIMPC(zeros(s.model.nu), traj, traj_cache, ref_traj, im_traj, im_traj_cache, 
 		H_mpc, stride, altitude, ϕ, [κ_mpc], newton, newton_mode, s, copy(ref_traj.q[1]),
-		N_sample, [N_sample], window, mpc_opts,
-		0.0, 0.0,
-		times_reference, total_time_reference)
+		N_sample, [N_sample], mpc_opts)
 end
 
 function policy(p::CIMPC{T,NQ,NU,NW,NC}, traj::Trajectory{T}, t::Int) where {T,NQ,NU,NW,NC}
@@ -101,9 +86,9 @@ function policy(p::CIMPC{T,NQ,NU,NW,NC}, traj::Trajectory{T}, t::Int) where {T,N
 		p.cnt[1] = p.N_sample
 		p.q0 .= p.ref_traj.q[1]
 		p.altitude .= 0.0
-		set_trajectory!(p.traj, p.ref_traj)
+		set_trajectory!(p.traj, p.ref_traj) 
 		set_implicit_trajectory!(p.im_traj, p.im_traj_cache)
-		reset_window!(p.window)
+		# update!(p.im_traj, p.traj, p.s, p.altitude, p.κ[1], p.traj.H) 
 	end
 
     if p.cnt[1] == p.N_sample
@@ -112,23 +97,19 @@ function policy(p::CIMPC{T,NQ,NU,NW,NC}, traj::Trajectory{T}, t::Int) where {T,N
 									traj, t, NC, p.N_sample,
 									threshold = p.opts.altitude_impact_threshold,
 									verbose = p.opts.altitude_verbose))
-		set_altitude!(p.im_traj, p.altitude)
+		set_altitude!(p.im_traj, p.altitude) 
 
 		# # optimize
 		q1 = traj.q[t+1]
 		newton_solve!(p.newton, p.s, p.q0, q1,
-			p.window, p.im_traj, p.traj, warm_start = t > 1)
-
-		update!(p.im_traj, p.traj, p.s, p.altitude, p.κ[1], p.traj.H)
+			p.im_traj, p.traj, warm_start = t > 1)
+		update!(p.im_traj, p.traj, p.s, p.altitude, p.κ[1], p.traj.H) 
 
 		# visualize
-		p.opts.live_plotting && live_plotting(p.s.model, p.traj, traj, p.newton, p.q0, traj.q[t+1], t)
+		# p.opts.live_plotting && live_plotting(p.s.model, p.traj, traj, p.newton, p.q0, traj.q[t+1], t)
 
 		# shift trajectory
-		rot_n_stride!(p.traj, p.traj_cache, p.stride, p.window)
-
-		# update
-		update_window!(p.window, p.ref_traj.H)
+		rot_n_stride!(p.traj, p.traj_cache, p.stride)
 		p.q0 .= q1
 
 		# reset count
@@ -139,33 +120,14 @@ function policy(p::CIMPC{T,NQ,NU,NW,NC}, traj::Trajectory{T}, t::Int) where {T,N
 
 	# scale control
 	if p.newton_mode == :direct
-		p.u .= p.newton.traj.u[1]
+		p.u .= p.newton.traj.u[1] 
 		p.u ./= p.N_sample
 	elseif p.newton_mode == :structure
-		p.u .= p.newton.u[1]
+		p.u .= p.newton.u[1] 
 		p.u ./= p.N_sample
 	else
 		println("newton mode specified not available")
 	end
 
 	return p.u
-end
-
-function reset_window!(window)
-	n = length(window)
-	for i = 1:n
-		window[i] = i
-	end
-	return
-end
-
-function update_window!(window, max_window)
-	n = length(window)
-	for i = 1:n
-		window[i] += 1
-		if window[i] > max_window
-			window[i] = 1
-		end
-	end
-	return window
 end
