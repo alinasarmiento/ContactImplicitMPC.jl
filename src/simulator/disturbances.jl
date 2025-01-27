@@ -82,3 +82,26 @@ function disturbances(d::RandomDisturbance, x, t)
     k = searchsortedlast(d.t, t)
     return d.w[k]
 end
+
+function simulate!(s::Simulator{T}; verbose=false) where T
+    status = false
+
+    N = length(s.traj.u)
+    p = s.policy
+    w = s.dist
+    traj = s.traj
+
+    for t = 1:N
+        # policy
+        policy_time = @elapsed traj.u[t] .= policy(p, traj, t)
+        s.opts.record && (s.stats.policy_time[t] = policy_time)
+
+        # disturbances
+        traj.w[t] .= ContactImplicitMPC.disturbances(w, traj.q[t+1], t)
+
+        # step
+        status = step!(s, t, verbose=verbose)
+        !status && break
+    end
+    return status
+end

@@ -6,6 +6,7 @@
  
 using ContactImplicitMPC
 using LinearAlgebra
+using Infiltrator
 
 # ## Simulation
 s = get_simulation("pushbot", "flat_2D_lc", "flat");
@@ -95,7 +96,8 @@ v1_sim = [0.0; 0.0]
 sim = simulator(s, H_sim, h=h_sim, policy=p, dist=d)
 
 # ## Simulate
-status = simulate!(sim, verbose = true)
+@infiltrate
+status = ContactImplicitMPC.simulate!(sim, q1_sim, v1_sim) #.verbose = true)
 
 # ## Visualizer
 vis = ContactImplicitMPC.Visualizer()
