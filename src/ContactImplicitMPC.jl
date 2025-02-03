@@ -29,7 +29,7 @@ using Scratch
 import Scratch: get_scratch!
 using Test
 using RoboDojo
-import RoboDojo: LinearSolver, LUSolver, Model, ResidualMethods, Space, IndicesZ, InteriorPoint, EmptySolver, Policy, Trajectory, GradientTrajectory, InteriorPointOptions, IndicesOptimization, interior_point, interior_point_solve!, bilinear_violation, residual_violation, general_correction_term!, r!, rz!, rθ!, linear_solve!, lu_solver, empty_policy, friction_coefficients, SimulatorStatistics, SimulatorOptions, indices_θ, num_data, initialize_z!, initialize_θ!, indices_z, indices_θ, simulate!, policy, process!, Simulator
+import RoboDojo: LinearSolver, LUSolver, Model, ResidualMethods, Space, IndicesZ, InteriorPoint, EmptySolver, Policy, Trajectory, GradientTrajectory, InteriorPointOptions, IndicesOptimization, interior_point, interior_point_solve!, bilinear_violation, residual_violation, general_correction_term!, r!, rz!, rθ!, linear_solve!, lu_solver, empty_policy, Disturbances, disturbances, friction_coefficients, SimulatorStatistics, SimulatorOptions, indices_θ, num_data, initialize_z!, initialize_θ!, indices_z, indices_θ, simulate!, policy, process!, Simulator
 
 # Utilities
 include("utils.jl")
@@ -177,7 +177,6 @@ export
     module_dir,
     open_loop_disturbances,
     disturbances,
-    Disturbances,
     empty_disturbances,
     EmptyDisturbances,
     OpenLoopDisturbance,
