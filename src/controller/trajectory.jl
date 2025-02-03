@@ -1,4 +1,4 @@
-struct ContactTraj{T,nq,nu,nw,nc,nb,nz,nθ}
+struct ContactTraj{T,nq,nu,nw,nc,nb,nz,nθ} <: Trajectory{T}
 	H::Int
 	h::T
 	κ::Vector{T}
