@@ -98,7 +98,7 @@ v1_sim = [0.0; 0.0]
 sim = simulator(s, H_sim, h=h_sim, policy=p, dist=d)
 
 # ## Simulate
-@infiltrate
+# @infiltrate
 status = simulate!(sim, q1_sim, v1_sim) #.verbose = true)
 
 # ## Visualizer
