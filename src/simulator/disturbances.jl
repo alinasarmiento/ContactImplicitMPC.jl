@@ -1,7 +1,17 @@
+abstract type Disturbances{T} end
+
 """
     empty disturbances
 """
-function disturbances(d::RoboDojo.EmptyDisturbances, x, t)
+struct EmptyDisturbances{T} <: Disturbances{T}
+    w::Vector{T}
+end
+
+function empty_disturbances(model)
+    EmptyDisturbances(zeros(model.nw))
+end
+
+function disturbances(d::EmptyDisturbances, x, t)
     return d.w
 end
 
@@ -89,3 +99,4 @@ function disturbances(d::RandomDisturbance, x, t)
     k = searchsortedlast(d.t, t)
     return d.w[k]
 end
+

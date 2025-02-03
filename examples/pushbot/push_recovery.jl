@@ -6,7 +6,7 @@
  
 using ContactImplicitMPC
 using RoboDojo
-# import ContactImplicitMPC: simulate!
+import ContactImplicitMPC: simulate!
 using LinearAlgebra
 using Infiltrator
 
@@ -43,7 +43,6 @@ v1 = [0.0; 0.0]
 sim = simulator(s, H, h=h)
 
 # ## Simulate
-@infiltrate
 status = simulate!(sim, q1, v1)
 
 # ## MPC setup 
