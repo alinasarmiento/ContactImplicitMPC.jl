@@ -42,7 +42,8 @@ v1 = [0.0; 0.0]
 # ## Simulator
 sim = simulator(s, H, h=h)
 
-# ## Simulate
+# ## Simulate -- set initial conditions
+@infiltrate
 status = simulate!(sim, q1, v1)
 
 # ## MPC setup 
