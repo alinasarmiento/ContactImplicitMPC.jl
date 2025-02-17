@@ -56,8 +56,8 @@ function simulator(s, T;
          rθ=zeros(nz, nθ),
          opts=solver_opts)
 
-    # traj = Trajectory(s.model, T, nb=s.model.nc * friction_dim(s.env))
-    traj = contact_trajectory(s.model, s.env, T, h)    
+    traj = Trajectory(s.model, T, nb=s.model.nc * friction_dim(s.env))
+    # traj = contact_trajectory(s.model, s.env, T, h)    
     grad = GradientTrajectory(s.model, T, nb=s.model.nc * friction_dim(s.env))
     
     return Simulator(s.model, policy, dist, traj, grad, ip, idx_z, idx_θ, f, h, stats, sim_opts)
