@@ -43,7 +43,6 @@ v1 = [0.0; 0.0]
 sim = simulator(s, H, h=h)
 
 # ## Simulate -- set initial conditions
-@infiltrate
 status = simulate!(sim, q1, v1)
 
 # ## MPC setup 
@@ -105,6 +104,7 @@ status = simulate!(sim, q1_sim, v1_sim) #.verbose = true)
 # ## Visualizer
 vis = ContactImplicitMPC.Visualizer()
 ContactImplicitMPC.render(vis)
+@infiltrate
 
 # ## Visualize
 anim = visualize_robot!(vis, model, sim.traj, sample = 1)
