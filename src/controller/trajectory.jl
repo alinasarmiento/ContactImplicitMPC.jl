@@ -1,28 +1,4 @@
-struct Trajectory_with_h{T} <: Trajectory{T}
-    q::Vector{Vector{T}} # generalized coordinates
-    v::Vector{Vector{T}} # generalized velocities
-    u::Vector{Vector{T}} # control inputs
-    γ::Vector{Vector{T}} # impact impulses 
-    b::Vector{Vector{T}} # friction impulses
-    w::Vector{Vector{T}} # disturbances
-    h::T # time discretization
-end
-
-function Trajectory(model, T, h; nv=model.nq, nc=model.nc, nb=model.nc)
-    nq = model.nq
-    nu = model.nu
-    nw = model.nw
-
-    q = [zeros(nq) for t = 1:T+2]
-    v = [zeros(nv) for t = 1:T+1] # midpoint velocities; TODO: knotpoint velocities
-    u = [zeros(nu) for t = 1:T]
-    γ = [zeros(nc) for t = 1:T]
-    b = [zeros(nb) for t = 1:T]
-    w = [zeros(nw) for t = 1:T]
-    Trajectory_with_h(q, v, u, γ, b, w, h)
-end
-
-struct ContactTraj{T,nq,nu,nw,nc,nb,nz,nθ} <: Trajectory{T}
+struct ContactTraj{T,nq,nu,nw,nc,nb,nz,nθ} #<: Trajectory{T}
 	H::Int
 	h::T
 	κ::Vector{T}

@@ -98,13 +98,11 @@ v1_sim = [0.0; 0.0]
 sim = simulator(s, H_sim, h=h_sim, policy=p, dist=d)
 
 # ## Simulate
-# @infiltrate
 status = simulate!(sim, q1_sim, v1_sim) #.verbose = true)
 
 # ## Visualizer
 vis = ContactImplicitMPC.Visualizer()
 ContactImplicitMPC.render(vis)
-@infiltrate
 
 # ## Visualize
 vis_traj = contact_trajectory(s.model, s.env, H_sim, h_sim)
