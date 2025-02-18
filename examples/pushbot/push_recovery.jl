@@ -40,7 +40,7 @@ q1 = [0.0 * π, 0.0]
 v1 = [0.0; 0.0]
 
 # ## Simulator
-sim = simulator(s, H, h)
+sim = simulator(s, H, h=h)
 
 # ## Simulate -- set initial conditions
 status = simulate!(sim, q1, v1)
@@ -95,7 +95,7 @@ q1_sim = [0.0, 0.0]
 v1_sim = [0.0; 0.0]
 
 # ## Simulator
-sim = simulator(s, H_sim, h_sim, p, dist=d)
+sim = simulator(s, H_sim, h=h_sim, policy=p, dist=d)
 
 # ## Simulate
 # @infiltrate
@@ -107,9 +107,10 @@ ContactImplicitMPC.render(vis)
 @infiltrate
 
 # ## Visualize
-anim = visualize_robot!(vis, model, sim.traj, sample = 1)
-pθ_right = generate_pusher_traj(d, sim.traj, side=:right)
-pθ_left  = generate_pusher_traj(d, sim.traj, side=:left)
+vis_traj = contact_trajectory(s.model, s.env, H_sim, h_sim)
+anim = visualize_robot!(vis, model, vis_traj, sample = 1)
+pθ_right = generate_pusher_traj(d, vis_traj, side=:right)
+pθ_left  = generate_pusher_traj(d, vis_traj, side=:left)
 visualize_disturbance!(vis, model, pθ_right, anim=anim, sample=1, offset=0.05, name=:PusherRight);
 visualize_disturbance!(vis, model, pθ_left,  anim=anim, sample=1, offset=0.05, name=:PusherLeft);
 
