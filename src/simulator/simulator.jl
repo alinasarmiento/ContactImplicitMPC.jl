@@ -32,8 +32,8 @@ function simulator(s, T;
     sim_opts=SimulatorOptions()
     )
 
-    policy=empty_policy(s.model), 
-    dist=empty_disturbances(s.model), 
+    policy=empty_policy(s.model)
+    dist=empty_disturbances(s.model)
      
     idx_z = indices_z(s)
     idx_θ = indices_θ(s.model, nf=length(f))
