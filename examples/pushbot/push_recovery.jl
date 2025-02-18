@@ -40,7 +40,7 @@ q1 = [0.0 * π, 0.0]
 v1 = [0.0; 0.0]
 
 # ## Simulator
-sim = simulator(s, H, h=h)
+sim = simulator(s, H, h)
 
 # ## Simulate -- set initial conditions
 status = simulate!(sim, q1, v1)
@@ -95,7 +95,7 @@ q1_sim = [0.0, 0.0]
 v1_sim = [0.0; 0.0]
 
 # ## Simulator
-sim = simulator(s, H_sim, h=h_sim, policy=p, dist=d)
+sim = simulator(s, H_sim, h_sim, p, dist=d)
 
 # ## Simulate
 # @infiltrate

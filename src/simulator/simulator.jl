@@ -12,8 +12,7 @@ function indices_z(s::Simulation)
     IndicesZ(q, γ, sγ, ψ, b, sψ, sb)
 end
 
-function simulator(s, T; 
-    h=0.01,
+function simulator(s, T, h; 
     f=friction_coefficients(s.model),
     residual=s.res.r!, 
     jacobian_z=s.res.rz!, 
@@ -63,9 +62,7 @@ function simulator(s, T;
     return Simulator(s.model, policy, dist, traj, grad, ip, idx_z, idx_θ, f, h, stats, sim_opts)
 end
 
-function simulator(s, T; 
-    h=0.01,
-    policy=empty_policy(s.model), 
+function simulator(s, T, h, policy; 
     dist=empty_disturbances(s.model), 
     f=friction_coefficients(s.model),
     residual=s.res.r!, 
