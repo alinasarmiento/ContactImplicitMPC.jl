@@ -12,7 +12,7 @@ function indices_z(s::Simulation)
     IndicesZ(q, γ, sγ, ψ, b, sψ, sb)
 end
 
-function simulator(s, T, h;
+function simulator(s, T;
     h=0.01,
     policy=empty_policy(s.model),
     dist=empty_disturbances(s.model),
