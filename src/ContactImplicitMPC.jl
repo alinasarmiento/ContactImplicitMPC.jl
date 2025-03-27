@@ -101,6 +101,9 @@ include("controller/mpc_utils.jl")
 include("controller/policy.jl")
 include("controller/newton_structure_solver/methods.jl")
 
+# LCM
+include("examples/pushbot/standalone_simulate.jl")
+
 # Visuals
 include("dynamics/visuals.jl")
 include("dynamics/visual_utils.jl")
@@ -276,6 +279,9 @@ export
     stairs!,
     Simulator,
     set_trajectory!,
-    initialize_z!
+    initialize_z!,
+    state_vector_t,
+    u_vector_t,
+    callback_sim
 
 end # module
