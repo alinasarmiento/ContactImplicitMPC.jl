@@ -102,7 +102,7 @@ include("controller/policy.jl")
 include("controller/newton_structure_solver/methods.jl")
 
 # LCM
-include("examples/pushbot/standalone_simulate.jl")
+include("controller/standalone_simulate.jl")
 
 # Visuals
 include("dynamics/visuals.jl")
