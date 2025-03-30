@@ -25,7 +25,7 @@ function callback_sim(lcm, sim, u_lcm_channel)
         @show channel
         @show msg
         print(msg)
-        
+        @infiltrate
         p = sim.policy
         traj = sim.traj
         q1 = msg.position
