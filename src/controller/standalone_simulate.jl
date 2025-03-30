@@ -21,11 +21,10 @@ end
 @lcmtypesetup(u_vector_t)
 
 function callback_sim(lcm, sim, u_lcm_channel)
-    return function(channel::String, msg::state_vector_t)
+    return function(channel::String, msg)
         @show channel
         @show msg
         print(msg)
-        @infiltrate
         
         p = sim.policy
         traj = sim.traj
