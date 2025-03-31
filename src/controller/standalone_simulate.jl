@@ -12,14 +12,14 @@ mutable struct lcmt_robot_output <: LCMType
     num_velocities::Int32
     num_efforts::Int32
 
-    position_names::SVector{num_positions, String}
-    position::SVector{num_positions, Float64}
+    position_names::SVector{2, String}
+    position::SVector{2, Float64}
     
-    velocity_names::SVector{num_velocities, String}
-    velocity::SVector{num_velocities, Float64}
+    velocity_names::SVector{2, String}
+    velocity::SVector{2, Float64}
     
-    effort_names::SVector{num_efforts, String}
-    effort::SVector{num_efforts, Float64}
+    effort_names::SVector{2, String}
+    effort::SVector{2, Float64}
 
     imu_accel::SVector{3, Float64}
 end
@@ -28,8 +28,8 @@ mutable struct lcmt_robot_input <: LCMType
     utime::Int64
     num_efforts::Int32
 
-    effort_names::SVector{num_efforts, String}
-    effort::SVector{num_efforts, Float64}
+    effort_names::SVector{2, String}
+    effort::SVector{2, Float64}
 end
 
 function setup_lcm()
