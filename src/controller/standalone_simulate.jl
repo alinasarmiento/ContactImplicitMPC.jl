@@ -15,7 +15,7 @@ mutable struct lcmt_robot_output <: LCMType
     position_names::Vector{String}
     position::Vector{Float64}
     
-    velocity_names::Vector{2, String}
+    velocity_names::Vector{String}
     velocity::Vector{Float64}
     
     effort_names::Vector{String}
