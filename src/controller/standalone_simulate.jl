@@ -12,14 +12,14 @@ mutable struct lcmt_robot_output <: LCMType
     num_velocities::Int32
     num_efforts::Int32
 
-    position_names::SVector{2, String}
-    position::SVector{2, Float64}
+    position_names::Vector{String}
+    position::Vector{Float64}
     
-    velocity_names::SVector{2, String}
-    velocity::SVector{2, Float64}
+    velocity_names::Vector{2, String}
+    velocity::Vector{Float64}
     
-    effort_names::SVector{2, String}
-    effort::SVector{2, Float64}
+    effort_names::Vector{String}
+    effort::Vector{Float64}
 
     imu_accel::SVector{3, Float64}
 end
@@ -32,11 +32,18 @@ mutable struct lcmt_robot_input <: LCMType
     effort::SVector{2, Float64}
 end
 
-# @lcmtypesetup(lcmt_robot_output)
-# @lcmtypesetup(lcmt_robot_input)
+@lcmtypesetup(lcmt_robot_output,
+              position => (num_positions,),
+              position_names => (num_positions,),
+              velocity => (num_velocities,),
+              velocity_names => (num_velocities,),
+              effort => (num_efforts,),
+              effort_names => (num_efforts,)
+              )
+@lcmtypesetup(lcmt_robot_input)
 
 function callback_sim(lcm, sim, u_lcm_channel)
-    return function(channel::String, msg::lcmt_robot_output)
+    return function(channel::String, msg)
         @show channel
         @show msg
         print(msg)
