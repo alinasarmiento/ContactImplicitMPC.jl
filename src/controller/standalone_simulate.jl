@@ -17,8 +17,10 @@ mutable struct u_vector_t <: LCMType
     input::SVector{2, Float64}
 end
 
-@lcmtypesetup(state_vector_t)
-@lcmtypesetup(u_vector_t)
+function setup_lcm()
+    @lcmtypesetup(state_vector_t)
+    @lcmtypesetup(u_vector_t)
+end
 
 function callback_sim(lcm, sim, u_lcm_channel)
     return function(channel::String, msg)
