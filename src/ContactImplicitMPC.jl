@@ -280,8 +280,8 @@ export
     Simulator,
     set_trajectory!,
     initialize_z!,
-    state_vector_t,
-    u_vector_t,
+    lcmt_robot_output,
+    lcmt_robot_input,
     callback_sim
 
 end # module

@@ -32,10 +32,8 @@ mutable struct lcmt_robot_input <: LCMType
     effort::SVector{2, Float64}
 end
 
-function setup_lcm()
-    @lcmtypesetup(lcmt_robot_output)
-    @lcmtypesetup(lcmt_robot_input)
-end
+# @lcmtypesetup(lcmt_robot_output)
+# @lcmtypesetup(lcmt_robot_input)
 
 function callback_sim(lcm, sim, u_lcm_channel)
     return function(channel::String, msg::lcmt_robot_output)
