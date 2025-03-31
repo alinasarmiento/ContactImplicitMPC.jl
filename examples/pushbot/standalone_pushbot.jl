@@ -106,8 +106,9 @@ u_lcm_channel = "PUSHBOT_INPUT"
 # cb = callback_sim(lcm, sim, u_lcm_channel)
 subscribe(lcm, x_lcm_channel, callback_sim(lcm, sim, u_lcm_channel))
 # Run event loop
-
-handle(lcm)
+while true
+    handle(lcm)
+end
 
 ## Visualizer
 vis = ContactImplicitMPC.Visualizer()
