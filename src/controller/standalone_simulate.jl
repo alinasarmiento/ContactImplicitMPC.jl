@@ -29,8 +29,8 @@ mutable struct lcmt_robot_input <: LCMType
     utime::Int64
     num_efforts::Int32
 
-    effort_names::SVector{2, String}
-    effort::SVector{2, Float64}
+    effort_names::Vector{String}
+    effort::Vector{Float64}
 end
 
 @lcmtypesetup(lcmt_robot_output,
@@ -41,16 +41,18 @@ end
               effort => (num_efforts,),
               effort_names => (num_efforts,)
               )
-@lcmtypesetup(lcmt_robot_input)
+@lcmtypesetup(lcmt_robot_input,
+              effort => (num_efforts,),
+              effort_names => (num_efforts,)
+              )              
 
 function callback_sim(lcm, sim, u_lcm_channel)
     return function(channel::String, msg)
         @show channel
         @show msg
-        print(msg)
         msg = decode(msg, lcmt_robot_output)
-        
-        @infiltrate
+        print(msg)
+
         p = sim.policy
         traj = sim.traj
         q1 = msg.position
@@ -74,7 +76,9 @@ function callback_sim(lcm, sim, u_lcm_channel)
         end
 
         # lcm broadcast p.u
-        u_lcm = lcmt_robot_input(msg.utime, msg.num_efforts, msg.effort_names, p.u)
+        u = lcmt_robot_input(msg.utime, msg.num_efforts, msg.effort_names, p.u)
+        print(u)
+        u_lcm = encode(u)
         publish(lcm, u_lcm_channel, u_lcm)
         
     end
