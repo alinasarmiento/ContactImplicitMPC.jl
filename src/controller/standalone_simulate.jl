@@ -6,24 +6,39 @@ using Infiltrator
 # 3. run controller and calculate u
 # 4. extract control action and transmit LCM message
 
-mutable struct state_vector_t <: LCMType
-    timestamp::Float64
-    position::SVector{2, Float64}
-    velocity::SVector{2, Float64}
+mutable struct lcmt_robot_output <: LCMType
+    utime::Int64
+    num_positions::Int32
+    num_velocities::Int32
+    num_efforts::Int32
+
+    position_names::SVector{num_positions, String}
+    position::SVector{num_positions, Float64}
+    
+    velocity_names::SVector{num_velocities, String}
+    velocity::SVector{num_velocities, Float64}
+    
+    effort_names::SVector{num_efforts, String}
+    effort::SVector{num_efforts, Float64}
+
+    imu_accel::SVector{3, Float64}
 end
 
-mutable struct u_vector_t <: LCMType
-    timestamp::Float64
-    input::SVector{2, Float64}
+mutable struct lcmt_robot_input <: LCMType
+    utime::Int64
+    num_efforts::Int32
+
+    effort_names::SVector{num_efforts, String}
+    effort::SVector{num_efforts, Float64}
 end
 
 function setup_lcm()
-    @lcmtypesetup(state_vector_t)
-    @lcmtypesetup(u_vector_t)
+    @lcmtypesetup(lcmt_robot_output)
+    @lcmtypesetup(lcmt_robot_input)
 end
 
 function callback_sim(lcm, sim, u_lcm_channel)
-    return function(channel::String, msg)
+    return function(channel::String, msg::lcmt_robot_output)
         @show channel
         @show msg
         print(msg)
@@ -51,7 +66,7 @@ function callback_sim(lcm, sim, u_lcm_channel)
         end
 
         # lcm broadcast p.u
-        u_lcm = u_vector_t(msg.timestamp, p.u)
+        u_lcm = lcmt_robot_input(msg.utime, msg.num_efforts, msg.effort_names, p.u)
         publish(lcm, u_lcm_channel, u_lcm)
         
     end

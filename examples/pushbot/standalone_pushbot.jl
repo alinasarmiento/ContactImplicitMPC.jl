@@ -104,6 +104,7 @@ lcm = LCM()
 x_lcm_channel = "PUSHBOT_STATE_SIMULATION"
 u_lcm_channel = "PUSHBOT_INPUT"
 # cb = callback_sim(lcm, sim, u_lcm_channel)
+setup_lcm()
 subscribe(lcm, x_lcm_channel, callback_sim(lcm, sim, u_lcm_channel))
 # Run event loop
 
