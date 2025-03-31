@@ -46,7 +46,9 @@ function callback_sim(lcm, sim, u_lcm_channel)
     return function(channel::String, msg)
         @show channel
         @show msg
+        msg = decode(msg, lmct_robot_output)
         print(msg)
+        
         @infiltrate
         p = sim.policy
         traj = sim.traj
