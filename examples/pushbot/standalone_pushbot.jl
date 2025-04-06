@@ -10,7 +10,7 @@ import ContactImplicitMPC: simulate!
 using LinearAlgebra
 using LCMCore
 using Infiltrator
-import ContactImplicitMPC: callback_sim, lcmt_robot_output, lcmt_robot_input
+import ContactImplicitMPC: callback_sim, lcmt_robot_output, lcmt_robot_input, debug_callback
 
 # ## Simulation
 s = get_simulation("pushbot", "flat_2D_lc", "flat");
@@ -103,8 +103,8 @@ sim = simulator(s, H_sim, h=h_sim, policy=p, dist=d)
 lcm = LCM()
 x_lcm_channel = "PUSHBOT_STATE_SIMULATION"
 u_lcm_channel = "PUSHBOT_INPUT"
-# cb = callback_sim(lcm, sim, u_lcm_channel)
 subscribe(lcm, x_lcm_channel, callback_sim(lcm, sim, u_lcm_channel))
+subscribe(lcm, u_lcm_channel, debug_callback)
 # Run event loop
 while true
     handle(lcm)

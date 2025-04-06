@@ -44,8 +44,14 @@ end
 @lcmtypesetup(lcmt_robot_input,
               effort => (num_efforts,),
               effort_names => (num_efforts,)
-              )              
+              )
 
+function debug_callback(channel::String, msg)
+    print(msg)
+    @infiltrate
+end
+
+    
 function callback_sim(lcm, sim, u_lcm_channel)
     return function(channel::String, msg)
         @show channel
@@ -78,7 +84,7 @@ function callback_sim(lcm, sim, u_lcm_channel)
         # lcm broadcast p.u
         u = lcmt_robot_input(msg.utime, msg.num_efforts, msg.effort_names, p.u)
         print(u)
-        @infiltrate
+        # @infiltrate
         u_lcm = encode(u)
         publish(lcm, u_lcm_channel, u_lcm)
         

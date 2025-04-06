@@ -282,6 +282,7 @@ export
     initialize_z!,
     lcmt_robot_output,
     lcmt_robot_input,
-    callback_sim
+    callback_sim,
+    debug_callback
 
 end # module
