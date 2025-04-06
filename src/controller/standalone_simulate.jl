@@ -54,8 +54,9 @@ end
     
 function callback_sim(lcm, sim, u_lcm_channel)
     return function(channel::String, msg)
-        @show channel
-        @show msg
+        # @show channel
+        # @show msg
+        @infiltrate
         msg = decode(msg, lcmt_robot_output)
         print(msg)
 
@@ -84,7 +85,6 @@ function callback_sim(lcm, sim, u_lcm_channel)
         # lcm broadcast p.u
         u = lcmt_robot_input(msg.utime, msg.num_efforts, msg.effort_names, p.u)
         print(u)
-        @infiltrate
         u_lcm = encode(u)
         publish(lcm, u_lcm_channel, u_lcm)
         
