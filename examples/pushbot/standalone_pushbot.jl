@@ -103,7 +103,7 @@ sim = simulator(s, H_sim, h=h_sim, policy=p, dist=d)
 lcm = LCM()
 x_lcm_channel = "PUSHBOT_STATE_SIMULATION"
 u_lcm_channel = "PUSHBOT_INPUT"
-subscribe(lcm, x_lcm_channel, callback_sim(lcm, sim, u_lcm_channel))
+# subscribe(lcm, x_lcm_channel, callback_sim(lcm, sim, u_lcm_channel))
 subscribe(lcm, u_lcm_channel, debug_callback)
 # Run event loop
 while true
