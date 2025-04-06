@@ -1,5 +1,4 @@
 using LCMCore, StaticArrays
-using Infiltrator
 import LCMCore: encode, decode
 
 # 1. receive LCM state
