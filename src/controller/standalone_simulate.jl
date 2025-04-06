@@ -7,44 +7,47 @@ import LCMCore: encode, decode
 # 3. run controller and calculate u
 # 4. extract control action and transmit LCM message
 
-mutable struct lcmt_robot_output <: LCMType
-    utime::Int64
-    num_positions::Int32
-    num_velocities::Int32
-    num_efforts::Int32
+# mutable struct lcmt_robot_output <: LCMType
+#     utime::Int64
+#     num_positions::Int32
+#     num_velocities::Int32
+#     num_efforts::Int32
 
-    position_names::Vector{String}
-    position::Vector{Float64}
+#     position_names::Vector{String}
+#     position::Vector{Float64}
     
-    velocity_names::Vector{String}
-    velocity::Vector{Float64}
+#     velocity_names::Vector{String}
+#     velocity::Vector{Float64}
     
-    effort_names::Vector{String}
-    effort::Vector{Float64}
+#     effort_names::Vector{String}
+#     effort::Vector{Float64}
 
-    imu_accel::SVector{3, Float64}
-end
+#     imu_accel::SVector{3, Float64}
+# end
 
-mutable struct lcmt_robot_input <: LCMType
-    utime::Int64
-    num_efforts::Int32
+# mutable struct lcmt_robot_input <: LCMType
+#     utime::Int64
+#     num_efforts::Int32
 
-    effort_names::Vector{String}
-    effort::Vector{Float64}
-end
+#     effort_names::Vector{String}
+#     effort::Vector{Float64}
+# end
 
-@lcmtypesetup(lcmt_robot_output,
-              position => (num_positions,),
-              position_names => (num_positions,),
-              velocity => (num_velocities,),
-              velocity_names => (num_velocities,),
-              effort => (num_efforts,),
-              effort_names => (num_efforts,)
-              )
-@lcmtypesetup(lcmt_robot_input,
-              effort => (num_efforts,),
-              effort_names => (num_efforts,)
-              )              
+# @lcmtypesetup(lcmt_robot_output,
+#               position => (num_positions,),
+#               position_names => (num_positions,),
+#               velocity => (num_velocities,),
+#               velocity_names => (num_velocities,),
+#               effort => (num_efforts,),
+#               effort_names => (num_efforts,)
+#               )
+# @lcmtypesetup(lcmt_robot_input,
+#               effort => (num_efforts,),
+#               effort_names => (num_efforts,)
+#               )              
+
+LCMCore.build_lcmtypes("/home/grey/research/ContactImplicitMPC.jl/src/controller/lcmtypes/lcmt_robot_output.lcm")
+LCMCore.build_lcmtypes("/home/grey/research/ContactImplicitMPC.jl/src/controller/lcmtypes/lcmt_robot_input.lcm")
 
 function callback_sim(lcm, sim, u_lcm_channel)
     return function(channel::String, msg)
