@@ -42,8 +42,8 @@ end
               effort_names => (num_efforts,)
               )
 @lcmtypesetup(lcmt_robot_input,
-              effort => (num_efforts,),
-              effort_names => (num_efforts,)
+              effort_names => (num_efforts,),
+              effort => (num_efforts,)
               )
 
 function debug_callback(channel::String, msg)
