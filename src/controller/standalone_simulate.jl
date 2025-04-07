@@ -55,7 +55,7 @@ function callback_sim(lcm, sim, u_lcm_channel)
     return function(channel::String, msg)
         # @show channel
         # @show msg
-        print("decode")
+        print("\n decode \n")
         msg = decode(msg, lcmt_robot_output)
         print(msg)
 
@@ -63,12 +63,12 @@ function callback_sim(lcm, sim, u_lcm_channel)
         traj = sim.traj
         q1 = msg.position
 
-        print("newton solve")
+        print("\n newton solve \n")
         @time newton_solve!(p.newton, p.s, p.q0, q1,
                             p.im_traj, p.traj, warm_start=true)
-        print("update")
+        print("\n update \n")
         @time update!(p.im_traj, p.traj, p.s, p.altitude, p.κ[1], p.traj.H)
-        print("rot_n_stride")
+        print("\n rot_n_stride \n")
         @time rot_n_stride!(p.traj, p.traj_cache, p.stride)
         p.q0 .= q1
 
@@ -86,9 +86,9 @@ function callback_sim(lcm, sim, u_lcm_channel)
         # lcm broadcast p.u
         u = lcmt_robot_input(msg.utime, msg.num_efforts, msg.effort_names, p.u)
         print(u)
-        print("encode u")
+        print("\n encode u  \n")
         @time u_lcm = encode(u)
-        print("publish")
+        print("\n publish \n")
         @time publish(lcm, u_lcm_channel, u_lcm)        
     end
 end
