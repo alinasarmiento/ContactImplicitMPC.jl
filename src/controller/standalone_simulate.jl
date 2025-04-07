@@ -53,23 +53,21 @@ end
     
 function callback_sim(lcm, sim, u_lcm_channel)
     return function(channel::String, msg)
-        # @show channel
-        # @show msg
-        print("\n decode \n")
-        @time msg = decode(msg, lcmt_robot_output)
+        # print("\n decode \n")
+        msg = decode(msg, lcmt_robot_output)
         print(msg)
 
         p = sim.policy
         traj = sim.traj
         q1 = msg.position
 
-        print("\n newton solve \n")
-        @time newton_solve!(p.newton, p.s, p.q0, q1,
+        # print("\n newton solve \n")
+        newton_solve!(p.newton, p.s, p.q0, q1,
                             p.im_traj, p.traj, warm_start=true)
-        print("\n update \n")
-        @time update!(p.im_traj, p.traj, p.s, p.altitude, p.κ[1], p.traj.H)
-        print("\n rot_n_stride \n")
-        @time rot_n_stride!(p.traj, p.traj_cache, p.stride)
+        # print("\n update \n")
+        update!(p.im_traj, p.traj, p.s, p.altitude, p.κ[1], p.traj.H)
+        # print("\n rot_n_stride \n")
+        rot_n_stride!(p.traj, p.traj_cache, p.stride)
         p.q0 .= q1
 
         # scale control
@@ -86,9 +84,9 @@ function callback_sim(lcm, sim, u_lcm_channel)
         # lcm broadcast p.u
         u = lcmt_robot_input(msg.utime, msg.num_efforts, msg.effort_names, p.u)
         print(u)
-        print("\n encode u  \n")
-        @time u_lcm = encode(u)
-        print("\n publish \n")
-        @time publish(lcm, u_lcm_channel, u_lcm)        
+        # print("\n encode u  \n")
+        u_lcm = encode(u)
+        # print("\n publish \n")
+        publish(lcm, u_lcm_channel, u_lcm)        
     end
 end

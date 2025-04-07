@@ -174,14 +174,17 @@ function newton_solve!(
     ref_traj::ContactTraj{T};
     warm_start::Bool=false) where T
 
-    # reset solver 
-    reset!(core, ref_traj, q0, q1, warm_start=warm_start)
+    # reset solver
+    print("\n reset\n")
+    @time reset!(core, ref_traj, q0, q1, warm_start=warm_start)
     
     # Compute implicit dynamics about traj
-	implicit_dynamics!(im_traj, core.traj)
+    print("\n implicit dynamics\n")
+    @time implicit_dynamics!(im_traj, core.traj)
     
     # Compute residual
-    residual!(core.res, core, core.ν, im_traj, core.traj, ref_traj)
+    print("\n residual\n")
+    @time residual!(core.res, core, core.ν, im_traj, core.traj, ref_traj)
 
     r_norm = norm(core.res.r, 1)
 	elapsed_time = 0.0
