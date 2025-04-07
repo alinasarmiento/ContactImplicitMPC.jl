@@ -175,44 +175,49 @@ function newton_solve!(
     warm_start::Bool=false) where T
 
     # reset solver
-    print("\n reset\n")
-    @time reset!(core, ref_traj, q0, q1, warm_start=warm_start)
+    # print("\n reset\n")
+    reset!(core, ref_traj, q0, q1, warm_start=warm_start)
     
     # Compute implicit dynamics about traj
-    print("\n implicit dynamics\n")
-    @time implicit_dynamics!(im_traj, core.traj)
+    # print("\n implicit dynamics\n")
+    implicit_dynamics!(im_traj, core.traj)
     
     # Compute residual
-    print("\n residual\n")
-    @time residual!(core.res, core, core.ν, im_traj, core.traj, ref_traj)
+    # print("\n residual\n")
+    residual!(core.res, core, core.ν, im_traj, core.traj, ref_traj)
 
     r_norm = norm(core.res.r, 1)
 	elapsed_time = 0.0
 
     for l = 1:core.opts.max_iter
-		elapsed_time >= core.opts.max_time && break
-		elapsed_time += @elapsed begin
-	        # check convergence
-	        r_norm / length(core.res.r) < core.opts.r_tol && break
+            elapsed_time >= core.opts.max_time && break
+            elapsed_time += @elapsed begin
+            # check convergence
+            r_norm / length(core.res.r) < core.opts.r_tol && break
 
-	        # Compute NewtonJacobian
-	        jacobian!(core.jac, im_traj, core.obj, core.traj.H, core.β)
-            
+            # Compute NewtonJacobian
+            print("\n jacobian\n")    
+            @time jacobian!(core.jac, im_traj, core.obj, core.traj.H, core.β)
+
             # Compute Search Direction
-	        linear_solve!(core.solver, core.Δ.r, core.jac.R, core.res.r)
+            print("\n linear solve\n")
+            @time linear_solve!(core.solver, core.Δ.r, core.jac.R, core.res.r)
 
             # line search the step direction
 	        α = 1.0
 	        iter = 0
 
 	        # candidate step
-	        update_traj!(core.traj_cand, core.traj, core.ν_cand, core.ν, core.Δ, α)
+                print("\n update traj\n")
+	        @time update_traj!(core.traj_cand, core.traj, core.ν_cand, core.ν, core.Δ, α)
 
 	        # Compute implicit dynamics for candidate
-			implicit_dynamics!(im_traj, core.traj_cand)
+                print("\n implicit dynamics\n")
+		@time implicit_dynamics!(im_traj, core.traj_cand)
 
 	        # Compute residual for candidate
-	        residual!(core.res_cand, core, core.ν_cand, im_traj, core.traj_cand, ref_traj)
+                print("\n residual\n")
+	        @time residual!(core.res_cand, core, core.ν_cand, im_traj, core.traj_cand, ref_traj)
 	        r_cand_norm = norm(core.res_cand.r, 1)
 
             while r_cand_norm^2.0 >= (1.0 - 0.001 * α) * r_norm^2.0
