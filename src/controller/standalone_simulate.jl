@@ -45,10 +45,10 @@ end
               efforts => (num_efforts,)
               )
 
-# function debug_callback(channel::String, msg)
-#     print(msg)
-#     @infiltrate
-# end
+function debug_callback(channel::String, msg)
+    print(msg)
+    # @infiltrate
+end
 
     
 function callback_sim(lcm, sim, u_lcm_channel)
