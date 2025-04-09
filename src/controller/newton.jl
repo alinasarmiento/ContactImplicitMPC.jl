@@ -1,4 +1,3 @@
-using Infiltrator
 # Newton solver options
 @with_kw mutable struct NewtonOptions{T}
     r_tol::T = 1.0e-5            # primal dual residual tolerance
@@ -202,7 +201,6 @@ function newton_solve!(
 
             # Compute Search Direction
             print("\n linear solve\n")
-            @infiltrate    
             @time linear_solve!(core.solver, core.Δ.r, core.jac.R, core.res.r)
 
             # line search the step direction
