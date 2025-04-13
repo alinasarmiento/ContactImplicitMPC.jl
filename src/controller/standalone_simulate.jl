@@ -87,6 +87,6 @@ function callback_sim(lcm, sim, u_lcm_channel)
         # print("\n encode u  \n")
         u_lcm = encode(u)
         # print("\n publish \n")
-        publish(lcm, u_lcm_channel, u_lcm)        
+        # publish(lcm, u_lcm_channel, u_lcm)        
     end
 end
