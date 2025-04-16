@@ -188,7 +188,8 @@ function newton_solve!(
 
     r_norm = norm(core.res.r, 1)
 	elapsed_time = 0.0
-
+    print("MAX ITER:")
+    print(core.opts.max_iter)
     for l = 1:core.opts.max_iter
             elapsed_time >= core.opts.max_time && break
             elapsed_time += @elapsed begin
@@ -200,7 +201,8 @@ function newton_solve!(
             @time jacobian!(core.jac, im_traj, core.obj, core.traj.H, core.β)
 
             # Compute Search Direction
-            print("\n linear solve\n")
+                print("\n linear solve\n")
+                print(l)
             @time linear_solve!(core.solver, core.Δ.r, core.jac.R, core.res.r)
 
             # line search the step direction
