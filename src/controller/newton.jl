@@ -135,6 +135,7 @@ function reset!(core::Newton, ref_traj::ContactTraj,
     warm_start::Bool = false) where T
 
     # H = ref_traj.H
+    @infiltrate
     H_mpc = core.traj.H
     opts = core.opts
 
@@ -192,7 +193,6 @@ function newton_solve!(
 	elapsed_time = 0.0
     print("MAX ITER:")
     print(core.opts.max_iter)
-    @infiltrate
     for l = 1:core.opts.max_iter
             elapsed_time >= core.opts.max_time && break
             elapsed_time += @elapsed begin
