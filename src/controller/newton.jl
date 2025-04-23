@@ -1,3 +1,5 @@
+using Infiltrator
+
 # Newton solver options
 @with_kw mutable struct NewtonOptions{T}
     r_tol::T = 1.0e-5            # primal dual residual tolerance
@@ -252,7 +254,7 @@ function newton_solve!(
 		end
     end
     print(elapsed_time)
-
+    @infiltrate
     return nothing
 end
 
