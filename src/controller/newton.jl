@@ -1,4 +1,4 @@
-# using Infiltrator
+using Infiltrator
 
 # Newton solver options
 @with_kw mutable struct NewtonOptions{T}
@@ -254,7 +254,7 @@ function newton_solve!(
 		end
     end
     print(elapsed_time)
-    # @infiltrate
+    @infiltrate
     return nothing
 end
 
