@@ -1,4 +1,4 @@
-# using Infiltrator
+using Infiltrator
 
 # Newton solver options
 @with_kw mutable struct NewtonOptions{T}
@@ -192,6 +192,7 @@ function newton_solve!(
 	elapsed_time = 0.0
     print("MAX ITER:")
     print(core.opts.max_iter)
+    @infiltrate
     for l = 1:core.opts.max_iter
             elapsed_time >= core.opts.max_time && break
             elapsed_time += @elapsed begin
@@ -205,8 +206,8 @@ function newton_solve!(
             # Compute Search Direction
                 # print("\n linear solve\n")
                 # print(l)
-                # print("\n core.jac.R shape: ")
-                # print(sizeof(core.jac.R))
+                print("\n core.jac.R shape: ")
+                print(sizeof(core.jac.R))
             @time linear_solve!(core.solver, core.Δ.r, core.jac.R, core.res.r)
 
             # line search the step direction
