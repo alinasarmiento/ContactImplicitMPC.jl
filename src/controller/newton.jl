@@ -132,7 +132,7 @@ function reset!(core::Newton, ref_traj::ContactTraj,
     q0::Vector{T}, q1::Vector{T};
     warm_start::Bool = false) where T
 
-    H = ref_traj.H
+    # H = ref_traj.H
     # H_mpc = core.traj.H
     opts = core.opts
 
