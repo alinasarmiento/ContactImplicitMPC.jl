@@ -197,12 +197,12 @@ function newton_solve!(
             r_norm / length(core.res.r) < core.opts.r_tol && break
 
             # Compute NewtonJacobian
-            print("\n jacobian\n")    
-            @time jacobian!(core.jac, im_traj, core.obj, core.traj.H, core.β)
+            # print("\n jacobian\n")    
+            jacobian!(core.jac, im_traj, core.obj, core.traj.H, core.β)
 
             # Compute Search Direction
-                print("\n linear solve\n")
-                print(l)
+                # print("\n linear solve\n")
+                # print(l)
             @time linear_solve!(core.solver, core.Δ.r, core.jac.R, core.res.r)
 
             # line search the step direction
@@ -210,16 +210,16 @@ function newton_solve!(
 	        iter = 0
 
 	        # candidate step
-                print("\n update traj\n")
-	        @time update_traj!(core.traj_cand, core.traj, core.ν_cand, core.ν, core.Δ, α)
+                # print("\n update traj\n")
+	        update_traj!(core.traj_cand, core.traj, core.ν_cand, core.ν, core.Δ, α)
 
 	        # Compute implicit dynamics for candidate
-                print("\n implicit dynamics\n")
-		@time implicit_dynamics!(im_traj, core.traj_cand)
+                # print("\n implicit dynamics\n")
+		implicit_dynamics!(im_traj, core.traj_cand)
 
 	        # Compute residual for candidate
-                print("\n residual\n")
-	        @time residual!(core.res_cand, core, core.ν_cand, im_traj, core.traj_cand, ref_traj)
+                # print("\n residual\n")
+	        residual!(core.res_cand, core, core.ν_cand, im_traj, core.traj_cand, ref_traj)
 	        r_cand_norm = norm(core.res_cand.r, 1)
 
             while r_cand_norm^2.0 >= (1.0 - 0.001 * α) * r_norm^2.0
