@@ -62,6 +62,12 @@ function callback_sim(lcm, sim, u_lcm_channel)
         q1 = msg.position
 
         # print("\n newton solve \n")
+        print("\n")
+        print(p.newton)
+        print("\n")
+        print(p.s)
+        print("\n")
+        print(p.q0)
         newton_solve!(p.newton, p.s, p.q0, q1,
                             p.im_traj, p.traj, warm_start=true)
         # print("\n update \n")
