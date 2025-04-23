@@ -1,4 +1,4 @@
-using Infiltrator
+# using Infiltrator
 
 # Newton solver options
 @with_kw mutable struct NewtonOptions{T}
@@ -253,8 +253,9 @@ function newton_solve!(
             core.opts.verbose && print_status(core, elapsed_time, α)
 		end
     end
-    print(elapsed_time)
-    @infiltrate
+    print("\n")
+    print(sizeof(core.jac.R))
+    
     return nothing
 end
 
