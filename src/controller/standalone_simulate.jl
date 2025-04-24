@@ -1,5 +1,6 @@
 using LCMCore, StaticArrays
 import LCMCore: encode, decode
+using Infiltrator
 
 # 1. receive LCM state
 # 2. Set Julia state from LCM message
@@ -63,6 +64,7 @@ function callback_sim(lcm, sim, u_lcm_channel)
 
         # print("\n newton solve \n")
         print("\n")
+        @infiltrate
         print(p.newton)
         print("\n")
         print(p.s)
