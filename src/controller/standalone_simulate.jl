@@ -59,6 +59,7 @@ function callback_sim(lcm, sim, u_lcm_channel)
         print(msg)
 
         p = sim.policy
+        print(p)
         traj = sim.traj
         q1 = msg.position
 
