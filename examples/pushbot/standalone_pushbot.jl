@@ -10,7 +10,7 @@ import ContactImplicitMPC: simulate!
 using LinearAlgebra
 using LCMCore
 import ContactImplicitMPC: callback_sim, lcmt_robot_output, lcmt_robot_input, debug_callback
-
+using Infiltrator
 # ## Simulation
 s = get_simulation("pushbot", "flat_2D_lc", "flat");
 model = s.model
@@ -79,7 +79,8 @@ p = ci_mpc_policy(ref_traj, s, obj,
 		max_iter = 10,
 		max_time = ref_traj.h/2, # HARD REAL TIME
 		),
-    mpc_opts = CIMPCOptions());
+                  mpc_opts = CIMPCOptions());
+@infiltrate
 
 ## Disturbances -- not used
 idx_d1 = 20
