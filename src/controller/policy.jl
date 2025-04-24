@@ -1,6 +1,7 @@
 """
     contact-implicit model-predictive control policy
 """
+using Infiltrator
 
 @with_kw mutable struct CIMPCOptions{T}
 	altitude_update::Bool = false
@@ -74,7 +75,7 @@ function ci_mpc_policy(traj::ContactTraj, s::Simulation{T}, obj::Objective;
 	else
 		@error "invalid Newton solver specified"
 	end
-
+    @infiltrate
 	CIMPC(zeros(s.model.nu), traj, traj_cache, ref_traj, im_traj, im_traj_cache, 
 		H_mpc, stride, altitude, ϕ, [κ_mpc], newton, newton_mode, s, copy(ref_traj.q[1]),
 		N_sample, [N_sample], mpc_opts)
