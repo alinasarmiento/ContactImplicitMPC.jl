@@ -10,7 +10,7 @@ import ContactImplicitMPC: simulate!
 using LinearAlgebra
 using LCMCore
 import ContactImplicitMPC: callback_sim, lcmt_robot_output, lcmt_robot_input, debug_callback
-using Infiltrator
+# using Infiltrator
 
 # ## Simulation
 s = get_simulation("pushbot", "flat_2D_lc", "flat");
@@ -99,7 +99,7 @@ v1_sim = [0.0; 0.0]
 ## Simulator
 sim = simulator(s, H_sim, h=h_sim, policy=p, dist=d)
 
-@infiltrate
+# @infiltrate
 ## LCM + Drake loop
 lcm = LCM()
 x_lcm_channel = "PUSHBOT_STATE_SIMULATION"
