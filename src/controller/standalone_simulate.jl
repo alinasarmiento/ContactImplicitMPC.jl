@@ -64,7 +64,6 @@ function callback_sim(lcm, sim, u_lcm_channel)
 
         # print("\n newton solve \n")
         print("\n")
-        @infiltrate
         print(p.newton)
         print("\n")
         print(p.s)
