@@ -134,7 +134,7 @@ function reset!(core::Newton, ref_traj::ContactTraj,
 
     # H = ref_traj.H
     print(core.traj.H)
-    print("\n"
+    print("\n")
     H_mpc = core.traj.H
     opts = core.opts
 
