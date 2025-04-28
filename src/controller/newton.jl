@@ -133,7 +133,8 @@ function reset!(core::Newton, ref_traj::ContactTraj,
     warm_start::Bool = false) where T
 
     # H = ref_traj.H
-    # print(core.traj.H)
+    print(core.traj.H)
+    print("\n"
     H_mpc = core.traj.H
     opts = core.opts
 
