@@ -206,7 +206,7 @@ function newton_solve!(
                 # print(l)
                 # print("\n core.jac.R shape: ")
                 # print(sizeof(core.jac.R))
-            @time linear_solve!(core.solver, core.Δ.r, core.jac.R, core.res.r)
+            linear_solve!(core.solver, core.Δ.r, core.jac.R, core.res.r)
 
             # line search the step direction
 	        α = 1.0
