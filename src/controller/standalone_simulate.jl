@@ -1,6 +1,6 @@
 using LCMCore, StaticArrays
 import LCMCore: encode, decode
-using Infiltrator
+# using Infiltrator
 
 # 1. receive LCM state
 # 2. Set Julia state from LCM message
@@ -56,7 +56,8 @@ function callback_sim(lcm, sim, u_lcm_channel)
     return function(channel::String, msg)
         # print("\n decode \n")
         msg = decode(msg, lcmt_robot_output)
-        print("x: ", msg, "\n")
+        print("\n x: ")
+        print(msg)
 
         p = sim.policy
         # print(p)
