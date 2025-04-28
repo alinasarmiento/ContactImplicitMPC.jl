@@ -133,7 +133,7 @@ function reset!(core::Newton, ref_traj::ContactTraj,
     warm_start::Bool = false) where T
 
     # H = ref_traj.H
-    print(core.traj.H)
+    # print(core.traj.H)
     H_mpc = core.traj.H
     opts = core.opts
 
@@ -204,8 +204,8 @@ function newton_solve!(
             # Compute Search Direction
                 # print("\n linear solve\n")
                 # print(l)
-                print("\n core.jac.R shape: ")
-                print(sizeof(core.jac.R))
+                # print("\n core.jac.R shape: ")
+                # print(sizeof(core.jac.R))
             @time linear_solve!(core.solver, core.Δ.r, core.jac.R, core.res.r)
 
             # line search the step direction
