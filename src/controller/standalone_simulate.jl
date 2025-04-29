@@ -55,6 +55,7 @@ end
 function callback_sim(lcm, sim, u_lcm_channel)
     return function(channel::String, msg)
         # print("\n decode \n")
+        print("\n received")
         msg = decode(msg, lcmt_robot_output)
         print("\n x: ")
         print(msg)
