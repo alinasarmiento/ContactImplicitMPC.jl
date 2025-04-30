@@ -71,24 +71,22 @@ function callback_sim(lcm, sim, u_lcm_channel)
         print("\n q0\n")
         print(p.q0)
 
-        newton_solve!(p.newton, p.s, p.q0, q1,
-                            p.im_traj, p.traj, warm_start=true)
-        # print("\n update \n")
-        update!(p.im_traj, p.traj, p.s, p.altitude, p.κ[1], p.traj.H)
-        # print("\n rot_n_stride \n")
-        rot_n_stride!(p.traj, p.traj_cache, p.stride)
-        p.q0 .= q1
+        # newton_solve!(p.newton, p.s, p.q0, q1,
+        #                     p.im_traj, p.traj, warm_start=true)
+        # update!(p.im_traj, p.traj, p.s, p.altitude, p.κ[1], p.traj.H)
+        # rot_n_stride!(p.traj, p.traj_cache, p.stride)
+        # p.q0 .= q1
 
-        # scale control
-        if p.newton_mode == :direct
-            p.u .= p.newton.traj.u[1] 
-            p.u ./= p.N_sample
-        elseif p.newton_mode == :structure
-            p.u .= p.newton.u[1] 
-            p.u ./= p.N_sample
-        else
-            println("newton mode specified not available")
-        end
+        # # scale control
+        # if p.newton_mode == :direct
+        #     p.u .= p.newton.traj.u[1] 
+        #     p.u ./= p.N_sample
+        # elseif p.newton_mode == :structure
+        #     p.u .= p.newton.u[1] 
+        #     p.u ./= p.N_sample
+        # else
+        #     println("newton mode specified not available")
+        # end
 
         # lcm broadcast p.u
         # u = lcmt_robot_input(msg.utime, msg.num_efforts, msg.effort_names, p.u)
