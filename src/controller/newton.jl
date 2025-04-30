@@ -1,3 +1,4 @@
+using Infiltrator
 # Newton solver options
 @with_kw mutable struct NewtonOptions{T}
     r_tol::T = 1.0e-5            # primal dual residual tolerance
@@ -137,6 +138,7 @@ function reset!(core::Newton, ref_traj::ContactTraj,
     opts = core.opts
 
     # Reset β value
+    @infiltrate
     core.β = opts.β_init
 
     if !warm_start
