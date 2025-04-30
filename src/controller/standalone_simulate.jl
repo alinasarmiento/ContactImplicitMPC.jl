@@ -76,7 +76,7 @@ function callback_sim(lcm, sim, u_lcm_channel)
         print("\n β_init \n")
         print(p.newton.opts.β_init)
         print("\n traj \n")
-        print(p.newton.traj)
+        print(sizeof(p.newton.traj))
 
         newton_solve!(p.newton, p.s, p.q0, q1,
                             p.im_traj, p.traj, warm_start=true)
