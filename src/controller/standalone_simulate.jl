@@ -66,6 +66,8 @@ function callback_sim(lcm, sim, u_lcm_channel)
         traj = sim.traj
         # q1 = msg.position
         q1 = [0.0, 0.0]
+        print("\n sim policy properties\n")
+        print(propertynames(p))
         print("\n q0\n")
         print(p.q0)
 
