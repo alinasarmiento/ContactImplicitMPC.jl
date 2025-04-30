@@ -64,7 +64,8 @@ function callback_sim(lcm, sim, u_lcm_channel)
         p = sim.policy
         # print(p)
         traj = sim.traj
-        q1 = msg.position
+        # q1 = msg.position
+        q1 = [0.0, 0.0]
 
         newton_solve!(p.newton, p.s, p.q0, q1,
                             p.im_traj, p.traj, warm_start=true)
