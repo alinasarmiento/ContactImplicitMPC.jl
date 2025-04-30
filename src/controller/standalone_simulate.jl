@@ -59,7 +59,8 @@ function callback_sim(lcm, sim, u_lcm_channel)
         msg = decode(msg, lcmt_robot_output)
         print("\n x: ")
         print(msg)
-
+        print("\n position\n")
+        print(msg.position)
         p = sim.policy
         traj = sim.traj
         q1 = msg.position
