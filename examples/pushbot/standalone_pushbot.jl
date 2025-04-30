@@ -102,7 +102,7 @@ sim = simulator(s, H_sim, h=h_sim, policy=p, dist=d)
 # set up for warm start
 newton_solve!(sim.policy.newton, sim.policy.s, sim.policy.q0, q1,
                         sim.policy.im_traj, sim.policy.traj, warm_start = false)
-
+print("\n ready \n")
 
 ## LCM + Drake loop
 lcm = LCM()
