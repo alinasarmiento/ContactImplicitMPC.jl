@@ -134,7 +134,7 @@ function reset!(core::Newton, ref_traj::ContactTraj,
     warm_start::Bool = false) where T
 
     # H = ref_traj.H
-    # H_mpc = core.traj.H
+    H_mpc = core.traj.H
     # @infiltrate
     opts = core.opts
 
