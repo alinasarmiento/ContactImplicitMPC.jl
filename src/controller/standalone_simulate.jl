@@ -67,8 +67,8 @@ function callback_sim(lcm, sim, u_lcm_channel)
         print("\n q0\n")
         print(p.q0)
 
-        newton_solve!(p.newton, p.s, p.q0, q1,
-                            p.im_traj, p.traj, warm_start=true)
+        # newton_solve!(p.newton, p.s, p.q0, q1,
+        #                     p.im_traj, p.traj, warm_start=true)
         # update!(p.im_traj, p.traj, p.s, p.altitude, p.κ[1], p.traj.H)
         # rot_n_stride!(p.traj, p.traj_cache, p.stride)
         # p.q0 .= q1
