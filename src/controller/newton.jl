@@ -136,6 +136,7 @@ function reset!(core::Newton, ref_traj::ContactTraj,
     # H = ref_traj.H
     H_mpc = core.traj.H
     # @infiltrate
+    print(fieldnames(core))
     opts = core.opts
 
     # Reset β value
