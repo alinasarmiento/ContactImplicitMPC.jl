@@ -139,7 +139,7 @@ function reset!(core::Newton, ref_traj::ContactTraj,
     opts = core.opts
 
     # Reset β value
-
+    print(opts.β_init)
     core.β = opts.β_init
 
     if !warm_start
