@@ -6,7 +6,7 @@
  
 using ContactImplicitMPC
 using RoboDojo
-import ContactImplicitMPC: simulate!
+import ContactImplicitMPC: simulate!, newton_solve!
 using LinearAlgebra
 using LCMCore
 import ContactImplicitMPC: callback_sim, lcmt_robot_output, lcmt_robot_input, debug_callback
