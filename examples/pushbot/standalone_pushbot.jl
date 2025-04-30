@@ -99,7 +99,11 @@ v1_sim = [0.0; 0.0]
 ## Simulator
 sim = simulator(s, H_sim, h=h_sim, policy=p, dist=d)
 
-# @infiltrate
+# set up for warm start
+newton_solve!(sim.policy.newton, sim.policy.s, sim.policy.q0, q1,
+                        sim.policy.im_traj, sim.policy.traj, warm_start = false)
+
+
 ## LCM + Drake loop
 lcm = LCM()
 x_lcm_channel = "PUSHBOT_STATE_SIMULATION"
