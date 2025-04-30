@@ -57,17 +57,12 @@ function callback_sim(lcm, sim, u_lcm_channel)
         # print("\n decode \n")
         print("\n received")
         msg = decode(msg, lcmt_robot_output)
-        # msg = lcmt_robot_output(0, 2, 2, 2, ["base_joint", "push_joint"], [0.7731647863882035, 0.20706555274702418], ["base_jointdot", "push_jointdot"], [4.551114023405554e-10, 6.184129494732598e-10], ["base_motor", "push_motor"], [0.0, 0.0], [0.0, 0.0, 0.0])
         print("\n x: ")
         print(msg)
 
         p = sim.policy
-        # print(p)
         traj = sim.traj
-        # q1 = msg.position
-        q1 = [0.0, 0.0]
-        print("\n sim policy properties\n")
-        print(propertynames(p))
+        q1 = msg.position
         print("\n q0\n")
         print(p.q0)
 
