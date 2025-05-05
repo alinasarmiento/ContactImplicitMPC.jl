@@ -1,0 +1,14 @@
+from julia.api import Julia
+jl = Julia(compiled_modules=False)
+from julia import Main
+cimpc_path = "/home/grey/research/ContactImplicitMPC.jl/"
+Main.eval('using Pkg; Pkg.add(path=%s); using ContactImplicitMPC' % cimpc_path)
+Main.include(cimpc_path + "/src/controller/standalone_simulate.jl")
+
+import lcm
+from dairlib import lcmt_robot_input, lcmt_robot_output
+from IPython import embed; embed()
+
+def cimpc_handler(channel, data):
+    msg = lcmt_robot_output.decode(data)
+    
