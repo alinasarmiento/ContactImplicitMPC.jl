@@ -9,7 +9,7 @@ using RoboDojo
 import ContactImplicitMPC: simulate!, newton_solve!
 using LinearAlgebra
 using LCMCore
-import ContactImplicitMPC: callback_sim, lcmt_robot_output, lcmt_robot_input, debug_callback
+import ContactImplicitMPC: callback_sim, lcmt_robot_output, lcmt_robot_input, debug_callback, callback_sim_py
 using PyCall
 # using Infiltrator
 
