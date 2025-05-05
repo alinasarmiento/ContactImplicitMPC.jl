@@ -93,10 +93,11 @@ function callback_sim(lcm, sim, u_lcm_channel)
     end
 end
 
+lcmt = pyimport("lcmtypes.dairlib")
 function callback_sim_py(sim, u_lcm_channel)
     return function(channel::String, msg)
         print("\n received")
-        msg = decode(msg, lcmt_robot_output)
+        msg = lcmt.lcmt_robot_output.decode(msg)
         print("\n x: ")
         print(msg)
         print("\n position\n")
