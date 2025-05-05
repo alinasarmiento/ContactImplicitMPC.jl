@@ -25,7 +25,7 @@ def py_handler(sim, u_lcm_channel):
         q1 = msg.position
 
         cimpc.newton_solve_b(p.newton, p.s, p.q0, q1,
-                            p.im_traj, p.traj, warm_start=true)
+                            p.im_traj, p.traj, warm_start=True)
         cimpc.update_b(p.im_traj, p.traj, p.s, p.altitude, p.κ[1], p.traj.H)
         cimpc.rot_n_stride_b(p.traj, p.traj_cache, p.stride)
         p.q0 = q1
