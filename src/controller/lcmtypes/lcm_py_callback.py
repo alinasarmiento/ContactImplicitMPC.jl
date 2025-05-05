@@ -32,7 +32,7 @@ def py_handler(sim, u_lcm_channel):
                             p.im_traj, p.traj, warm_start=True)
         cimpc.update_b(p.im_traj, p.traj, p.s, p.altitude, p.κ[0], p.traj.H)
         cimpc.rot_n_stride_b(p.traj, p.traj_cache, p.stride)
-        p.q0 = q1
+        p."q0" = q1
 
         # # scale control
         # if p.newton_mode == :direct
