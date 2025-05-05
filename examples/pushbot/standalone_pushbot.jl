@@ -10,6 +10,7 @@ import ContactImplicitMPC: simulate!, newton_solve!
 using LinearAlgebra
 using LCMCore
 import ContactImplicitMPC: callback_sim, lcmt_robot_output, lcmt_robot_input, debug_callback
+using PyCall
 # using Infiltrator
 
 # ## Simulation
@@ -102,21 +103,30 @@ sim = simulator(s, H_sim, h=h_sim, policy=p, dist=d)
 # set up for warm start
 newton_solve!(sim.policy.newton, sim.policy.s, sim.policy.q0, q1,
               sim.policy.im_traj, sim.policy.traj, warm_start = false)
-print("\n sim.policy outside lcm:\n")
-print(propertynames(sim.policy))
-print("\n")
-print(sim.policy.q0)
-print("\n ready \n")
+# print("\n sim.policy outside lcm:\n")
+# print(propertynames(sim.policy))
+# print("\n")
+# print(sim.policy.q0)
+# print("\n ready \n")
 
-## LCM + Drake loop
-lcm = LCM()
 x_lcm_channel = "PUSHBOT_STATE_SIMULATION"
 u_lcm_channel = "PUSHBOT_INPUT"
-subscribe(lcm, x_lcm_channel, callback_sim(lcm, sim, u_lcm_channel))
-# subscribe(lcm, u_lcm_channel, debug_callback)
-# Run event loop
+
+## LCM + Drake loop using LCMCore
+# lcm = LCM()
+# subscribe(lcm, x_lcm_channel, callback_sim(lcm, sim, u_lcm_channel))
+# # Run event loop
+# while true
+#     handle(lcm)
+# end
+
+## LCM + Drake loop in Python
+lcm = pyimport("lcm")
+pyhandler = pyimport("lcmtypes.lcm_py_callback.py_callback_sim")
+lc = lcm.LCM()
+subscription = lc.subscribe(x_lcm_channel, pyhandler(sim, u_lcm_channel))
 while true
-    handle(lcm)
+    lc.handle()
 end
 
 ## Visualizer

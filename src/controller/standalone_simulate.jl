@@ -1,5 +1,6 @@
 using LCMCore, StaticArrays
 import LCMCore: encode, decode
+using PyCall
 # using Infiltrator
 
 # 1. receive LCM state
@@ -55,6 +56,45 @@ end
 function callback_sim(lcm, sim, u_lcm_channel)
     return function(channel::String, msg)
         # print("\n decode \n")
+        print("\n received")
+        msg = decode(msg, lcmt_robot_output)
+        print("\n x: ")
+        print(msg)
+        print("\n position\n")
+        print(msg.position)
+        p = sim.policy
+        traj = sim.traj
+        q1 = msg.position
+        print("\n q0\n")
+        print(p.q0)
+
+        newton_solve!(p.newton, p.s, p.q0, q1,
+                            p.im_traj, p.traj, warm_start=true)
+        # update!(p.im_traj, p.traj, p.s, p.altitude, p.κ[1], p.traj.H)
+        # rot_n_stride!(p.traj, p.traj_cache, p.stride)
+        p.q0 .= q1
+
+        # # scale control
+        # if p.newton_mode == :direct
+        #     p.u .= p.newton.traj.u[1] 
+        #     p.u ./= p.N_sample
+        # elseif p.newton_mode == :structure
+        #     p.u .= p.newton.u[1] 
+        #     p.u ./= p.N_sample
+        # else
+        #     println("newton mode specified not available")
+        # end
+
+        # lcm broadcast p.u
+        # u = lcmt_robot_input(msg.utime, msg.num_efforts, msg.effort_names, p.u)
+        # print(u)
+        # u_lcm = encode(u)
+        # publish(lcm, u_lcm_channel, u_lcm)        
+    end
+end
+
+function callback_sim_py(sim, u_lcm_channel)
+    return function(channel::String, msg)
         print("\n received")
         msg = decode(msg, lcmt_robot_output)
         print("\n x: ")
