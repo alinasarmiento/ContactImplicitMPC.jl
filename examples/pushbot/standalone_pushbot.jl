@@ -121,6 +121,8 @@ u_lcm_channel = "PUSHBOT_INPUT"
 # end
 
 ## LCM + Drake loop in Python
+sys = pyimport("sys")
+pushfirst!(sys."path","")
 lcm = pyimport("lcm")
 pyhandler = pyimport("lcmtypes.lcm_py_callback.py_callback_sim")
 lc = lcm.LCM()

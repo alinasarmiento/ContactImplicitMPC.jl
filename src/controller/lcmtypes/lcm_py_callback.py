@@ -10,7 +10,7 @@ import julia.ContactImplicitMPC as cimpc
 
 import sys
 import os
-sys.append(os.environ['LCMT_PATH'])
+sys.path.append(os.environ['LCMT_PATH'])
 import lcm
 from dairlib import lcmt_robot_input, lcmt_robot_output
 # from IPython import embed; embed()
