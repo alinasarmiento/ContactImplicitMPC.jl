@@ -5,7 +5,7 @@ cimpc_path = "/home/grey/research/ContactImplicitMPC.jl/"
 Main.eval('using Pkg; Pkg.add(path="%s");' % cimpc_path)
 Main.eval('using ContactImplicitMPC')
 Main.eval('using StaticArrays')
-Main.include(cimpc_path + "src/controller/standalone_simulate.jl")
+# Main.include(cimpc_path + "src/controller/standalone_simulate.jl")
 import julia.ContactImplicitMPC as cimpc
 
 import sys

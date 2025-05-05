@@ -127,6 +127,8 @@ lcm = pyimport("lcm")
 pyhandler = pyimport("lcmtypes.lcm_py_callback.py_callback_sim")
 lc = lcm.LCM()
 subscription = lc.subscribe(x_lcm_channel, pyhandler(sim, u_lcm_channel))
+print("\n LCM ready.")
+
 while true
     lc.handle()
 end
