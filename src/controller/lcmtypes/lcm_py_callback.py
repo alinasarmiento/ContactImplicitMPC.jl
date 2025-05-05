@@ -1,6 +1,7 @@
 from julia.api import Julia
 jl = Julia(compiled_modules=False)
 from julia import Main
+from julia import convert as jlconvert
 cimpc_path = "/home/grey/research/ContactImplicitMPC.jl/"
 # Main.eval('using Pkg; Pkg.add(path="%s");' % cimpc_path)
 Main.eval('using ContactImplicitMPC')
@@ -23,6 +24,9 @@ def py_handler(sim, u_lcm_channel):
         p = sim.policy
         traj = sim.traj
         q1 = msg.position
+        q1 = jlconvert(Main.Vector, list(q1))
+        print(q1)
+        print(type(q1))
 
         cimpc.newton_solve_b(p.newton, p.s, p.q0, q1,
                             p.im_traj, p.traj, warm_start=True)
