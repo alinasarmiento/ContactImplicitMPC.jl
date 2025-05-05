@@ -15,7 +15,7 @@ import lcm
 from dairlib import lcmt_robot_input, lcmt_robot_output
 # from IPython import embed; embed()
 
-def py_callback_sim(sim, u_lcm_channel):
+def py_handler(sim, u_lcm_channel):
     def handler(channel, msg):
         print("\n received")
         msg = lcmt_robot_output.decode(msg)
