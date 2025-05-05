@@ -32,18 +32,7 @@ def py_handler(sim, u_lcm_channel):
                             p.im_traj, p.traj, warm_start=True)
         cimpc.update_b(p.im_traj, p.traj, p.s, p.altitude, p.κ[0], p.traj.H)
         cimpc.rot_n_stride_b(p.traj, p.traj_cache, p.stride)
-        getattr(p, "q0") = q1
-
-        # # scale control
-        # if p.newton_mode == :direct
-        #     p.u .= p.newton.traj.u[1] 
-        #     p.u ./= p.N_sample
-        # elseif p.newton_mode == :structure
-        #     p.u .= p.newton.u[1] 
-        #     p.u ./= p.N_sample
-        # else
-        #     println("newton mode specified not available")
-        # end
+        cimpc.update_q0_u_b(p, q1)
 
         # lcm broadcast p.u
         # u = lcmt_robot_input(msg.utime, msg.num_efforts, msg.effort_names, p.u)

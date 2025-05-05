@@ -103,6 +103,7 @@ include("controller/newton_structure_solver/methods.jl")
 
 # LCM
 include("controller/standalone_simulate.jl")
+include("controller/lcm_py_utils.jl")
 
 # Visuals
 include("dynamics/visuals.jl")
@@ -283,6 +284,7 @@ export
     lcmt_robot_output,
     lcmt_robot_input,
     callback_sim,
-    debug_callback
+    debug_callback,
+    update_q0_u!
 
 end # module
