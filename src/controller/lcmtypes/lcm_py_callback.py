@@ -16,7 +16,7 @@ import lcm
 from dairlib import lcmt_robot_input, lcmt_robot_output
 # from IPython import embed; embed()
 
-def py_handler(sim, u_lcm_channel):
+def py_handler(lc, sim, u_lcm_channel):
     def handler(channel, msg):
         print("\n received")
         msg = lcmt_robot_output.decode(msg)
@@ -26,7 +26,6 @@ def py_handler(sim, u_lcm_channel):
         q1 = msg.position
         q1 = jlconvert(Main.Vector, list(q1))
         print(q1)
-        print(type(q1))
 
         cimpc.newton_solve_b(p.newton, p.s, p.q0, q1,
                             p.im_traj, p.traj, warm_start=True)
@@ -36,8 +35,12 @@ def py_handler(sim, u_lcm_channel):
 
         # lcm broadcast p.u
         # u = lcmt_robot_input(msg.utime, msg.num_efforts, msg.effort_names, p.u)
-        # print(u)
-        # u_lcm = encode(u)
-        # publish(lcm, u_lcm_channel, u_lcm)
+        u = lcmt_robot_input()
+        u.utime = msg.utime
+        u.num_efforts = msg.num_efforts
+        u.effort_names = msg.effort_names
+        u.efforts = p.u
+        print(u.efforts)
+        lc.publish(u_lcm_channel, u.encode())
 
     return handler

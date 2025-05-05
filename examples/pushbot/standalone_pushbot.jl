@@ -124,9 +124,9 @@ u_lcm_channel = "PUSHBOT_INPUT"
 sys = pyimport("sys")
 pushfirst!(sys."path","")
 lcm = pyimport("lcm")
-# lcmpy_callback = pyimport("lcmtypes.lcm_py_callback")
+lcm_py_callback = pyimport("lcmtypes.lcm_py_callback")
 lc = lcm.LCM()
-subscription = lc.subscribe(x_lcm_channel, lcmpy_callback.py_handler(sim, u_lcm_channel))
+subscription = lc.subscribe(x_lcm_channel, lcm_py_callback.py_handler(lc, sim, u_lcm_channel))
 # subscription = lc.subscribe(x_lcm_channel, callback_sim_py(sim, u_lcm_channel))
 print("\n LCM ready.")
 
