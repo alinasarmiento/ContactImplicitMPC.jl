@@ -18,14 +18,14 @@ from dairlib import lcmt_robot_input, lcmt_robot_output
 
 def py_handler(lc, sim, u_lcm_channel):
     def handler(channel, msg):
-        print("\n received")
+        # print("\n received")
         msg = lcmt_robot_output.decode(msg)
-        print("\n x:", msg)
+        # print("\n x:", msg)
         p = sim.policy
         traj = sim.traj
         q1 = msg.position
+        print("pos:",q1)
         q1 = jlconvert(Main.Vector, list(q1))
-        print(q1)
 
         cimpc.newton_solve_b(p.newton, p.s, p.q0, q1,
                             p.im_traj, p.traj, warm_start=True)
@@ -40,7 +40,7 @@ def py_handler(lc, sim, u_lcm_channel):
         u.num_efforts = msg.num_efforts
         u.effort_names = msg.effort_names
         u.efforts = p.u
-        print(u.efforts)
+        # print(u.efforts)
         lc.publish(u_lcm_channel, u.encode())
 
     return handler
