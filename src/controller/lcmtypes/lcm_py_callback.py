@@ -2,11 +2,8 @@ from julia.api import Julia
 jl = Julia(compiled_modules=False)
 from julia import Main
 from julia import convert as jlconvert
-cimpc_path = "/home/grey/research/ContactImplicitMPC.jl/"
-# Main.eval('using Pkg; Pkg.add(path="%s");' % cimpc_path)
 Main.eval('using ContactImplicitMPC')
 Main.eval('using StaticArrays')
-# Main.include(cimpc_path + "src/controller/standalone_simulate.jl")
 import julia.ContactImplicitMPC as cimpc
 
 import sys
@@ -14,17 +11,15 @@ import os
 sys.path.append(os.environ['LCMT_PATH'])
 import lcm
 from dairlib import lcmt_robot_input, lcmt_robot_output
-# from IPython import embed; embed()
 
 def py_handler(lc, sim, u_lcm_channel):
     def handler(channel, msg):
         # print("\n received")
         msg = lcmt_robot_output.decode(msg)
-        # print("\n x:", msg)
         p = sim.policy
         traj = sim.traj
         q1 = msg.position
-        print("pos:",q1)
+        print("\n pos:",q1)
         q1 = jlconvert(Main.Vector, list(q1))
 
         cimpc.newton_solve_b(p.newton, p.s, p.q0, q1,
@@ -34,13 +29,12 @@ def py_handler(lc, sim, u_lcm_channel):
         cimpc.update_q0_u_b(p, q1)
 
         # lcm broadcast p.u
-        # u = lcmt_robot_input(msg.utime, msg.num_efforts, msg.effort_names, p.u)
         u = lcmt_robot_input()
         u.utime = msg.utime
         u.num_efforts = msg.num_efforts
         u.effort_names = msg.effort_names
         u.efforts = p.u
-        # print(u.efforts)
+        print("\n u:",u.efforts)
         lc.publish(u_lcm_channel, u.encode())
 
     return handler

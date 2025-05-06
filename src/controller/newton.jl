@@ -134,13 +134,9 @@ function reset!(core::Newton, ref_traj::ContactTraj,
 
     # H = ref_traj.H
     H_mpc = core.traj.H
-    # @infiltrate
-    print("\n")
-    print(propertynames(core))
     opts = core.opts
 
     # Reset β value
-    # print(opts.β_init)
     core.β = opts.β_init
 
     if !warm_start
