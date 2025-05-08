@@ -116,11 +116,11 @@ end
 # Parameters
 g = 9.81 # gravity
 μ_world = 0.5  # coefficient of friction
-μ_joint = 10.0
+μ_joint = 0.0 #10.0
 
 mb = 1.0 # body mass
 ma = 0.01 # mass of ee # CHANGED
-l = 1.0  # leg mass
+l = 1.0  # leg length
 
 # Dimensions
 nq = 2
