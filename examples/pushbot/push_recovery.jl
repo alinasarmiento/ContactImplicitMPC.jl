@@ -106,10 +106,13 @@ status = simulate!(sim, q1_sim, v1_sim, verbose=true)
 vis = ContactImplicitMPC.Visualizer()
 ContactImplicitMPC.render(vis)
 
+mc_vis = MeshCat.CoreVisualizer(port=9000)
+mc_anim = MeshCat.Animation(Int(floor(1/h_sim)), visualizer=mc_vis)
+
 # ## Visualize
 vis_traj = contact_trajectory(s.model, s.env, H_sim, h_sim)
-anim = visualize_robot!(vis, model, vis_traj, sample = 1)
-# anim = visualize_robot!(vis, model, sim.traj, sample = 1)
+# anim = visualize_robot!(vis, model, vis_traj, sample = 1)
+anim = visualize_robot!(vis, model, sim.traj, sample = 1, h=h_sim, anim=mc_anim)
 pθ_right = generate_pusher_traj(d, vis_traj, side=:right)
 pθ_left  = generate_pusher_traj(d, vis_traj, side=:left)
 visualize_disturbance!(vis, model, pθ_right, anim=anim, sample=1, offset=0.05, name=:PusherRight);
