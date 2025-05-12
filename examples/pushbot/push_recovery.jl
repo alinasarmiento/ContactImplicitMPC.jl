@@ -11,6 +11,7 @@ using LinearAlgebra
 using Infiltrator
 using DelimitedFiles
 using MeshCat
+using Sockets
 
 # ## Simulation
 s = get_simulation("pushbot", "flat_2D_lc", "flat");
@@ -104,11 +105,12 @@ sim = simulator(s, H_sim, h=h_sim, policy=p, dist=d)
 status = simulate!(sim, q1_sim, v1_sim, verbose=true)
 
 # ## Visualizer
-vis = ContactImplicitMPC.Visualizer()
+# vis = ContactImplicitMPC.Visualizer()
+vis = MeshCat.CoreVisualizer(ip"127.0.0.1", 9000)
 ContactImplicitMPC.render(vis)
 
-mc_vis = MeshCat.CoreVisualizer(port=9000)
-mc_anim = MeshCat.Animation(Int(floor(1/h_sim)), visualizer=mc_vis)
+# mc_vis = MeshCat.CoreVisualizer(port=9000)
+mc_anim = MeshCat.Animation(Int(floor(1/h_sim)), visualizer=vis)
 
 # ## Visualize
 vis_traj = contact_trajectory(s.model, s.env, H_sim, h_sim)
