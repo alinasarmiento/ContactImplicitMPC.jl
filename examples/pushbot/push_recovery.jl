@@ -10,6 +10,7 @@ import ContactImplicitMPC: simulate!
 using LinearAlgebra
 using Infiltrator
 using DelimitedFiles
+using MeshCat
 
 # ## Simulation
 s = get_simulation("pushbot", "flat_2D_lc", "flat");
