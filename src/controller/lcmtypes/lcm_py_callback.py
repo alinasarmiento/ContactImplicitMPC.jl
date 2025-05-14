@@ -19,7 +19,7 @@ def py_handler(lc, sim, u_lcm_channel):
         p = sim.policy
         traj = sim.traj
         q1 = msg.position
-        print("\n pos:",q1)
+        # print("\n pos:",q1)
         q1 = jlconvert(Main.Vector, list(q1))
 
         cimpc.newton_solve_b(p.newton, p.s, p.q0, q1,
