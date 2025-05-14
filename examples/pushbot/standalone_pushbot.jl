@@ -38,8 +38,7 @@ for t = 1:H
 end
 
 ## Initial conditions
-# q0 = ContactImplicitMPC.SVector{2}([0.0 * π, 0.0])
-q1 = [0.3 * π, 0.0]
+q1 = [0.0,0.0] 
 v1 = [0.0; 0.0]
 
 ## Simulator
@@ -56,20 +55,20 @@ H_sim = 1000
 κ_mpc = 1.0e-4
 
 ## Slow Recovery
-# obj = TrackingVelocityObjective(model, env, H_mpc,
-# 	q = [Diagonal([12*(t/H_mpc)^2; 2.0*(t/H_mpc)^4]) for t = 1:H_mpc-0],
-# 	v = [Diagonal([1; 0.01] ./ (h^2.0)) for t = 1:H_mpc-0],
-# 	u = [Diagonal([100; 1]) for t = 1:H_mpc-0],
-# 	γ = [Diagonal(1.0e-100 * ones(model.nc)) for t = 1:H_mpc-0],
-# 	b = [Diagonal(1.0e-100 * ones(model.nc * friction_dim(env))) for t = 1:H_mpc]);
+obj = TrackingVelocityObjective(model, env, H_mpc,
+	q = [Diagonal([120*(t/H_mpc)^2; 1.0*(t/H_mpc)^4]) for t = 1:H_mpc-0],
+	v = [Diagonal([1; 0.01] ./ (h^2.0)) for t = 1:H_mpc-0],
+	u = [Diagonal([100; 1e-100]) for t = 1:H_mpc-0],
+	γ = [Diagonal(1.0e-100 * ones(model.nc)) for t = 1:H_mpc-0],
+	b = [Diagonal(1.0e-100 * ones(model.nc * friction_dim(env))) for t = 1:H_mpc]);
 
 ## Fast Recovery
-obj = TrackingVelocityObjective(model, env, H_mpc,
-    q = [Diagonal([12*(t/H_mpc)^2; 12*(t/H_mpc)^2]) for t = 1:H_mpc-0],
-	v = [Diagonal([1; 0.01] ./ (h^2.0)) for t = 1:H_mpc-0],
-    u = [Diagonal([100; .0001]) for t = 1:H_mpc-0],
-    γ = [Diagonal(1.0e-100 * ones(model.nc)) for t = 1:H_mpc-0],
-    b = [Diagonal(1.0e-100 * ones(model.nc * friction_dim(env))) for t = 1:H_mpc]);
+# obj = TrackingVelocityObjective(model, env, H_mpc,
+#     q = [Diagonal([12*(t/H_mpc)^2; 12*(t/H_mpc)^2]) for t = 1:H_mpc-0],
+# 	v = [Diagonal([1; 0.01] ./ (h^2.0)) for t = 1:H_mpc-0],
+#     u = [Diagonal([100; .0001]) for t = 1:H_mpc-0],
+#     γ = [Diagonal(1.0e-100 * ones(model.nc)) for t = 1:H_mpc-0],
+#     b = [Diagonal(1.0e-100 * ones(model.nc * friction_dim(env))) for t = 1:H_mpc]);
 
 ## Policy
 p = ci_mpc_policy(ref_traj, s, obj,
@@ -101,13 +100,8 @@ v1_sim = [0.0; 0.0]
 sim = simulator(s, H_sim, h=h_sim, policy=p) #, dist=d)
 
 # set up for warm start
-newton_solve!(sim.policy.newton, sim.policy.s, sim.policy.q0, q1,
+newton_solve!(sim.policy.newton, sim.policy.s, sim.policy.q0, q1_sim,
               sim.policy.im_traj, sim.policy.traj, warm_start = false)
-# print("\n sim.policy outside lcm:\n")
-# print(propertynames(sim.policy))
-# print("\n")
-# print(sim.policy.q0)
-# print("\n ready \n")
 
 x_lcm_channel = "PUSHBOT_STATE_SIMULATION"
 u_lcm_channel = "PUSHBOT_INPUT"
