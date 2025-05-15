@@ -105,9 +105,9 @@ sim = simulator(s, H_sim, h=h_sim, policy=p, dist=d)
 status = simulate!(sim, q1_sim, v1_sim, verbose=true)
 
 # ## Visualizer
-# vis = ContactImplicitMPC.Visualizer()
-mc_vis = MeshCat.CoreVisualizer(ip"127.0.0.1", 9000)
-vis = MeshCat.Visualizer(mc_vis, ["meshcat"])
+vis = ContactImplicitMPC.Visualizer()
+# mc_vis = MeshCat.CoreVisualizer(ip"127.0.0.1", 9000)
+# vis = MeshCat.Visualizer(mc_vis, ["meshcat"])
 ContactImplicitMPC.render(vis)
 
 # mc_vis = MeshCat.CoreVisualizer(port=9000)

@@ -19,7 +19,7 @@ model = s.model
 env = s.env
 
 # ## Reference Trajectory
-h = 0.04
+h = 0.0005 #0.04
 H = 1000
 ref_traj = contact_trajectory(model, env, H, h)
 ref_traj.h
@@ -49,7 +49,7 @@ status = simulate!(sim, q1, v1)
 
 ## MPC setup 
 N_sample = 2
-H_mpc = 40
+H_mpc = 1000
 h_sim = h / N_sample
 H_sim = 1000
 κ_mpc = 1.0e-4
@@ -83,14 +83,14 @@ p = ci_mpc_policy(ref_traj, s, obj,
                   mpc_opts = CIMPCOptions());
 
 ## Disturbances -- not used
-idx_d1 = 20
-idx_d2 = idx_d1 + 200
-idx_d3 = idx_d2 + 80
-idx_d4 = idx_d3 + 200
-idx_d5 = idx_d4 + 30
-idx = [idx_d1, idx_d2, idx_d3, idx_d4, idx_d5]
-impulses = [[-5.5; 0.0], [+5.5; 0.0], [+5.5; 0.0], [-1.5; 0.0], [-6.5; 0.0]]
-d = impulse_disturbances(impulses, idx);
+# idx_d1 = 20
+# idx_d2 = idx_d1 + 200
+# idx_d3 = idx_d2 + 80
+# idx_d4 = idx_d3 + 200
+# idx_d5 = idx_d4 + 30
+# idx = [idx_d1, idx_d2, idx_d3, idx_d4, idx_d5]
+# impulses = [[-5.5; 0.0], [+5.5; 0.0], [+5.5; 0.0], [-1.5; 0.0], [-6.5; 0.0]]
+# d = impulse_disturbances(impulses, idx);
 
 ## Initial Conditions
 q1_sim = [0.0, 0.0]
