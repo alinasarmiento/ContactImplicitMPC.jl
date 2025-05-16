@@ -3,7 +3,7 @@ function update_q0_u!(p, q1)
 
     # scale control
     if p.newton_mode == :direct
-        p.u .= p.newton.traj.u[1] 
+        p.u .= p.newton.traj.u[1] * 10
         p.u ./= p.N_sample
     elseif p.newton_mode == :structure
         p.u .= p.newton.u[1] 
