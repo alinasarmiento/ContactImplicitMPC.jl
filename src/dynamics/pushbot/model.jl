@@ -106,8 +106,8 @@ end
 function B_func(model::PushBot, q)
 	# @SMatrix [1.0 * model.l 1.0;
 	#           1.0 1.0 / model.l]
-	@SMatrix [1.0 * model.l 0.0;
-	          0.0 1.0 / model.l]
+	@SMatrix [0.0 * model.l 0.0;
+	          0.0 0.0 / model.l]
 
 end
 
