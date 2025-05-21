@@ -2,7 +2,6 @@
 	generate_base_expressions(model::Model)
 Generate fast base methods using Symbolics symbolic computing tools.
 """
-using Infiltrator
 function generate_base_expressions(model::Model;
 	M_analytical = true,
 	C_analytical = true,
