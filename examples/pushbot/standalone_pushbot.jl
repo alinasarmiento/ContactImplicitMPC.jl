@@ -11,12 +11,13 @@ using LinearAlgebra
 using LCMCore
 import ContactImplicitMPC: callback_sim, lcmt_robot_output, lcmt_robot_input, debug_callback, callback_sim_py
 using PyCall
-# using Infiltrator
+using Infiltrator
 
 # ## Simulation
 s = get_simulation("pushbot", "flat_2D_lc", "flat");
 model = s.model
 env = s.env
+@infiltrate
 
 # ## Reference Trajectory
 h = 0.04 #0.04
