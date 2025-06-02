@@ -39,6 +39,7 @@ end
 
 # ## Initial conditions
 # q0 = ContactImplicitMPC.SVector{2}([0.0 * π, 0.0])
+# for instantiation BEFORE controller created
 q1 = [0.0 * π, 0.0]
 v1 = [0.0; 0.0]
 
@@ -56,20 +57,20 @@ H_sim = 1000
 κ_mpc = 1.0e-4
 
 # ## Slow Recovery
-# obj = TrackingVelocityObjective(model, env, H_mpc,
-# 	q = [Diagonal([12*(t/H_mpc)^2; 2.0*(t/H_mpc)^4]) for t = 1:H_mpc-0],
-# 	v = [Diagonal([1; 0.01] ./ (h^2.0)) for t = 1:H_mpc-0],
-# 	u = [Diagonal([100; 1]) for t = 1:H_mpc-0],
-# 	γ = [Diagonal(1.0e-100 * ones(model.nc)) for t = 1:H_mpc-0],
-# 	b = [Diagonal(1.0e-100 * ones(model.nc * friction_dim(env))) for t = 1:H_mpc]);
+obj = TrackingVelocityObjective(model, env, H_mpc,
+	q = [Diagonal([12*(t/H_mpc)^2; 2.0*(t/H_mpc)^4]) for t = 1:H_mpc-0],
+	v = [Diagonal([1; 0.01] ./ (h^2.0)) for t = 1:H_mpc-0],
+	u = [Diagonal([100; 1]) for t = 1:H_mpc-0],
+	γ = [Diagonal(1.0e-100 * ones(model.nc)) for t = 1:H_mpc-0],
+	b = [Diagonal(1.0e-100 * ones(model.nc * friction_dim(env))) for t = 1:H_mpc]);
 
 # ## Fast Recovery
-obj = TrackingVelocityObjective(model, env, H_mpc,
-    q = [Diagonal([12*(t/H_mpc)^2; 12*(t/H_mpc)^2]) for t = 1:H_mpc-0],
-	v = [Diagonal([1; 0.01] ./ (h^2.0)) for t = 1:H_mpc-0],
-    u = [Diagonal([100; 1]) for t = 1:H_mpc-0],
-    γ = [Diagonal(1.0e-100 * ones(model.nc)) for t = 1:H_mpc-0],
-    b = [Diagonal(1.0e-100 * ones(model.nc * friction_dim(env))) for t = 1:H_mpc]);
+# obj = TrackingVelocityObjective(model, env, H_mpc,
+#     q = [Diagonal([12*(t/H_mpc)^2; 12*(t/H_mpc)^2]) for t = 1:H_mpc-0],
+# 	v = [Diagonal([1; 0.01] ./ (h^2.0)) for t = 1:H_mpc-0],
+#     u = [Diagonal([100; 1]) for t = 1:H_mpc-0],
+#     γ = [Diagonal(1.0e-100 * ones(model.nc)) for t = 1:H_mpc-0],
+#     b = [Diagonal(1.0e-100 * ones(model.nc * friction_dim(env))) for t = 1:H_mpc]);
 
 # ## Policy
 p = ci_mpc_policy(ref_traj, s, obj,
@@ -91,12 +92,12 @@ idx_d4 = idx_d3 + 200
 idx_d5 = idx_d4 + 30
 idx = [idx_d1, idx_d2, idx_d3, idx_d4, idx_d5]
 # impulses = [[-5.5; 0.0], [+5.5; 0.0], [+5.5; 0.0], [-1.5; 0.0], [-6.5; 0.0]]
-impulses = [[-15.5; 0.0], [+15.5; 0.0], [+15.5; 0.0], [-11.5; 0.0], [-16.5; 0.0]]
+impulses = [[0.0; 0.0], [0.0; 0.0], [0.0; 0.0], [0.0; 0.0], [0.0; 0.0]]
 d = impulse_disturbances(impulses, idx);
 
 # ## Initial Conditions
-q1_sim = [0.1, 0.0]
-v1_sim = [0.1; 0.0]
+q1_sim = [0.2, 0.0]
+v1_sim = [1; 0.0]
 
 # ## Simulator
 sim = simulator(s, H_sim, h=h_sim, policy=p, dist=d)
@@ -106,12 +107,7 @@ status = simulate!(sim, q1_sim, v1_sim, verbose=true)
 
 # ## Visualizer
 vis = ContactImplicitMPC.Visualizer()
-# mc_vis = MeshCat.CoreVisualizer(ip"127.0.0.1", 9000)
-# vis = MeshCat.Visualizer(mc_vis, ["meshcat"])
 ContactImplicitMPC.render(vis)
-
-# mc_vis = MeshCat.CoreVisualizer(port=9000)
-# mc_anim = MeshCat.Animation(Int(floor(1/h_sim)), visualizer=vis)
 
 # ## Visualize
 vis_traj = contact_trajectory(s.model, s.env, H_sim, h_sim)
@@ -123,6 +119,13 @@ visualize_disturbance!(vis, model, pθ_right, anim=anim, sample=1, offset=0.05, 
 visualize_disturbance!(vis, model, pθ_left,  anim=anim, sample=1, offset=0.05, name=:PusherLeft);
 
 # ## Timing result
+
 # Julia is [JIT-ed](https://en.wikipedia.org/wiki/Just-in-time_compilation) so re-run the MPC setup through Simulate for correct timing results.
 process!(sim.stats, N_sample) # Time budget
 H_sim * h_sim / sum(sim.stats.policy_time) # Speed ratio
+
+u_mat = mapreduce(permutedims, vcat, sim.traj.u)
+v_mat = mapreduce(permutedims, vcat, sim.traj.v)
+print("u range of pusher: ", minimum(u_mat[:,2]), " ", maximum(u_mat[:,2]), "\n")
+print("vel range of pusher: ", minimum(v_mat[:,2]), " ", maximum(v_mat[:,2]), "\n")
+@infiltrate

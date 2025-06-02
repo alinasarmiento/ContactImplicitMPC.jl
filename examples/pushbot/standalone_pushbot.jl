@@ -17,7 +17,7 @@ using Infiltrator
 s = get_simulation("pushbot", "flat_2D_lc", "flat");
 model = s.model
 env = s.env
-@infiltrate
+# @infiltrate
 
 # ## Reference Trajectory
 h = 0.04 #0.04

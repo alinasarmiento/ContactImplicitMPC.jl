@@ -51,8 +51,7 @@ function generate_base_expressions(model::Model;
 	end
 
 	# Control input Jacobian
-    B = B_func(model, q)
-    @infiltrate
+        B = B_func(model, q)
 	B = reshape(B, (nu, nv))
 	B = Symbolics.simplify.(B)
 
