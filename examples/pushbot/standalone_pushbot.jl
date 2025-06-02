@@ -51,7 +51,7 @@ status = simulate!(sim, q1, v1)
 ## MPC setup 
 N_sample = 2
 H_mpc = 40
-h_sim = h / N_sample
+h_sim = 0.0005 #h / N_sample
 H_sim = 1000
 κ_mpc = 1.0e-4
 
