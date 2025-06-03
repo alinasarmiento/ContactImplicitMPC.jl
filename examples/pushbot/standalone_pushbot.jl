@@ -20,7 +20,7 @@ env = s.env
 # @infiltrate
 
 # ## Reference Trajectory
-h = 0.04 #0.04
+h = 0.005 #0.04
 H = 1000
 ref_traj = contact_trajectory(model, env, H, h)
 ref_traj.h
@@ -50,7 +50,7 @@ status = simulate!(sim, q1, v1)
 
 ## MPC setup 
 N_sample = 2
-H_mpc = 200
+H_mpc = 100
 h_sim = 0.005 #h / N_sample
 H_sim = 1000
 κ_mpc = 1.0e-4
