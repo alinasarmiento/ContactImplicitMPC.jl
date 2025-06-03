@@ -104,10 +104,10 @@ function J_func(model::PushBot, env::Environment, q)
 end
 
 function B_func(model::PushBot, q)
-	# @SMatrix [1.0 * model.l 1.0;
-	#           1.0 1.0 / model.l]
-	@SMatrix [0.0 * model.l 0.0;
-	          0.0 0.0 / model.l]
+	@SMatrix [1.0 * model.l 1.0;
+	          1.0 1.0 / model.l]
+	# @SMatrix [0.0 * model.l 0.0;
+	#           0.0 0.0 / model.l]
 
 end
 
@@ -119,10 +119,10 @@ end
 # Parameters
 g = 9.81 # gravity
 μ_world = 0.5  # coefficient of friction
-μ_joint = 10.0
+μ_joint = 1.0
 
 mb = 1.0 # body mass
-ma = 0.01 # mass of ee # CHANGED
+ma = 0.05 # mass of ee # CHANGED
 l = 1.0  # leg length
 
 # Dimensions
