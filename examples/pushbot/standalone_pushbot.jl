@@ -66,7 +66,7 @@ H_sim = 1000
 ## Fast Recovery
 obj = TrackingVelocityObjective(model, env, H_mpc,
     q = [Diagonal([120*(t/H_mpc)^2; 12*(t/H_mpc)^2]) for t = 1:H_mpc-0],
-	v = [Diagonal([1; 0.01] ./ (h^2.0)) for t = 1:H_mpc-0],
+	v = [Diagonal([0.0; 0.0] ./ (h^2.0)) for t = 1:H_mpc-0],
     u = [Diagonal([100; .0001]) for t = 1:H_mpc-0],
     γ = [Diagonal(1.0e-100 * ones(model.nc)) for t = 1:H_mpc-0],
     b = [Diagonal(1.0e-100 * ones(model.nc * friction_dim(env))) for t = 1:H_mpc]);
