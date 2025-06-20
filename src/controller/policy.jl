@@ -1,7 +1,6 @@
 """
     contact-implicit model-predictive control policy
 """
-using Infiltrator
 @with_kw mutable struct CIMPCOptions{T}
 	altitude_update::Bool = false
 	altitude_impact_threshold::T = 1.0
@@ -121,7 +120,8 @@ function policy(p::CIMPC{T,NQ,NU,NW,NC}, traj::Trajectory{T}, t::Int) where {T,N
 	if p.newton_mode == :direct
 	    p.u .= p.newton.traj.u[1] 
 	    p.u ./= p.N_sample
-            @infiltrate
+            p.u[1] = 0
+            p.u[2] = 1
 	elseif p.newton_mode == :structure
 		p.u .= p.newton.u[1] 
 		p.u ./= p.N_sample
