@@ -52,7 +52,7 @@ status = simulate!(sim, q1, v1)
 # ## MPC setup 
 N_sample = 2
 H_mpc = 40
-h_sim = 0.005 #h / N_sample
+h_sim = h / N_sample
 H_sim = 1000
 κ_mpc = 1.0e-4
 
@@ -126,8 +126,6 @@ H_sim * h_sim / sum(sim.stats.policy_time) # Speed ratio
 
 u_mat = mapreduce(permutedims, vcat, sim.traj.u)
 v_mat = mapreduce(permutedims, vcat, sim.traj.v)
-q_mat = mapreduce(permutedims, vcat, sim.traj.q)
 print("u range of pusher: ", minimum(u_mat[:,2]), " ", maximum(u_mat[:,2]), "\n")
 print("vel range of pusher: ", minimum(v_mat[:,2]), " ", maximum(v_mat[:,2]), "\n")
-print("x range of pusher: ", minimum(q_mat[:,2]), " ", maximum(q_mat[:,2]), "\n")
 @infiltrate

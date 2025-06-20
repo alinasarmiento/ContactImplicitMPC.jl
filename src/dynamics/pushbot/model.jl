@@ -136,7 +136,7 @@ pushbot = PushBot(nq,nu,nw,nc,
 			   mb, ma, l,
 			   μ_world, μ_joint, g,
 			   BaseMethods(), DynamicsMethods(),
-			   SVector{2}(μ_joint * [1.0; 1.0]))
+			   SVector{2}(μ_joint * [2.0; 0.5]))
 
 function friction_coefficients(model::PushBot) 
 	return [model.μ_world]
