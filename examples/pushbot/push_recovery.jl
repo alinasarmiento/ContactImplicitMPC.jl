@@ -97,7 +97,7 @@ d = impulse_disturbances(impulses, idx);
 
 # ## Initial Conditions
 q1_sim = [0.2, 0.0]
-v1_sim = [1; 0.0]
+v1_sim = [0.0; 0.0]
 
 # ## Simulator
 sim = simulator(s, H_sim, h=h_sim, policy=p, dist=d)
@@ -111,12 +111,21 @@ ContactImplicitMPC.render(vis)
 
 # ## Visualize
 vis_traj = contact_trajectory(s.model, s.env, H_sim, h_sim)
-# anim = visualize_robot!(vis, model, vis_traj, sample = 1)
+
+## TEST: replace u with constant value
+# @infiltrate
+# u_test = zeros(1000,2)
+# u_test[:,2] .= 1
+# u_test_vec = [u_test[i,:] for i in 1:size(u_test,1)]
+
+# traj_type = typeof(sim.traj)
+# test_traj = traj_type(sim.traj.q, sim.traj.v, u_test_vec, sim.traj.γ, sim.traj.b, sim.traj.w)
+
 anim = visualize_robot!(vis, model, sim.traj, sample = 1, h=h_sim)
-pθ_right = generate_pusher_traj(d, vis_traj, side=:right)
-pθ_left  = generate_pusher_traj(d, vis_traj, side=:left)
-visualize_disturbance!(vis, model, pθ_right, anim=anim, sample=1, offset=0.05, name=:PusherRight);
-visualize_disturbance!(vis, model, pθ_left,  anim=anim, sample=1, offset=0.05, name=:PusherLeft);
+# pθ_right = generate_pusher_traj(d, vis_traj, side=:right)
+# pθ_left  = generate_pusher_traj(d, vis_traj, side=:left)
+# visualize_disturbance!(vis, model, pθ_right, anim=anim, sample=1, offset=0.05, name=:PusherRight);
+# visualize_disturbance!(vis, model, pθ_left,  anim=anim, sample=1, offset=0.05, name=:PusherLeft);
 
 # ## Timing result
 
@@ -127,7 +136,8 @@ H_sim * h_sim / sum(sim.stats.policy_time) # Speed ratio
 u_mat = mapreduce(permutedims, vcat, sim.traj.u)
 v_mat = mapreduce(permutedims, vcat, sim.traj.v)
 q_mat = mapreduce(permutedims, vcat, sim.traj.q)
-print("u range of pusher: ", minimum(u_mat[:,2]), " ", maximum(u_mat[:,2]), "\n")
+print("u2 range of pusher: ", minimum(u_mat[:,2]), " ", maximum(u_mat[:,2]), "\n")
+print("u1 range of pusher: ", minimum(u_mat[:,1]), " ", maximum(u_mat[:,1]), "\n")
 print("vel range of pusher: ", minimum(v_mat[:,2]), " ", maximum(v_mat[:,2]), "\n")
 print("x range of pusher: ", minimum(q_mat[:,2]), " ", maximum(q_mat[:,2]), "\n")
 @infiltrate

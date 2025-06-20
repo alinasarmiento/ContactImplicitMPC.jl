@@ -119,8 +119,12 @@ function policy(p::CIMPC{T,NQ,NU,NW,NC}, traj::Trajectory{T}, t::Int) where {T,N
 
 	# scale control
 	if p.newton_mode == :direct
-		p.u .= p.newton.traj.u[1] 
-		p.u ./= p.N_sample
+	    p.u .= p.newton.traj.u[1] 
+	    p.u ./= p.N_sample
+            u_test = zeros(1000,2)
+            u_test[:,2] .= 1
+            u_test_vec = [u_test[i,:] for i in 1:size(u_test,1)]
+            p.u .= u_test_vec
 	elseif p.newton_mode == :structure
 		p.u .= p.newton.u[1] 
 		p.u ./= p.N_sample

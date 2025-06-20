@@ -52,7 +52,7 @@ status = simulate!(sim, q1, v1)
 N_sample = 2
 H_mpc = 100
 h_sim = 0.05 #h / N_sample
-H_sim = 1000
+H_sim = 40
 κ_mpc = 1.0e-4
 
 ## Slow Recovery
@@ -65,9 +65,9 @@ H_sim = 1000
 
 ## Fast Recovery
 obj = TrackingVelocityObjective(model, env, H_mpc,
-    q = [Diagonal([120*(t/H_mpc)^2; 12*(t/H_mpc)^2]) for t = 1:H_mpc-0],
-	v = [Diagonal([0.0; 0.0] ./ (h^2.0)) for t = 1:H_mpc-0],
-    u = [Diagonal([100; .0001]) for t = 1:H_mpc-0],
+    q = [Diagonal([120*(t/H_mpc)^2; 150*(t/H_mpc)^2]) for t = 1:H_mpc-0],
+	v = [Diagonal([1.0; 0.0] ./ (h^2.0)) for t = 1:H_mpc-0],
+    u = [Diagonal([100; .0]) for t = 1:H_mpc-0],
     γ = [Diagonal(1.0e-100 * ones(model.nc)) for t = 1:H_mpc-0],
     b = [Diagonal(1.0e-100 * ones(model.nc * friction_dim(env))) for t = 1:H_mpc]);
 
@@ -94,7 +94,7 @@ p = ci_mpc_policy(ref_traj, s, obj,
 # d = impulse_disturbances(impulses, idx);
 
 ## Initial Conditions
-q1_sim = [0.2, 0.0]
+q1_sim = [0.1, 0.0]
 v1_sim = [0.0; 0.0]
 
 ## Simulator
