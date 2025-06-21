@@ -104,10 +104,10 @@ function J_func(model::PushBot, env::Environment, q)
 end
 
 function B_func(model::PushBot, q)
-	# @SMatrix [1.0 * model.l 1.0;
-	#           1.0 1.0 / model.l]
-	@SMatrix [1.0 * model.l 0.0;
-	          0.0 1.0 / model.l]
+	@SMatrix [1.0 * model.l 1.0;
+	          1.0 1.0 / model.l]
+	# @SMatrix [1.0 * model.l 0.0;
+	#           0.0 1.0 / model.l]
 
 end
 
