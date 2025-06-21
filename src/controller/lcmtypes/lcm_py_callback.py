@@ -10,6 +10,7 @@ import sys
 import os
 sys.path.append(os.environ['LCMT_PATH'])
 import lcm
+import numpy as np
 from dairlib import lcmt_robot_input, lcmt_robot_output
 
 def py_handler(lc, sim, u_lcm_channel):
@@ -28,13 +29,25 @@ def py_handler(lc, sim, u_lcm_channel):
         cimpc.rot_n_stride_b(p.traj, p.traj_cache, p.stride)
         cimpc.update_q0_u_b(p, q1)
 
+        # apply B to u
+        B = sim.model.base.B([0,0]) # q doesnt matter
+        B = jlconvert(Main.Matrix, B)
+        print(type(B))
+        print(B)
+        B = np.array(B)
+        u = np.array(p.u)
+        print(u)
+        u = B @ u
+        print(u)
+        
+        
         # lcm broadcast p.u
-        u = lcmt_robot_input()
-        u.utime = msg.utime
-        u.num_efforts = msg.num_efforts
-        u.effort_names = msg.effort_names
-        u.efforts = p.u
-        print("u:",u.efforts)
-        lc.publish(u_lcm_channel, u.encode())
+        u_lcm = lcmt_robot_input()
+        u_lcm.utime = msg.utime
+        u_lcm.num_efforts = msg.num_efforts
+        u_lcm.effort_names = msg.effort_names
+        u_lcm.efforts = u
+        print("u:",u_lcm.efforts)
+        lc.publish(u_lcm_channel, u_lcm.encode())
 
     return handler
