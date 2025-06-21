@@ -285,6 +285,7 @@ export
     lcmt_robot_input,
     callback_sim,
     debug_callback,
-    update_q0_u!
+    update_q0_u!,
+    set_initial_q0!
 
 end # module

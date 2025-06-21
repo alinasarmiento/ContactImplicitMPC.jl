@@ -49,7 +49,7 @@ sim = simulator(s, H, h=h)
 status = simulate!(sim, q1, v1)
 
 ## MPC setup 
-N_sample = 2
+N_sample = 5
 H_mpc = 40
 h_sim = 0.05 #h / N_sample
 H_sim = 1000
@@ -65,10 +65,10 @@ H_sim = 1000
 
 ## Fast Recovery
 obj = TrackingVelocityObjective(model, env, H_mpc,
-    q = [Diagonal([120*(t/H_mpc)^2; 150*(t/H_mpc)^2]) for t = 1:H_mpc-0],
-	v = [Diagonal([1.0; 0.0] ./ (h^2.0)) for t = 1:H_mpc-0],
-    u = [Diagonal([100; .0]) for t = 1:H_mpc-0],
-    γ = [Diagonal(1.0e-100 * ones(model.nc)) for t = 1:H_mpc-0],
+    q = [Diagonal([12*(t/H_mpc)^2; 6*(t/H_mpc)^4]) for t = 1:H_mpc-0],
+    v = [Diagonal([1.0; 0.01] ./ (h^2.0)) for t = 1:H_mpc-0],
+    u = [Diagonal([100; 1]) for t = 1:H_mpc-0],
+    γ = [Diagonal(1.0e-10 * ones(model.nc)) for t = 1:H_mpc-0],
     b = [Diagonal(1.0e-100 * ones(model.nc * friction_dim(env))) for t = 1:H_mpc]);
 
 ## Policy
@@ -121,7 +121,7 @@ pushfirst!(sys."path","")
 lcm = pyimport("lcm")
 lcm_py_callback = pyimport("lcmtypes.lcm_py_callback")
 lc = lcm.LCM()
-subscription = lc.subscribe(x_lcm_channel, lcm_py_callback.py_handler(lc, sim, u_lcm_channel))
+subscription = lc.subscribe(x_lcm_channel, lcm_py_callback.py_handler(lc, sim, u_lcm_channel, q1_sim))
 # subscription = lc.subscribe(x_lcm_channel, callback_sim_py(sim, u_lcm_channel))
 print("\n LCM ready.")
 

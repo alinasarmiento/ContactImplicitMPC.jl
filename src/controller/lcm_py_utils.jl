@@ -13,3 +13,8 @@ function update_q0_u!(p, q1)
     end
 end
 
+function set_initial_q0!(p, q0)
+    p.q0 .= q0
+    set_trajectory!(p.traj, p.ref_traj)
+    set_implicit_trajectory!(p.im_traj, p.im_traj_cache)
+end

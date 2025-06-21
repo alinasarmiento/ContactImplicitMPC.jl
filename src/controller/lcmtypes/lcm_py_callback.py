@@ -13,7 +13,7 @@ import lcm
 import numpy as np
 from dairlib import lcmt_robot_input, lcmt_robot_output
 
-def py_handler(lc, sim, u_lcm_channel):
+def py_handler(lc, sim, u_lcm_channel, q0_sim=[0,0]):
     def handler(channel, msg):
         # print("\n received")
         msg = lcmt_robot_output.decode(msg)
@@ -23,18 +23,23 @@ def py_handler(lc, sim, u_lcm_channel):
         # print("\n pos:",q1)
         q1 = jlconvert(Main.Vector, list(q1))
 
-        cimpc.newton_solve_b(p.newton, p.s, p.q0, q1,
-                            p.im_traj, p.traj, warm_start=True)
-        cimpc.update_b(p.im_traj, p.traj, p.s, p.altitude, p.κ[0], p.traj.H)
-        cimpc.rot_n_stride_b(p.traj, p.traj_cache, p.stride)
-        cimpc.update_q0_u_b(p, q1)
+        # check if utime is next h
+        t_now = msg.utime/1e6
+        if t_now%0.05 == 0:
+            if t == 0:
+                cimpc.set_initial_q0_b(p,q0_sim)
+            cimpc.newton_solve_b(p.newton, p.s, p.q0, q1,
+                                p.im_traj, p.traj, warm_start=True)
+            cimpc.update_b(p.im_traj, p.traj, p.s, p.altitude, p.κ[0], p.traj.H)
+            cimpc.rot_n_stride_b(p.traj, p.traj_cache, p.stride)
+            cimpc.update_q0_u_b(p, q1)
 
         # apply B to u
-        # B = sim.model.base.B([0,0]) # q doesnt matter
-        # B = jlconvert(Main.Matrix, B)
-        # B = np.array(B)
-        # u = np.array(p.u)
-        # u = B @ u
+        B = sim.model.base.B([0,0]) # q doesnt matter
+        B = jlconvert(Main.Matrix, B)
+        B = np.array(B)
+        u = np.array(p.u)
+        u = B @ u
 
         # lcm broadcast p.u
         u_lcm = lcmt_robot_input()
@@ -42,7 +47,7 @@ def py_handler(lc, sim, u_lcm_channel):
         u_lcm.num_efforts = msg.num_efforts
         u_lcm.effort_names = msg.effort_names
         u_lcm.efforts = p.u
-        print("u:",u_lcm.efforts)
+        print("u:",u_lcm.efforts,"t;",msg.utime)
         lc.publish(u_lcm_channel, u_lcm.encode())
 
     return handler
