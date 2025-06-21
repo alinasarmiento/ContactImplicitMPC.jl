@@ -34,14 +34,14 @@ def py_handler(lc, sim, u_lcm_channel):
         B = jlconvert(Main.Matrix, B)
         B = np.array(B)
         u = np.array(p.u)
-        # u = B @ u
+        u = B @ u
 
         # lcm broadcast p.u
         u_lcm = lcmt_robot_input()
         u_lcm.utime = msg.utime
         u_lcm.num_efforts = msg.num_efforts
         u_lcm.effort_names = msg.effort_names
-        u_lcm.efforts = p.u
+        u_lcm.efforts = u
         print("u:",u_lcm.efforts)
         lc.publish(u_lcm_channel, u_lcm.encode())
 
