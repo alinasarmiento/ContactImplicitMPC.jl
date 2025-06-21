@@ -32,15 +32,10 @@ def py_handler(lc, sim, u_lcm_channel):
         # apply B to u
         B = sim.model.base.B([0,0]) # q doesnt matter
         B = jlconvert(Main.Matrix, B)
-        print(type(B))
-        print(B)
         B = np.array(B)
         u = np.array(p.u)
-        print(u)
-        u = B @ u
-        print(u)
-        
-        
+        # u = B @ u
+
         # lcm broadcast p.u
         u_lcm = lcmt_robot_input()
         u_lcm.utime = msg.utime
