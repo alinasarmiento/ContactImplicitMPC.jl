@@ -51,8 +51,8 @@ status = simulate!(sim, q1, v1)
 ## MPC setup 
 N_sample = 5
 H_mpc = 40
-h_sim = 0.05 #h / N_sample
-H_sim = 1000
+h_sim = 0.01 #h / N_sample
+H_sim = 10000
 κ_mpc = 1.0e-4
 
 ## Slow Recovery
@@ -63,12 +63,11 @@ H_sim = 1000
 # 	γ = [Diagonal(1.0e-100 * ones(model.nc)) for t = 1:H_mpc-0],
 # 	b = [Diagonal(1.0e-100 * ones(model.nc * friction_dim(env))) for t = 1:H_mpc]);
 
-## Fast Recovery
 obj = TrackingVelocityObjective(model, env, H_mpc,
-    q = [Diagonal([12*(t/H_mpc)^2; 6*(t/H_mpc)^4]) for t = 1:H_mpc-0],
+    q = [Diagonal([60*(t/H_mpc)^2; 12*(t/H_mpc)])^4 for t = 1:H_mpc-0],
     v = [Diagonal([1.0; 0.01] ./ (h^2.0)) for t = 1:H_mpc-0],
-    u = [Diagonal([100; 1]) for t = 1:H_mpc-0],
-    γ = [Diagonal(1.0e-10 * ones(model.nc)) for t = 1:H_mpc-0],
+    u = [Diagonal([10; .1]) for t = 1:H_mpc-0],
+    γ = [Diagonal(1.0e-100 * ones(model.nc)) for t = 1:H_mpc-0],
     b = [Diagonal(1.0e-100 * ones(model.nc * friction_dim(env))) for t = 1:H_mpc]);
 
 ## Policy
@@ -82,16 +81,6 @@ p = ci_mpc_policy(ref_traj, s, obj,
 		max_time = ref_traj.h/2, # HARD REAL TIME
 		),
                   mpc_opts = CIMPCOptions());
-
-## Disturbances -- not used
-# idx_d1 = 20
-# idx_d2 = idx_d1 + 200
-# idx_d3 = idx_d2 + 80
-# idx_d4 = idx_d3 + 200
-# idx_d5 = idx_d4 + 30
-# idx = [idx_d1, idx_d2, idx_d3, idx_d4, idx_d5]
-# impulses = [[-5.5; 0.0], [+5.5; 0.0], [+5.5; 0.0], [-1.5; 0.0], [-6.5; 0.0]]
-# d = impulse_disturbances(impulses, idx);
 
 ## Initial Conditions
 q1_sim = [0.1, 0.0]
@@ -107,14 +96,6 @@ newton_solve!(sim.policy.newton, sim.policy.s, sim.policy.q0, q1_sim,
 x_lcm_channel = "PUSHBOT_STATE_SIMULATION"
 u_lcm_channel = "PUSHBOT_INPUT"
 
-## LCM + Drake loop using LCMCore
-# lcm = LCM()
-# subscribe(lcm, x_lcm_channel, callback_sim(lcm, sim, u_lcm_channel))
-# # Run event loop
-# while true
-#     handle(lcm)
-# end
-
 ## LCM + Drake loop in Python
 sys = pyimport("sys")
 pushfirst!(sys."path","")
@@ -122,26 +103,8 @@ lcm = pyimport("lcm")
 lcm_py_callback = pyimport("lcmtypes.lcm_py_callback")
 lc = lcm.LCM()
 subscription = lc.subscribe(x_lcm_channel, lcm_py_callback.py_handler(lc, sim, u_lcm_channel, q1_sim))
-# subscription = lc.subscribe(x_lcm_channel, callback_sim_py(sim, u_lcm_channel))
 print("\n LCM ready.")
 
 while true
     lc.handle()
 end
-
-## Visualizer
-vis = ContactImplicitMPC.Visualizer()
-ContactImplicitMPC.render(vis)
-
-## Visualize
-vis_traj = contact_trajectory(s.model, s.env, H_sim, h_sim)
-anim = visualize_robot!(vis, model, vis_traj, sample = 1)
-pθ_right = generate_pusher_traj(d, vis_traj, side=:right)
-pθ_left  = generate_pusher_traj(d, vis_traj, side=:left)
-visualize_disturbance!(vis, model, pθ_right, anim=anim, sample=1, offset=0.05, name=:PusherRight);
-visualize_disturbance!(vis, model, pθ_left,  anim=anim, sample=1, offset=0.05, name=:PusherLeft);
-
-## Timing result
-# Julia is [JIT-ed](https://en.wikipedia.org/wiki/Just-in-time_compilation) so re-run the MPC setup through Simulate for correct timing results.
-process!(sim.stats, N_sample) # Time budget
-H_sim * h_sim / sum(sim.stats.policy_time) # Speed ratio

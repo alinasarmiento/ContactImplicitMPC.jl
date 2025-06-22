@@ -26,8 +26,8 @@ def py_handler(lc, sim, u_lcm_channel, q0_sim=[0,0]):
         # check if utime is next h
         t_now = msg.utime/1e6
         if t_now%0.05 == 0:
-            if t == 0:
-                cimpc.set_initial_q0_b(p,q0_sim)
+            # if t_now == 0:
+            #     cimpc.set_initial_q0_b(p,q0_sim)
             cimpc.newton_solve_b(p.newton, p.s, p.q0, q1,
                                 p.im_traj, p.traj, warm_start=True)
             cimpc.update_b(p.im_traj, p.traj, p.s, p.altitude, p.κ[0], p.traj.H)
@@ -35,11 +35,11 @@ def py_handler(lc, sim, u_lcm_channel, q0_sim=[0,0]):
             cimpc.update_q0_u_b(p, q1)
 
         # apply B to u
-        B = sim.model.base.B([0,0]) # q doesnt matter
-        B = jlconvert(Main.Matrix, B)
-        B = np.array(B)
-        u = np.array(p.u)
-        u = B @ u
+        # B = sim.model.base.B([0,0]) # q doesnt matter
+        # B = jlconvert(Main.Matrix, B)
+        # B = np.array(B)
+        # u = np.array(p.u)
+        # u = B @ u
 
         # lcm broadcast p.u
         u_lcm = lcmt_robot_input()
