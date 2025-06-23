@@ -115,8 +115,11 @@ end
 
 # disturbance Jacobian
 function A_func(model::Waiter2D, q)
-	SMatrix{2, 2}([1.0 0.0;
-                       0.0 1.0])
+    A = zeros(2,5)
+    A[1,1] = 1
+    A[2,2] = 1
+    A = SMatrix{2,5}(A)
+    return A
 end
 
 function _jacobian(model::Waiter2D, q; mode=:ee_t)
