@@ -41,6 +41,7 @@ include("dynamics/hopper_3D/model.jl")
 include("dynamics/quadruped/model.jl")
 include("dynamics/flamingo/model.jl")
 include("dynamics/pushbot/model.jl")
+include("dynamics/waiter2d/model.jl")
 include("dynamics/walledcartpole/model.jl")
 
 # Simulation
