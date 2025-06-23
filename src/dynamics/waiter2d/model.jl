@@ -171,8 +171,8 @@ d_ee = 0.01
 r_tray = 0.2286
 d_tray = 0.022
 
-supp1 = SVector{2,1}([0.6,0.447]) # back point
-supp2 = SVector{2,1}([0.7,0.447]) # front point
+supp1 = SVector{2}([0.6,0.447]) # back point
+supp2 = SVector{2}([0.7,0.447]) # front point
 
 # nq, nu, nw, nc, m, g, mt, mu_world, mu_joint, r, d, r_tray, d_tray, supp1, supp2
 
