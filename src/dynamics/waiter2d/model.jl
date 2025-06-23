@@ -139,10 +139,10 @@ end
 
 # contact Jacobian
 function J_func(model::Waiter2D, env::Environment, q)
-    return SMatrix{8, 5}([_jacobian(model, :ee_t);
-                          _jacobian(model, :ee_t);
-                          _jacobian(model, :t_supp);
-                          _jacobian(model, :t_supp);])
+    return SMatrix{8, 5}([_jacobian(model, q, :ee_t);
+                          _jacobian(model, q, :ee_t);
+                          _jacobian(model, q, :t_supp);
+                          _jacobian(model, q, :t_supp);])
 end
 
 # idk what this does
