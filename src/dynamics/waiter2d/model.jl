@@ -165,7 +165,7 @@ gravity = 9.81
 μ_joint = 0.0
 
 m_ee = 0.37
-m_tray = 1
+m_tray = 1.0
 r_ee = 0.0725
 d_ee = 0.01
 r_tray = 0.2286
