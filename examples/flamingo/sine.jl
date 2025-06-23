@@ -6,6 +6,7 @@
  
 using ContactImplicitMPC
 using LinearAlgebra
+using Infiltrator
 
 # ## Simulation
 s_sim = get_simulation("flamingo", "sine3_2D_lc", "sinusoidal");
@@ -71,6 +72,7 @@ ContactImplicitMPC.render(vis)
 
 # ## Visualize
 anim = visualize_meshrobot!(vis, model, sim.traj, h=h_sim * 10, sample=10);
+@infiltrate
 
 # ## Timing result
 # Julia is [JIT-ed](https://en.wikipedia.org/wiki/Just-in-time_compilation) so re-run the MPC setup through Simulate for correct timing results.

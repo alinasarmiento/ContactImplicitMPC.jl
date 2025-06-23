@@ -1,0 +1,79 @@
+using Colors
+using CoordinateTransformations
+using FileIO
+using GeometryBasics
+using MeshCat, MeshIO, Meshing
+using Rotations
+
+function visualize!(vis, model::Waiter2D, q;
+	Δt = 0.1, d=0.01, r=0.0725)
+
+	default_background!(vis)
+
+    setobject!(vis["plate"],
+		GeometryBasics.Cylinder(GeometryBasics.Point3f(0,0,-d/2), GeometryBasics.Point3f(0,0,d/2),
+		convert(Float32, r)),
+		MeshPhongMaterial(color = RGBA(13/255, 152/255, 186/255, 1.0)))
+
+    anim = MeshCat.Animation(convert(Int, floor(1.0 / Δt)))
+
+    for t = 1:length(q)
+        MeshCat.atframe(anim, t) do
+            settransform!(vis["plate"], MeshCat.Translation(q[t][1], 0.0, q[t][2]))
+        end
+    end
+
+    MeshCat.setanimation!(vis, anim)
+end
+
+
+
+function plot_lines!(vis::Visualizer, model::Waiter2D, q::AbstractVector;
+		r=0.05, size=10, name::Symbol=:waiter_2D, col::Bool=true)
+	# Point Traj
+	com_point = Vector{Point{3,Float64}}()
+
+	for qi in q
+		push!(com_point, Point(qi[1], 0.0, qi[2] + r))
+	end
+
+	# Set lines
+	orange_mat, blue_mat, black_mat = get_line_material(size)
+	if col
+		setobject!(vis[name]["lines"]["com"], MeshCat.Line(com_point, orange_mat))
+	else
+		setobject!(vis[name]["lines"]["com"], MeshCat.Line(com_point, black_mat))
+	end
+	return nothing
+end
+
+function build_robot!(vis::Visualizer, model::Waiter2D; name::Symbol=:Waiter2D, d=0.01, r=0.0725, α=1.0)
+    nc = model.nc
+    r = convert(Float32, r)
+    d = convert(Float32, d)
+    body_mat = MeshPhongMaterial(color = RGBA(13/255, 152/255, 186/255, α))
+
+    default_background!(vis)
+
+    setobject!(vis[name][:robot]["waiter_2D"],
+               GeometryBasics.Cylinder(GeometryBasics.Point3f(0,0,-d/2),
+                                       GeometryBasics.Point3f(0,0,d/2),
+                                       convert(Float32, r)),
+		body_mat)
+    return nothing
+end
+
+function set_robot!(vis::Visualizer, model::Waiter2D, q::AbstractVector; name::Symbol=:Waiter2D, d=0.01, r=0.0725)
+	nc = model.nc
+
+	settransform!(vis[name][:robot]["waiter_2D"], Translation(q[1], 0.0, q[2]))
+	return nothing
+end
+
+function contact_point(model::Waiter2D, q::AbstractVector; r=0.0725)
+    p_front = [q[1]+r, 0.0, q[2]]
+    p_back = [q[1]-r, 0.0, q[2]]
+    pc = [p_back, p_front]
+    
+    return pc
+end
