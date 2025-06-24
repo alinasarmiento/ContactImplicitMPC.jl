@@ -185,7 +185,7 @@ end
 # Working Parameters
 params = YAML.load_file(joinpath(@__DIR__,"params.yaml"))
 
-supp1 = SVector{2}(params["supp_pos"]) # back point
+supp1 = params["supp_pos"] # back point
 supp1[1] -= params["supp_xdim"]/2
 supp1[2] += params["supp_zdim"]/2
 
@@ -199,7 +199,7 @@ waiter_2D = Waiter2D(5, 2, 2, 4,
                      params["m_ee"], params["gravity"], params["m_tray"],
                      params["mu_world"], params["mu_joint"],
                      params["r_ee"], params["d_ee"], params["r_tray"], params["d_tray"],
-                     supp1, supp2,
+                     SVector{2}(supp1), SVector{2}(supp2),
 	             BaseMethods(), DynamicsMethods(),
 	             SVector{5}(zeros(5)))
 
