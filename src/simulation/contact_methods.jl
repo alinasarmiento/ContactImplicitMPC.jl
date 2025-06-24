@@ -25,11 +25,12 @@ function ContactMethods()
 end
 
 function contact_forces(model::Model, env::Environment{<:World,LinearizedCone}, γ1, b1, q2, k)
-	nc = model.nc
-	nb = nc * friction_dim(env)
-	nf = Int(nb / nc)
-	ne = dim(env)
-	λ1 = vcat([transpose(rotation(env, k[(i-1) * (ne - 1) .+ (1:ne)])) * [friction_mapping(env) * b1[(i-1) * nf .+ (1:nf)]; γ1[i]] for i = 1:nc]...) # TODO: make efficient
+    nc = model.nc
+    nb = nc * friction_dim(env)
+    nf = Int(nb / nc)
+    ne = dim(env)
+    print("nc:",nc, "nb:",nb, "friction:",friction_dim(env), "ne:",ne)
+    λ1 = vcat([transpose(rotation(env, k[(i-1) * (ne - 1) .+ (1:ne)])) * [friction_mapping(env) * b1[(i-1) * nf .+ (1:nf)]; γ1[i]] for i = 1:nc]...) # TODO: make efficient
 end
 
 function contact_forces(model::Model, env::Environment{<:World,NonlinearCone}, γ1, b1, q2, k)
