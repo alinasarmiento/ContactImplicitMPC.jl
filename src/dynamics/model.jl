@@ -24,7 +24,6 @@ function dynamics(model::Model, h, q0, q1, u1, w1, Λ1, q2)
 	D1L1, D2L1 = lagrangian_derivatives(model, qm1, vm1)
 	D1L2, D2L2 = lagrangian_derivatives(model, qm2, vm2)
 
-	# return 0.0
 	return (0.5 * h[1] * D1L1 + D2L1 + 0.5 * h[1] * D1L2 - D2L2
 		+ transpose(B_fast(model, qm2)) * u1
 		+ transpose(A_fast(model, qm2)) * w1
