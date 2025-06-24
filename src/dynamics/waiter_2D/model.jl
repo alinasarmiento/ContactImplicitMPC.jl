@@ -1,3 +1,4 @@
+using YAML
 """
     - 2D plate subject to contact forces
 
@@ -49,9 +50,10 @@ end
 
 function kinematics(model::Waiter2D, q; mode=:contacts)
     # supposed to return pose of each contact point
+    # (why also defined in visuals.jl??)
     if mode == :contacts
-        ee1 = SVector{2}([q[1]-model.r, q[2]])
-        ee2 = SVector{2}([q[1]+model.r, q[2]])
+        ee1 = SVector{2}([q[1]-model.r, q[2]+(model.d/2)])
+        ee2 = SVector{2}([q[1]+model.r, q[2]+(model.d/2)])
         return SVector{8}([ee1; ee2; model.supp_1; model.supp_2])
     elseif mode == :ee
         return q[1:2]
@@ -181,26 +183,22 @@ end
 
 
 # Working Parameters
-gravity = 9.81
-μ_world = 0.4
-μ_joint = 0.0
+params = YAML.load_file(joinpath(@__DIR__,"params.yaml"))
 
-m_ee = 0.37
-m_tray = 1.0
-r_ee = 0.0725
-d_ee = 0.01
-r_tray = 0.2286
-d_tray = 0.022
+supp1 = SVector{2}(params["supp_pos"]) # back point
+supp1[1] -= params["supp_xdim"]/2
+supp1[2] += params["supp_zdim"]/2
 
-supp1 = SVector{2}([0.6,0.447]) # back point
-supp2 = SVector{2}([0.7,0.447]) # front point
+supp2 = SVector{2}(params["supp_pos"]) # front point
+supp2[1] -= params["supp_xdim"]/2 + 0.1
+supp2[2] += params["supp_zdim"]/2
 
 # nq, nu, nw, nc, m, g, mt, mu_world, mu_joint, r, d, r_tray, d_tray, supp1, supp2
 
 waiter_2D = Waiter2D(5, 2, 2, 4,
-                     m_ee, gravity, m_tray,
-                     μ_world, μ_joint,
-                     r_ee, d_ee, r_tray, d_tray,
+                     params["m_ee"], params["gravity"], params["m_tray"],
+                     params["mu_world"], params["mu_joint"],
+                     params["r_ee"], params["d_ee"], params["r_tray"], params["d_tray"],
                      supp1, supp2,
 	             BaseMethods(), DynamicsMethods(),
 	             SVector{5}(zeros(5)))

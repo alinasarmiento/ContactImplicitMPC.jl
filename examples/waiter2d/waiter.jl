@@ -17,14 +17,14 @@ using Sockets
 s = get_simulation("waiter_2D", "flat_2D_lc", "flat");
 model = s.model
 env = s.env
-@infiltrate
 
 # ## Reference Trajectory
-h = 0.04
+h = 0.005
 H = 100
 ref_traj = contact_trajectory(model, env, H, h)
 ref_traj.h
-qref = [0.0; 0.0]
+qref = [0.5; 0.484;
+        0.5; 0.5; 0.0;]
 ur = zeros(model.nu)
 γr = zeros(model.nc)
 br = zeros(model.nc * friction_dim(env))
@@ -41,14 +41,17 @@ end
 # ## Initial conditions
 # q0 = ContactImplicitMPC.SVector{2}([0.0 * π, 0.0])
 # for instantiation BEFORE controller created
-q1 = [0.0 * π, 0.0]
-v1 = [0.0; 0.0]
+q1 = [0.5; 0.43;
+      0.65; 0.485; 0.0;]
+v1 = [0.0; 0.0;
+      0.0; 0.0; 0.0;]
 
 # ## Simulator
 sim = simulator(s, H, h=h)
 
 # ## Simulate -- set initial conditions
 status = simulate!(sim, q1, v1)
+@infiltrate
 
 # ## MPC setup 
 N_sample = 2

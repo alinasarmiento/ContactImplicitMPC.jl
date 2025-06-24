@@ -4,6 +4,9 @@ using FileIO
 using GeometryBasics
 using MeshCat, MeshIO, Meshing
 using Rotations
+using YAML
+
+params = YAML.load_file(jointpath(@__DIR__,"params.yaml"))
 
 function plot_lines!(vis::Visualizer, model::Waiter2D, q::AbstractVector;
 		r=0.05, size=10, name::Symbol=:waiter_2D, col::Bool=true)
@@ -24,11 +27,12 @@ function plot_lines!(vis::Visualizer, model::Waiter2D, q::AbstractVector;
 	return nothing
 end
 
-function build_robot!(vis::Visualizer, model::Waiter2D; name::Symbol=:Waiter2D, d=0.01, r=0.0725, α=1.0)
+function build_robot!(vis::Visualizer, model::Waiter2D; name::Symbol=:Waiter2D, d=params["d_ee"], r=params["r_ee"], α=1.0)
     nc = model.nc
     r = convert(Float32, r)
     d = convert(Float32, d)
-    support_pos = [0.8; 0.0; 0.447]
+    supp_xz = params["supp_pos"]
+    support_pos = [supp_xz[1], 0.0, supp_xz[2]]
     
     body_mat = MeshPhongMaterial(color = RGBA(13/255, 152/255, 186/255, α))
     contact_mat = MeshPhongMaterial(color = RGBA(1.0, 165/255, 0.0, α))
@@ -46,24 +50,25 @@ function build_robot!(vis::Visualizer, model::Waiter2D; name::Symbol=:Waiter2D, 
     setobject!(vis[name][:robot]["contact_back"], Sphere(Point3f0(0.0),0.01),contact_mat)
 
     setobject!(vis[name][:object]["tray"],
-               GeometryBasics.Cylinder(GeometryBasics.Point3f(0,0,-0.011),
-                                       GeometryBasics.Point3f(0,0,0.011),
-                                       convert(Float32, 0.2286)),
+               GeometryBasics.Cylinder(GeometryBasics.Point3f(0,0,-params["d_tray"]/2),
+                                       GeometryBasics.Point3f(0,0,params["d_tray"]/2),
+                                       convert(Float32, params["r_tray"])),
                tray_mat)
     
     setobject!(vis[name][:env]["support"]["init"],
-               Rect(Vec(0,0,0),Vec(0.4, 0.8, 0.05)),wall_mat)
+               Rect(Vec(0,0,0),Vec(params["supp_xdim"],params["supp_ydim"],params["supp_zdim"])),wall_mat)
     settransform!(vis[name][:env]["support"]["init"], Translation(support_pos))
     
     return nothing
 end
 
-function set_robot!(vis::Visualizer, model::Waiter2D, q::AbstractVector; name::Symbol=:Waiter2D, d=0.01, r=0.0725)
+function set_robot!(vis::Visualizer, model::Waiter2D, q::AbstractVector; name::Symbol=:Waiter2D, d=params["d_ee"], r=params["r_ee"])
     r = convert(Float32, r)
+    d = convert(Float32, d)
     
     settransform!(vis[name][:robot]["plate"], Translation(q[1], 0.0, q[2]))
-    settransform!(vis[name][:robot]["contact_front"], Translation(q[1]+r, 0.0, q[2]))
-    settransform!(vis[name][:robot]["contact_back"], Translation(q[1]-r, 0.0, q[2]))
+    settransform!(vis[name][:robot]["contact_front"], Translation(q[1]+r, 0.0, q[2]+(d/2)))
+    settransform!(vis[name][:robot]["contact_back"], Translation(q[1]-r, 0.0, q[2]+(d/2)))
 
     tray_pos = Translation(q[3], 0.0, q[4])
     tray_rot = LinearMap(RotY(q[5]))
@@ -73,10 +78,16 @@ function set_robot!(vis::Visualizer, model::Waiter2D, q::AbstractVector; name::S
     return nothing
 end
 
-function contact_point(model::Waiter2D, q::AbstractVector; r=0.0725)
-    p_front = [q[1]+r, 0.0, q[2]]
-    p_back = [q[1]-r, 0.0, q[2]]
-    pc = [p_back, p_front]
+function contact_point(model::Waiter2D, q::AbstractVector; d=params["d_ee"], r=params["r_ee"])
+    p_front = [q[1]+r, 0.0, q[2]+(d/2)]
+    p_back = [q[1]-r, 0.0, q[2]+(d/2)]
+
+    sp = params["supp_pos"]
+    sx = params["supp_xdim"]
+    sz = params["supp_zdim"]
+    p_supp1 = [sp[1]-(sx/2), 0.0, sp[2]+(sz/2)]
+    p_supp2 = [sp[1]-(sx/2)+0.1, 0.0, sp[2]+(sz/2)]
+    pc = [p_back, p_front, p_supp1, p_supp2]
     
     return pc
 end
