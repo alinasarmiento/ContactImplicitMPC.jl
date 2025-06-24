@@ -47,8 +47,13 @@ function lagrangian(model::Waiter2D, q, q̇)
     return L
 end
 
-function kinematics(::Waiter2D, q; mode=:ee)
-    if mode == :ee
+function kinematics(::Waiter2D, q; mode=:contacts)
+    # supposed to return pose of each contact point
+    if mode == :contacts
+        ee1 = SVector{2}([q[1]-model.r, q[2]])
+        ee2 = SVector{2}([q[1]+model.r, q[2]])
+        return SVector{8}([ee1, ee2, model.supp_1, model.supp_2])
+    elseif mode == :ee
         return q[1:2]
     elseif mode == :tray
         return q[3:5]
@@ -92,8 +97,8 @@ end
 # signed distance function
 function ϕ_func(model::Waiter2D, env::Environment, q)
     # ee_back-tray, ee_front-tray, tray-supp_back, tray-supp_front
-    ee1 = SVector{2}([q[1]-model.r, q[2]])
-    ee2 = SVector{2}([q[1]+model.r, q[2]])
+    ee1 = kinematics(model, q, :contacts)[1:2]
+    ee2 = kinematics(model, q, :contacts)[3:4]
     tray = q[3:5]
 
     ee1_dist = dist_tray(model, ee1, tray)
