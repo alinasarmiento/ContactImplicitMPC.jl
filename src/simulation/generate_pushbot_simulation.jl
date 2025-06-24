@@ -26,8 +26,8 @@ instantiate_residual!(sim, path_res, path_jac)
 ################################################################################
 # Waiter2D
 ################################################################################
-dir_model = joinpath(module_dir(), "src/dynamics/waiter2d")
-dir_sim   = joinpath(module_dir(), "src/simulation/waiter2d")
+dir_model = joinpath(module_dir(), "src/dynamics/waiter_2D")
+dir_sim   = joinpath(module_dir(), "src/simulation/waiter_2D")
 model = deepcopy(waiter_2D)
 env = deepcopy(flat_2D_lc)
 sim = Simulation(model, env)
