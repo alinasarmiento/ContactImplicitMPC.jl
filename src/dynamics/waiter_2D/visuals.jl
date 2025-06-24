@@ -6,7 +6,7 @@ using MeshCat, MeshIO, Meshing
 using Rotations
 using YAML
 
-params = YAML.load_file(jointpath(@__DIR__,"params.yaml"))
+params = YAML.load_file(joinpath(@__DIR__,"params.yaml"))
 
 function plot_lines!(vis::Visualizer, model::Waiter2D, q::AbstractVector;
 		r=0.05, size=10, name::Symbol=:waiter_2D, col::Bool=true)
