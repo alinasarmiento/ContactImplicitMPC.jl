@@ -189,7 +189,7 @@ supp1 = params["supp_pos"] # back point
 supp1[1] -= params["supp_xdim"]/2
 supp1[2] += params["supp_zdim"]/2
 
-supp2 = SVector{2}(params["supp_pos"]) # front point
+supp2 = params["supp_pos"] # front point
 supp2[1] -= params["supp_xdim"]/2 + 0.1
 supp2[2] += params["supp_zdim"]/2
 
