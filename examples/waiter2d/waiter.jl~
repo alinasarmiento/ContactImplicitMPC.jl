@@ -14,7 +14,7 @@ using MeshCat
 using Sockets
 
 # ## Simulation
-s = get_simulation("waiter_2D", "flat_2D_lc", "flat");
+s = get_simulation("pushbot", "flat_2D_lc", "flat");
 model = s.model
 env = s.env
 
