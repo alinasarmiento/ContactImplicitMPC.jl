@@ -149,7 +149,7 @@ function J_func(model::Waiter2D, env::Environment, q)
 end
 
 # idk what this does
-function contact_forces(model::Waiter2D, env::Environment{<:World, LinearizedCone}, γ1, b1, q2, k)
+function contact_forces(model::Waiter2D, env::Environment{<:World, LinearizedCone}, γ1, b1, q2) #, k)
     # γ1: force vector (size num contacts)
     # b1: idk but size 2*num contacts
     # k: also size 2*num contacts
