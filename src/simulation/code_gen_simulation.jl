@@ -1,4 +1,4 @@
-# using Infiltrator
+using Infiltrator
 function generate_contact_expressions(model::Model, env::Environment;
 		T = Float64, jacobians = false, nv = model.nq)
 	# model dimensions
@@ -47,7 +47,7 @@ function generate_contact_expressions(model::Model, env::Environment;
 	ϕ = Symbolics.simplify.(ϕ)[1:nc]
 
     # Contact forces
-    # @infiltrate
+    @infiltrate
 	cf = contact_forces(model, env, γ1, b1, q2, k)
 	cf = Symbolics.simplify.(cf)
 
