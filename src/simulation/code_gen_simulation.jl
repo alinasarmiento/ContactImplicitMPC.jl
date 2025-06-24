@@ -1,7 +1,6 @@
-
+using Infiltrator
 function generate_contact_expressions(model::Model, env::Environment;
 		T = Float64, jacobians = false, nv = model.nq)
-    using Infiltrator
 	# model dimensions
 	nq = model.nq
 	nu = model.nu
