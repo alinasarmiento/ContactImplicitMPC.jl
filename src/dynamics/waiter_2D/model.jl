@@ -47,7 +47,7 @@ function lagrangian(model::Waiter2D, q, q̇)
     return L
 end
 
-function kinematics(::Waiter2D, q; mode=:contacts)
+function kinematics(model::Waiter2D, q; mode=:contacts)
     # supposed to return pose of each contact point
     if mode == :contacts
         ee1 = SVector{2}([q[1]-model.r, q[2]])
