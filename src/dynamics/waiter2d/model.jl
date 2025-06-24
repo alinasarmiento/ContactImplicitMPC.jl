@@ -52,7 +52,7 @@ function kinematics(::Waiter2D, q; mode=:contacts)
     if mode == :contacts
         ee1 = SVector{2}([q[1]-model.r, q[2]])
         ee2 = SVector{2}([q[1]+model.r, q[2]])
-        return SVector{8}([ee1, ee2, model.supp_1, model.supp_2])
+        return SVector{8}([ee1; ee2; model.supp_1; model.supp_2])
     elseif mode == :ee
         return q[1:2]
     elseif mode == :tray
