@@ -167,10 +167,16 @@ function contact_forces(model::Waiter2D, env::Environment{<:World, LinearizedCon
 end
 
 function velocity_stack(model::Waiter2D, env::Environment{<:World, LinearizedCone}, q1, q2, k, h)
-	v = J_func(model, env, q2) * (q2 - q1) / h[1]
-	v1_surf = rotation(env, k) * v
-
-	SVector{2}(transpose(friction_mapping(env)) * v1_surf[1])
+    v = J_func(model, env, q2) * (q2 - q1) / h[1]
+    v1_surf = rotation(env, k[1:1]) * v[1:2]
+    v2_surf = rotation(env, k[3:3]) * v[3:4]
+    v3_surf = rotation(env, k[5:5]) * v[5:6]
+    v4_surf = rotation(env, k[7:7]) * v[7:8]
+    
+    SVector{8}(transpose(friction_mapping(env)) * v1_surf[1];
+               transpose(friction_mapping(env)) * v2_surf[1];
+               transpose(friction_mapping(env)) * v3_surf[1];
+               transpose(friction_mapping(env)) * v4_surf[1]])
 end
 
 
