@@ -185,7 +185,7 @@ waiter_2D = Waiter2D(5, 2, 2, 4,
                      r_ee, d_ee, r_tray, d_tray,
                      supp1, supp2,
 	             BaseMethods(), DynamicsMethods(),
-	             SVector{2}(zeros(2)))
+	             SVector{2}(zeros(5)))
 
 function friction_coefficients(model::Waiter2D) 
 	return [model.μ_world]
