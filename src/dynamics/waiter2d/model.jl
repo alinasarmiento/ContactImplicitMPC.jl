@@ -97,8 +97,8 @@ end
 # signed distance function
 function ϕ_func(model::Waiter2D, env::Environment, q)
     # ee_back-tray, ee_front-tray, tray-supp_back, tray-supp_front
-    ee1 = kinematics(model, q, :contacts)[1:2]
-    ee2 = kinematics(model, q, :contacts)[3:4]
+    ee1 = kinematics(model, q, mode=:contacts)[1:2]
+    ee2 = kinematics(model, q, mode=:contacts)[3:4]
     tray = q[3:5]
 
     ee1_dist = dist_tray(model, ee1, tray)
