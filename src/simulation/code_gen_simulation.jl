@@ -119,7 +119,8 @@ function generate_residual_expressions(model::Model, env::Environment;
 	nu = model.nu
 	nc = model.nc
 	nb = nc * friction_dim(env)
-	nz = num_var(model, env)
+    nz = num_var(model, env)
+    print("nz",nz)
 	nθ = num_data(model)
 
 	# Declare variables
