@@ -68,7 +68,7 @@ include("dynamics/hopper_3D/model.jl")
 include("dynamics/quadruped/model.jl")
 include("dynamics/flamingo/model.jl")
 include("dynamics/pushbot/model.jl")
-include("dynamics/waiter2d/model.jl")
+include("dynamics/waiter_2D/model.jl")
 include("dynamics/walledcartpole/model.jl")
 
 # Simulator
@@ -117,7 +117,7 @@ include("dynamics/hopper_3D/visuals.jl")
 include("dynamics/quadruped/visuals.jl")
 include("dynamics/flamingo/visuals.jl")
 include("dynamics/pushbot/visuals.jl")
-include("dynamics/waiter2d/visuals.jl")
+include("dynamics/waiter_2D/visuals.jl")
 include("dynamics/walledcartpole/visuals.jl")
 
 export
