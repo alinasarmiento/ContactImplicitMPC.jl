@@ -18,7 +18,7 @@ instantiate_dynamics!(model, path_dyn)
 ################################################################################
 # Waiter2D
 ################################################################################
-dir = joinpath(@__DIR__, "waiter2d")
+dir = joinpath(@__DIR__, "waiter_2D")
 model = deepcopy(waiter_2D)
 
 path_base = joinpath(dir, "dynamics/base.jld2")

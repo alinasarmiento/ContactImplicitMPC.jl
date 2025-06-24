@@ -17,6 +17,7 @@ using Sockets
 s = get_simulation("waiter_2D", "flat_2D_lc", "flat");
 model = s.model
 env = s.env
+@infiltrate
 
 # ## Reference Trajectory
 h = 0.04
