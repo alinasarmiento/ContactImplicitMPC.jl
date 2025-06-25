@@ -141,8 +141,10 @@ function _jacobian(model::Waiter2D, q; mode=:ee_t)
         return j
         
     elseif mode == :t_supp
-        j = SMatrix{2,5}([0.0 0.0 cos(th_t) -sin(th_t) -(x_ee-x_t)*sin(th_t);
-                          0.0 0.0 sin(th_t) cos(th_t) (x_ee - x_t)*cos(th_t)])
+        j = SMatrix{4,5}([0.0 0.0 cos(th_t) -sin(th_t) -(x_t-model.supp_1[1])*sin(th_t);
+                          0.0 0.0 sin(th_t) cos(th_t) (x_ee -model.supp_1[1])*cos(th_t);
+                          0.0 0.0 cos(th_t) -sin(th_t) -(x_t-model.supp_2[1])*sin(th_t);
+                          0.0 0.0 sin(th_t) cos(th_t) (x_ee -model.supp_2[1])*cos(th_t)])
         return j
     end
 end
@@ -151,7 +153,6 @@ end
 function J_func(model::Waiter2D, env::Environment, q)
     return SMatrix{8, 5}([_jacobian(model, q, mode=:ee_t);
                           _jacobian(model, q, mode=:ee_t);
-                          _jacobian(model, q, mode=:t_supp);
                           _jacobian(model, q, mode=:t_supp);])
 end
 
