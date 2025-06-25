@@ -20,7 +20,7 @@ env = s.env
 
 # ## Reference Trajectory
 h = 0.005
-H = 10
+H = 100
 ref_traj = contact_trajectory(model, env, H, h)
 ref_traj.h
 
@@ -50,8 +50,16 @@ v1 = [0.0; 0.0;
 # ## Simulator
 sim = simulator(s, H, h=h)
 
-# ## Simulate -- set initial conditions
+# ## Simulate -- simulates entire trajectory?
 status = simulate!(sim, q1, v1)
+# ## Visualizer
+vis = ContactImplicitMPC.Visualizer()
+ContactImplicitMPC.render(vis)
+
+# ## Visualize
+vis_traj = contact_trajectory(s.model, s.env, H, h)
+anim = visualize_robot!(vis, model, sim.traj, sample = 1, h=h)
+
 
 # ## MPC setup 
 N_sample = 2

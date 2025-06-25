@@ -31,8 +31,8 @@ function build_robot!(vis::Visualizer, model::Waiter2D; name::Symbol=:Waiter2D, 
     nc = model.nc
     r = convert(Float32, r)
     d = convert(Float32, d)
-    supp_xz = params["supp_pos"]
-    support_pos = [supp_xz[1], 0.0, supp_xz[2]]
+    supp_xz = params["supp_pos"] - [params["supp_xdim"]/2, params["supp_zdim"]/2]
+    support_pos = [supp_xz[1], -params["supp_ydim"]/2, supp_xz[2]]
     
     body_mat = MeshPhongMaterial(color = RGBA(13/255, 152/255, 186/255, α))
     contact_mat = MeshPhongMaterial(color = RGBA(1.0, 165/255, 0.0, α))
