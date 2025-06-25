@@ -3,6 +3,7 @@
 This structure holds the trajectory of evaluations and Jacobians of the implicit dynamics.
 These evaluations and Jacobians are computed using a linearizedimation computed around `lin`.
 """
+using Infiltrator
 mutable struct ImplicitTrajectory{T,R,RZ,Rθ,NQ}
 	H::Int
 	lin::Vector{LinearizedStep{T}}
