@@ -161,7 +161,7 @@ function implicit_dynamics!(im_traj::ImplicitTrajectory, traj::ContactTraj)
 	im_traj.ip[t].θ .= traj.θ[t]
 
 	# solve
-	status = interior_point_solve!(im_traj.ip[t], verbose=True)
+	status = interior_point_solve!(im_traj.ip[t], verbose=true)
         
 	!status && (@warn "implicit dynamics failure (t = $t)")
 

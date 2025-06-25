@@ -23,6 +23,7 @@ h = 0.005
 H = 100
 ref_traj = contact_trajectory(model, env, H, h)
 ref_traj.h
+
 qref = [0.5; 0.484;
         0.5; 0.5; 0.0;]
 ur = zeros(model.nu)
