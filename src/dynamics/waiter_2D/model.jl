@@ -136,13 +136,13 @@ function _jacobian(model::Waiter2D, q; mode=:ee_t)
 
     x_ee, z_ee, x_t, z_t, th_t = q
     if mode == :ee_t
-        j = SMatrix{2,5}([0.0 1.0 sin(th_t) cos(th_t) (x_ee - x_t)*cos(th_t);
-                          1.0 0.0 cos(th_t) -sin(th_t) -(x_ee-x_t)*sin(th_t)])
+        j = SMatrix{2,5}([1.0 0.0 cos(th_t) -sin(th_t) -(x_ee-x_t)*sin(th_t);
+                          0.0 1.0 sin(th_t) cos(th_t) (x_ee - x_t)*cos(th_t)])
         return j
         
     elseif mode == :t_supp
-        j = SMatrix{2,5}([0.0 0.0 sin(th_t) cos(th_t) (x_ee - x_t)*cos(th_t);
-                          0.0 0.0 cos(th_t) -sin(th_t) -(x_ee-x_t)*sin(th_t)])
+        j = SMatrix{2,5}([0.0 0.0 cos(th_t) -sin(th_t) -(x_ee-x_t)*sin(th_t);
+                          0.0 0.0 sin(th_t) cos(th_t) (x_ee - x_t)*cos(th_t)])
         return j
     end
 end
