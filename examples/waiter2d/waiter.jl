@@ -52,14 +52,14 @@ sim = simulator(s, H, h=h)
 
 # ## Simulate -- simulates entire trajectory?
 status = simulate!(sim, q1, v1)
-# ## Visualizer
-vis = ContactImplicitMPC.Visualizer()
-ContactImplicitMPC.render(vis)
+# # ## Visualizer
+# vis = ContactImplicitMPC.Visualizer()
+# ContactImplicitMPC.render(vis)
 
-# ## Visualize
-vis_traj = contact_trajectory(s.model, s.env, H, h)
-anim = visualize_robot!(vis, model, sim.traj, sample = 1, h=h)
-@infiltrate
+# # ## Visualize
+# vis_traj = contact_trajectory(s.model, s.env, H, h)
+# anim = visualize_robot!(vis, model, sim.traj, sample = 1, h=h)
+# @infiltrate
 
 # ## MPC setup 
 N_sample = 2
@@ -86,7 +86,6 @@ obj = TrackingVelocityObjective(model, env, H_mpc,
 	b = [Diagonal(1.0e-100 * ones(model.nc * friction_dim(env))) for t = 1:H_mpc]);
 
 # ## Policy
-@infiltrate
 p = ci_mpc_policy(ref_traj, s, obj,
     H_mpc = H_mpc,
     N_sample = N_sample,
@@ -96,7 +95,9 @@ p = ci_mpc_policy(ref_traj, s, obj,
 		max_iter = 10,
 		max_time = ref_traj.h/2, # HARD REAL TIME
 		),
-    mpc_opts = CIMPCOptions());
+                  mpc_opts = CIMPCOptions());
+@infiltrate
+
 # ## Disturbances
 # idx_d1 = 20
 # idx_d2 = idx_d1 + 200
