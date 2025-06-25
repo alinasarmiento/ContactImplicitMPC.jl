@@ -42,16 +42,16 @@ function build_robot!(vis::Visualizer, model::Waiter2D; name::Symbol=:Waiter2D, 
     default_background!(vis)
 
     setobject!(vis[name][:robot]["plate"],
-               GeometryBasics.Cylinder(GeometryBasics.Point3f(0,0,-d/2),
-                                       GeometryBasics.Point3f(0,0,d/2),
+               GeometryBasics.Cylinder(GeometryBasics.Point3f0(0,0,-d/2),
+                                       GeometryBasics.Point3f0(0,0,d/2),
                                        convert(Float32, r)),
 	       body_mat)
-    setobject!(vis[name][:robot]["contact_front"], Sphere(Point3f0(0.0),0.01),contact_mat)
-    setobject!(vis[name][:robot]["contact_back"], Sphere(Point3f0(0.0),0.01),contact_mat)
+    setobject!(vis[name][:robot]["contact_front"], Sphere(GeometryBasics.Point3f0(0.0),0.01),contact_mat)
+    setobject!(vis[name][:robot]["contact_back"], Sphere(GeomeryBasics.Point3f0(0.0),0.01),contact_mat)
 
     setobject!(vis[name][:object]["tray"],
-               GeometryBasics.Cylinder(GeometryBasics.Point3f(0,0,-params["d_tray"]/2),
-                                       GeometryBasics.Point3f(0,0,params["d_tray"]/2),
+               GeometryBasics.Cylinder(GeometryBasics.Point3f0(0,0,-params["d_tray"]/2),
+                                       GeometryBasics.Point3f0(0,0,params["d_tray"]/2),
                                        convert(Float32, params["r_tray"])),
                tray_mat)
     
