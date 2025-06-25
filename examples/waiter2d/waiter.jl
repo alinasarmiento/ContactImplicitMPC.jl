@@ -26,7 +26,7 @@ ref_traj.h
 
 qref = [0.5; 0.484;
         0.5; 0.5; 0.0;]
-ur = [0; model.m*9.81] #zeros(model.nu)
+ur = zeros(model.nu)
 γr = zeros(model.nc)
 br = zeros(model.nc * friction_dim(env))
 ψr = zeros(model.nc)

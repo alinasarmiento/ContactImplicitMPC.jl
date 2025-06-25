@@ -25,7 +25,7 @@ function ImplicitTrajectory(ref_traj::ContactTraj, s::Simulation;
 	opts = InteriorPointOptions(
 	    undercut = 5.0,
 	    γ_reg = 0.1,
-	    κ_tol = 0.002, #κ[1],
+	    κ_tol = κ[1],
 	    r_tol = 1.0e-8,
 	    diff_sol = true,
 	    solver = :empty_solver,
