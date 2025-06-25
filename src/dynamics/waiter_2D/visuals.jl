@@ -56,7 +56,7 @@ function build_robot!(vis::Visualizer, model::Waiter2D; name::Symbol=:Waiter2D, 
                tray_mat)
     
     setobject!(vis[name][:env]["support"]["init"],
-               Rect(Vec(0,0,0),Vec(params["supp_xdim"],params["supp_ydim"],params["supp_zdim"])),wall_mat)
+               Rect(Vec(0,0,0),Vec(params["supp_xdim"],params["supp_ydim"],params["supp_zdim"])),support_mat)
     settransform!(vis[name][:env]["support"]["init"], Translation(support_pos))
     
     return nothing
