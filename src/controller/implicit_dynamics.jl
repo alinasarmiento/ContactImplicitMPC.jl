@@ -155,25 +155,29 @@ end
 
 function implicit_dynamics!(im_traj::ImplicitTrajectory, traj::ContactTraj)
 
-	for t = 1:traj.H
-		# initialized solver
-		z_initialize!(im_traj.ip[t].z, im_traj.iq2, traj.q[t+2]) #TODO: try alt. schemes
-		im_traj.ip[t].θ .= traj.θ[t]
+    for t = 1:traj.H
+	# initialized solver
+	z_initialize!(im_traj.ip[t].z, im_traj.iq2, traj.q[t+2]) #TODO: try alt. schemes
+	im_traj.ip[t].θ .= traj.θ[t]
 
-		# solve
-		status = interior_point_solve!(im_traj.ip[t])
+	# solve
+	status = interior_point_solve!(im_traj.ip[t])
 
-		!status && (@warn "implicit dynamics failure (t = $t)")
+        if !status
+            @infiltrate
+        end
+        
+	!status && (@warn "implicit dynamics failure (t = $t)")
 
-		# compute dynamics violation
-		im_traj.dq2[t] .-= traj.q[t+2]
-		
-		if im_traj.mode == :configurationforce
-			im_traj.dγ1[t] .-= traj.γ[t]
-			im_traj.db1[t] .-= traj.b[t]
-		elseif im_traj.mode == :configuration
-			nothing
-		end
+	# compute dynamics violation
+	im_traj.dq2[t] .-= traj.q[t+2]
+	
+	if im_traj.mode == :configurationforce
+	    im_traj.dγ1[t] .-= traj.γ[t]
+	    im_traj.db1[t] .-= traj.b[t]
+	elseif im_traj.mode == :configuration
+	    nothing
 	end
-	return nothing
+    end
+    return nothing
 end
