@@ -185,12 +185,12 @@ end
 # Working Parameters
 params = YAML.load_file(joinpath(@__DIR__,"params.yaml"))
 
-supp1 = params["supp_pos"] # back point
+supp1 = deepcopy(params["supp_pos"]) # back point
 supp1[1] -= params["supp_xdim"]/2
 supp1[2] += params["supp_zdim"]/2
 
-supp2 = params["supp_pos"] # front point
-supp2[1] -= params["supp_xdim"]/2 + 0.1
+supp2 = deepcopy(params["supp_pos"]) # front point
+supp2[1] -= params["supp_xdim"]/2 - 0.1
 supp2[2] += params["supp_zdim"]/2
 
 # nq, nu, nw, nc, m, g, mt, mu_world, mu_joint, r, d, r_tray, d_tray, supp1, supp2
