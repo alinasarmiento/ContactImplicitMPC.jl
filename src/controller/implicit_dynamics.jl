@@ -3,7 +3,6 @@
 This structure holds the trajectory of evaluations and Jacobians of the implicit dynamics.
 These evaluations and Jacobians are computed using a linearizedimation computed around `lin`.
 """
-using Infiltrator
 mutable struct ImplicitTrajectory{T,R,RZ,Rθ,NQ}
 	H::Int
 	lin::Vector{LinearizedStep{T}}
@@ -163,10 +162,6 @@ function implicit_dynamics!(im_traj::ImplicitTrajectory, traj::ContactTraj)
 
 	# solve
 	status = interior_point_solve!(im_traj.ip[t])
-
-        if !status
-            @infiltrate
-        end
         
 	!status && (@warn "implicit dynamics failure (t = $t)")
 

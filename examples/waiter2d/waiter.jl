@@ -87,7 +87,7 @@ p = ci_mpc_policy(ref_traj, s, obj,
 		max_time = ref_traj.h/2, # HARD REAL TIME
 		),
     mpc_opts = CIMPCOptions());
-
+@infiltrate
 # ## Disturbances
 # idx_d1 = 20
 # idx_d2 = idx_d1 + 200
