@@ -142,9 +142,9 @@ function _jacobian(model::Waiter2D, q; mode=:ee_t)
         
     elseif mode == :t_supp
         j = SMatrix{4,5}([0.0 0.0 cos(th_t) -sin(th_t) -(x_t-model.supp_1[1])*sin(th_t);
-                          0.0 0.0 sin(th_t) cos(th_t) (x_t -model.supp_1[1])*cos(th_t);
+                          0.0 0.0 sin(th_t) cos(th_t) (x_ee -model.supp_1[1])*cos(th_t);
                           0.0 0.0 cos(th_t) -sin(th_t) -(x_t-model.supp_2[1])*sin(th_t);
-                          0.0 0.0 sin(th_t) cos(th_t) (x_t -model.supp_2[1])*cos(th_t)])
+                          0.0 0.0 sin(th_t) cos(th_t) (x_ee -model.supp_2[1])*cos(th_t)])
         return j
     end
 end
