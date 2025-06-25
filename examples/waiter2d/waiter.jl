@@ -26,7 +26,7 @@ ref_traj.h
 
 qref = [0.5; 0.484;
         0.5; 0.5; 0.0;]
-ur = zeros(model.nu)
+ur = [0; model.m*9.81] #zeros(model.nu)
 γr = zeros(model.nc)
 br = zeros(model.nc * friction_dim(env))
 ψr = zeros(model.nc)
@@ -35,8 +35,8 @@ wr = zeros(model.nw)
 
 # ## Set Reference
 for t = 1:H
-	ref_traj.z[t] = pack_z(model, env, qref, γr, br, ψr, ηr)
-	ref_traj.θ[t] = pack_θ(model, qref, qref, ur, wr, model.μ_world, ref_traj.h)
+    ref_traj.z[t] = pack_z(model, env, qref, γr, br, ψr, ηr)
+    ref_traj.θ[t] = pack_θ(model, qref, qref, ur, wr, model.μ_world, ref_traj.h)
 end
 
 # ## Initial conditions
@@ -59,7 +59,7 @@ ContactImplicitMPC.render(vis)
 # ## Visualize
 vis_traj = contact_trajectory(s.model, s.env, H, h)
 anim = visualize_robot!(vis, model, sim.traj, sample = 1, h=h)
-
+@infiltrate
 
 # ## MPC setup 
 N_sample = 2
