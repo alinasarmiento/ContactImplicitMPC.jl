@@ -20,7 +20,7 @@ env = s.env
 
 # ## Reference Trajectory
 h = 0.005
-H = 100
+H = 10
 ref_traj = contact_trajectory(model, env, H, h)
 ref_traj.h
 
@@ -78,6 +78,7 @@ obj = TrackingVelocityObjective(model, env, H_mpc,
 	b = [Diagonal(1.0e-100 * ones(model.nc * friction_dim(env))) for t = 1:H_mpc]);
 
 # ## Policy
+@infiltrate
 p = ci_mpc_policy(ref_traj, s, obj,
     H_mpc = H_mpc,
     N_sample = N_sample,
@@ -88,7 +89,6 @@ p = ci_mpc_policy(ref_traj, s, obj,
 		max_time = ref_traj.h/2, # HARD REAL TIME
 		),
     mpc_opts = CIMPCOptions());
-@infiltrate
 # ## Disturbances
 # idx_d1 = 20
 # idx_d2 = idx_d1 + 200

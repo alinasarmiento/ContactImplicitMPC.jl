@@ -23,14 +23,14 @@ function ImplicitTrajectory(ref_traj::ContactTraj, s::Simulation;
 	max_time = 1e5,
 	mode = :configurationforce,
 	opts = InteriorPointOptions(
-			undercut = 5.0,
-			γ_reg = 0.1,
-			κ_tol = 0.002, #κ[1],
-			r_tol = 1.0e-8,
-			diff_sol = true,
-			solver = :empty_solver,
+	    undercut = 5.0,
+	    γ_reg = 0.1,
+	    κ_tol = 0.002, #κ[1],
+	    r_tol = 1.0e-8,
+	    diff_sol = true,
+	    solver = :empty_solver,
 	    max_time = max_time,
-        verbose = true))
+            verbose = true))
 
 	model = s.model
 	env = s.env
@@ -66,7 +66,7 @@ function ImplicitTrajectory(ref_traj::ContactTraj, s::Simulation;
 			 r  = RLin(s, lin[t].z, lin[t].θ, lin[t].r, lin[t].rz, lin[t].rθ),
 			 rz = RZLin(s, lin[t].rz),
 			 rθ = RθLin(s, lin[t].rθ),
-			 opts = opts) for t = 1:H]
+			 opts = opts,verbose=true) for t = 1:H]
 
 	# views
 	d = [view(ip[t].z, 1:nd) for t = 1:H]
