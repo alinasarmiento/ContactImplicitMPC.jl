@@ -140,8 +140,8 @@ function _jacobian(model::Waiter2D, q; mode=:ee_t)
     if mode == :ee_t
         j = SMatrix{4,5}([1.0 0.0 cos(th_t) -sin(th_t) -(x_ee1-x_t)*sin(th_t);
                           0.0 1.0 sin(th_t) cos(th_t) (x_ee1 - x_t)*cos(th_t);
-                          1.0 0.0 cos(th_t) -sin(th_t) -(x_ee2-x_t)*sin(th_t);
-                          0.0 1.0 sin(th_t) cos(th_t) (x_ee2 - x_t)*cos(th_t)])
+                          -1.0 0.0 -cos(th_t) sin(th_t) (x_ee2-x_t)*sin(th_t);
+                          0.0 -1.0 -sin(th_t) -cos(th_t) -(x_ee2 - x_t)*cos(th_t)])
         return j
         
     elseif mode == :t_supp
@@ -159,7 +159,7 @@ function J_func(model::Waiter2D, env::Environment, q)
                           _jacobian(model, q, mode=:t_supp);])
 end
 
-# idk what this does
+# translates the two variables normal force (γ) and tangential forces (b) into a single vector for jacobian
 function contact_forces(model::Waiter2D, env::Environment{<:World, LinearizedCone}, γ1, b1, q2, k)
     # γ1: force vector (size num contacts)
     # b1: idk but size 2*num contacts

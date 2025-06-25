@@ -53,13 +53,13 @@ sim = simulator(s, H, h=h)
 # ## Simulate -- simulates entire trajectory?
 status = simulate!(sim, q1, v1)
 # # ## Visualizer
-# vis = ContactImplicitMPC.Visualizer()
-# ContactImplicitMPC.render(vis)
+vis = ContactImplicitMPC.Visualizer()
+ContactImplicitMPC.render(vis)
 
-# # ## Visualize
-# vis_traj = contact_trajectory(s.model, s.env, H, h)
-# anim = visualize_robot!(vis, model, sim.traj, sample = 1, h=h)
-# @infiltrate
+# ## Visualize
+vis_traj = contact_trajectory(s.model, s.env, H, h)
+anim = visualize_robot!(vis, model, sim.traj, sample = 1, h=h)
+@infiltrate
 
 # ## MPC setup 
 N_sample = 2
@@ -91,12 +91,11 @@ p = ci_mpc_policy(ref_traj, s, obj,
     N_sample = N_sample,
     κ_mpc = κ_mpc,
     n_opts = NewtonOptions(
-		r_tol = 3e-4,
+		r_tol = 3e-3,
 		max_iter = 10,
 		max_time = ref_traj.h/2, # HARD REAL TIME
 		),
                   mpc_opts = CIMPCOptions());
-@infiltrate
 
 # ## Disturbances
 # idx_d1 = 20
@@ -125,6 +124,7 @@ ContactImplicitMPC.render(vis)
 # ## Visualize
 vis_traj = contact_trajectory(s.model, s.env, H_sim, h_sim)
 anim = visualize_robot!(vis, model, sim.traj, sample = 1, h=h_sim)
+@infiltrate
 
 # ## Timing result
 
