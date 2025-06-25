@@ -135,9 +135,13 @@ function _jacobian(model::Waiter2D, q; mode=:ee_t)
     # t_supp := tray-support contact
 
     x_ee, z_ee, x_t, z_t, th_t = q
+    x_ee1 = deepcopy(x_ee) - model.r
+    x_ee2 = deepcopy(x_ee) + model.r
     if mode == :ee_t
-        j = SMatrix{2,5}([1.0 0.0 cos(th_t) -sin(th_t) -(x_ee-x_t)*sin(th_t);
-                          0.0 1.0 sin(th_t) cos(th_t) (x_ee - x_t)*cos(th_t)])
+        j = SMatrix{4,5}([1.0 0.0 cos(th_t) -sin(th_t) -(x_ee1-x_t)*sin(th_t);
+                          0.0 1.0 sin(th_t) cos(th_t) (x_ee1 - x_t)*cos(th_t);
+                          1.0 0.0 cos(th_t) -sin(th_t) -(x_ee2-x_t)*sin(th_t);
+                          0.0 1.0 sin(th_t) cos(th_t) (x_ee2 - x_t)*cos(th_t)])
         return j
         
     elseif mode == :t_supp
@@ -152,7 +156,6 @@ end
 # contact Jacobian
 function J_func(model::Waiter2D, env::Environment, q)
     return SMatrix{8, 5}([_jacobian(model, q, mode=:ee_t);
-                          _jacobian(model, q, mode=:ee_t);
                           _jacobian(model, q, mode=:t_supp);])
 end
 
