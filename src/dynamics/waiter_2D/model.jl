@@ -121,8 +121,9 @@ end
 # signed distance function
 function ϕ_func(model::Waiter2D, env::Environment, q)
     # ee_back-tray, ee_front-tray, tray-supp_back, tray-supp_front
-    ee1 = kinematics(model, q, mode=:contacts)[1:2]
-    ee2 = kinematics(model, q, mode=:contacts)[3:4]
+    cp = kinematics(model, q, mode=:contacts)
+    ee1 = cp[1:2]
+    ee2 = cp[3:4]
     tray = q[3:5]
 
     ee1_dist = dist_tray(model, ee1, tray)
@@ -130,7 +131,7 @@ function ϕ_func(model::Waiter2D, env::Environment, q)
     supp1_dist = dist_tray(model, model.supp_1, tray)
     supp2_dist = dist_tray(model, model.supp_2, tray)
     
-    ee_ground = q[2]
+    ee_ground = cp[10]
     
     return SVector{6}([ee1_dist; ee2_dist; supp1_dist; supp2_dist; ee_ground; ee_ground])
 end
