@@ -1,5 +1,5 @@
 gravity: 9.81
-mu_world: 0.4
+mu_world: 1.0
 mu_joint: 0.0
 
 m_ee: 0.37

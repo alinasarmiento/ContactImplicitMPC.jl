@@ -124,7 +124,7 @@ function ϕ_func(model::Waiter2D, env::Environment, q)
     cp = kinematics(model, q, mode=:contacts)
     ee1 = cp[1:2]
     ee2 = cp[3:4]
-    tray = q[3:5]
+    tray = q[3:5] 
 
     ee1_dist = dist_tray(model, ee1, tray)
     ee2_dist = dist_tray(model, ee2, tray)
