@@ -87,10 +87,10 @@ function dist_tray(model::Waiter2D, p, pt)
     diff = p-pt[1:2]
     beta = atan(diff[1]/diff[2]) + pt[3] # angle between vector and tray-vertical
 
-    zdiff = norm(diff)*cos(beta)
+    zdiff = abs(norm(diff)*cos(beta))
     zdist = zdiff-(model.d_tray/2)
 
-    xdiff = norm(diff)*sin(beta)
+    xdiff = abs(norm(diff)*sin(beta))
     xdist = xdiff-model.r_tray
 
     penetration = 1 # start out of penetration
