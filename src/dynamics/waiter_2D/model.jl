@@ -210,7 +210,7 @@ function velocity_stack(model::Waiter2D, env::Environment{<:World, LinearizedCon
     v5_surf = rotation(env, k[9:9]) * v[9:10]
     v6_surf = rotation(env, k[11:11]) * v[11:12]
     
-    SVector{8}([transpose(friction_mapping(env)) * v1_surf[1];
+    SVector{12}([transpose(friction_mapping(env)) * v1_surf[1];
                 transpose(friction_mapping(env)) * v2_surf[1];
                 transpose(friction_mapping(env)) * v3_surf[1];
                 transpose(friction_mapping(env)) * v4_surf[1];
