@@ -125,7 +125,7 @@ function ϕ_func(model::Waiter2D, env::Environment, q)
     supp1_dist = dist_tray(model, model.supp_1, tray)
     supp2_dist = dist_tray(model, model.supp_2, tray)
     
-    ee_ground = q[4]
+    ee_ground = q[2]
     
     return SVector{6}([ee1_dist; ee2_dist; supp1_dist; supp2_dist; ee_ground; ee_ground])
 end
