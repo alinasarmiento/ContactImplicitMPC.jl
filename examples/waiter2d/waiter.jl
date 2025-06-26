@@ -19,14 +19,15 @@ model = s.model
 env = s.env
 
 # ## Reference Trajectory
-h = 0.005
+h = 0.05
 H = 100
 ref_traj = contact_trajectory(model, env, H, h)
 ref_traj.h
 
-qref = [0.5; 0.484;
+qref = [0.5; 0.43;
         0.5; 0.5; 0.0;]
-ur = [0.0; 0.37*9.81] #zeros(model.nu)
+
+ur = [0.0; 0.] #zeros(model.nu)
 γr = zeros(model.nc)
 br = zeros(model.nc * friction_dim(env))
 ψr = zeros(model.nc)
@@ -42,10 +43,11 @@ end
 # ## Initial conditions
 # q0 = ContactImplicitMPC.SVector{2}([0.0 * π, 0.0])
 # for instantiation BEFORE controller created
-q1 = [0.5; 0.43;
-      0.65; 0.485; 0.0;]
-# q1 = [0.5; 0.484;
-#       0.5; 0.5; 0.0;]
+
+# q1 = [0.5; 0.43;
+#       0.65; 0.485; 0.0;]
+q1 = [0.5; 0.6;
+        0.65; 0.616; 0.0;]
 v1 = [0.0; 0.0;
       0.0; 0.0; 0.0;]
 
@@ -54,7 +56,7 @@ sim = simulator(s, H, h=h)
 
 # ## Simulate -- simulates entire trajectory?
 status = simulate!(sim, q1, v1)
-# ## Visualizer
+## Visualizer
 vis = ContactImplicitMPC.Visualizer()
 ContactImplicitMPC.render(vis)
 
@@ -67,18 +69,18 @@ anim = visualize_robot!(vis, model, sim.traj, sample = 1, h=h)
 N_sample = 2
 H_mpc = 40
 h_sim = h / N_sample
-H_sim = 1000
+H_sim = 100
 κ_mpc = 1.0e-4
 
 ## Cost
-q_scale = 20.0
-q_vec = q_scale .* [1., 1., 1., 1., 1.] # x_ee, z_ee, x_tray, z_tray, θ_tray
+q_scale = 1.0
+q_vec = q_scale .* [1., 10., 0., 0., 0.] # x_ee, z_ee, x_tray, z_tray, θ_tray
 
 v_scale = 10.0
 v_vec = v_scale .* [1., 1., 1., 1., 0.] # x_ee, z_ee, x_tray, z_tray, θ_tray
 
-u_scale = 1.0
-u_vec = [1., 1.]
+u_scale = 10
+u_vec = [1., 0.1]
 
 print("creating objective\n")
 obj = TrackingVelocityObjective(model, env, H_mpc,
@@ -117,7 +119,7 @@ v1_sim = v1
 
 print("simulation\n")
 # ## Simulator
-sim = simulator(s, H_sim, h=h_sim, policy=p) #, dist=d)
+sim = simulator(s, H_sim, h=h_sim) #, policy=p) #, dist=d)
 
 # ## Simulate
 status = simulate!(sim, q1_sim, v1_sim, verbose=true)
@@ -139,4 +141,3 @@ H_sim * h_sim / sum(sim.stats.policy_time) # Speed ratio
 
 u_mat = mapreduce(permutedims, vcat, sim.traj.u)
 v_mat = mapreduce(permutedims, vcat, sim.traj.v)
-@infiltrate
