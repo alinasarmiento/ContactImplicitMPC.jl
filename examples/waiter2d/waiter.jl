@@ -42,9 +42,11 @@ end
 # ## Initial conditions
 # q0 = ContactImplicitMPC.SVector{2}([0.0 * π, 0.0])
 # for instantiation BEFORE controller created
-q1 = [0.5; 0.43;
-      0.65; 0.485; 0.0;]
-v1 = [0.0; 1.0;
+# q1 = [0.5; 0.43;
+#       0.65; 0.485; 0.0;]
+q1 = [0.5; 0.484;
+      0.5; 0.5; 0.0;]
+v1 = [0.0; 0.0;
       0.0; 0.0; 0.0;]
 
 # ## Simulator
