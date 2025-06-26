@@ -93,18 +93,10 @@ function dist_tray(model::Waiter2D, p, pt)
     xdiff = abs(norm(diff)*sin(beta))
     xdist = xdiff-model.r_tray
 
-    penetration = 1 # start out of penetration
-    if (zdist<0)
-        if (xdist > 0)
-            zdist = 0
-        end
-    elseif (xdist < 0)
-        xdist = 0
-    else # both in penetration
-        penetration = -1
-    end 
-
-    return penetration*norm([xdist, zdist])
+    both_negative = min(sign(-zdist), sign(-xdist))
+    penetration_sign = 1 + min(both_penetrating, 0.0)
+    
+    return penetration_sign*norm([xdist, zdist])
 end
 
 # signed distance function
