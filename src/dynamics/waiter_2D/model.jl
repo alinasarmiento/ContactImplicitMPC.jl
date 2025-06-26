@@ -95,7 +95,9 @@ function dist_tray(model::Waiter2D, p, pt)
     # p: [x, z], pt: [xtray, ztray, θtray]
     diff = p-pt[1:2]
     beta = atan(diff[1]/diff[2]) + pt[3] # angle between vector and tray-vertical
-    xdiff, zdiff = abs((transpose(RotMatrix{2}(pt[3])) * p) - pt[1:2])
+    xdiff, zdiff = (transpose(RotMatrix{2}(pt[3])) * p) - pt[1:2]
+    xdiff = abs(xdiff)
+    zdiff = abs(zdiff)
         
     # zdiff = abs(norm(diff)*cos(beta))
     zdist = zdiff-(model.d_tray/2)
