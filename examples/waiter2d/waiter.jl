@@ -19,12 +19,12 @@ model = s.model
 env = s.env
 
 # ## Reference Trajectory
-h = 0.05
+h = 0.04
 H = 100
 ref_traj = contact_trajectory(model, env, H, h)
 ref_traj.h
 
-qref = [0.5; 0.43;
+qref = [0.4; 0.43;
         0.5; 0.5; 0.0;]
 
 ur = [0.0; 0.] #zeros(model.nu)
@@ -44,10 +44,10 @@ end
 # q0 = ContactImplicitMPC.SVector{2}([0.0 * π, 0.0])
 # for instantiation BEFORE controller created
 
-# q1 = [0.5; 0.43;
-#       0.65; 0.485; 0.0;]
-q1 = [0.5; 0.6;
-        0.65; 0.616; 0.0;]
+q1 = [0.5; 0.43;
+      0.65; 0.485; 0.0;]
+# q1 = [0.5; 0.6;
+#         0.5; 0.616; 0.0;]
 v1 = [0.0; 0.0;
       0.0; 0.0; 0.0;]
 
@@ -56,6 +56,8 @@ sim = simulator(s, H, h=h)
 
 # ## Simulate -- simulates entire trajectory?
 status = simulate!(sim, q1, v1)
+
+##########################
 ## Visualizer
 vis = ContactImplicitMPC.Visualizer()
 ContactImplicitMPC.render(vis)
@@ -64,6 +66,7 @@ ContactImplicitMPC.render(vis)
 vis_traj = contact_trajectory(s.model, s.env, H, h)
 anim = visualize_robot!(vis, model, sim.traj, sample = 1, h=h)
 @infiltrate
+##########################
 
 # ## MPC setup 
 N_sample = 2
@@ -119,7 +122,7 @@ v1_sim = v1
 
 print("simulation\n")
 # ## Simulator
-sim = simulator(s, H_sim, h=h_sim) #, policy=p) #, dist=d)
+sim = simulator(s, H_sim, h=h_sim, policy=p) #, dist=d)
 
 # ## Simulate
 status = simulate!(sim, q1_sim, v1_sim, verbose=true)

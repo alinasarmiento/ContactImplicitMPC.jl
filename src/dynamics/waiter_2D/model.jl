@@ -1,4 +1,6 @@
 using YAML
+using Rotations
+
 """
     - 2D plate subject to contact forces
 
@@ -93,11 +95,12 @@ function dist_tray(model::Waiter2D, p, pt)
     # p: [x, z], pt: [xtray, ztray, θtray]
     diff = p-pt[1:2]
     beta = atan(diff[1]/diff[2]) + pt[3] # angle between vector and tray-vertical
-
-    zdiff = abs(norm(diff)*cos(beta))
+    xdiff, zdiff = abs((transpose(RotMatrix{2}(pt[3])) * p) - pt[1:2])
+        
+    # zdiff = abs(norm(diff)*cos(beta))
     zdist = zdiff-(model.d_tray/2)
 
-    xdiff = abs(norm(diff)*sin(beta))
+    # xdiff = abs(norm(diff)*sin(beta))
     xdist = xdiff-model.r_tray
 
     same = max(0, sign(zdist)*sign(xdist)) # 1 if same, 0 if not
