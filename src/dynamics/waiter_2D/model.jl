@@ -70,7 +70,7 @@ function M_func(model::Waiter2D, q)
     m = model.m
     mt = model.m_tray
 
-    Diagonal(@SVector [m, m, mt, mt, mt])
+    Diagonal(@SVector [m, m, mt, mt, 1])
 end
 
 # gravity
@@ -88,12 +88,23 @@ function dist_tray(model::Waiter2D, p, pt)
     beta = atan(diff[1]/diff[2]) + pt[3] # angle between vector and tray-vertical
 
     zdiff = norm(diff)*cos(beta)
-    zdist = max(0, zdiff-(model.d_tray/2))
+    zdist = zdiff-(model.d_tray/2)
 
     xdiff = norm(diff)*sin(beta)
-    xdist = max(0, xdiff-model.r_tray)
+    xdist = xdiff-model.r_tray
 
-    return norm([xdist, zdist])
+    penetration = 1 # start out of penetration
+    if (zdist<0)
+        if (xdist > 0)
+            zdist = 0
+        end
+    elseif (xdist < 0)
+        xdist = 0
+    else # both in penetration
+        penetration = -1
+    end 
+
+    return penetration*norm([xdist, zdist])
 end
 
 # signed distance function

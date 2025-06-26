@@ -44,7 +44,7 @@ end
 # for instantiation BEFORE controller created
 q1 = [0.5; 0.43;
       0.65; 0.485; 0.0;]
-v1 = [0.0; 0.0;
+v1 = [0.0; 1.0;
       0.0; 0.0; 0.0;]
 
 # ## Simulator
@@ -52,14 +52,14 @@ sim = simulator(s, H, h=h)
 
 # ## Simulate -- simulates entire trajectory?
 status = simulate!(sim, q1, v1)
-# # ## Visualizer
-# vis = ContactImplicitMPC.Visualizer()
-# ContactImplicitMPC.render(vis)
+# ## Visualizer
+vis = ContactImplicitMPC.Visualizer()
+ContactImplicitMPC.render(vis)
 
-# # ## Visualize
-# vis_traj = contact_trajectory(s.model, s.env, H, h)
-# anim = visualize_robot!(vis, model, sim.traj, sample = 1, h=h)
-# @infiltrate
+# ## Visualize
+vis_traj = contact_trajectory(s.model, s.env, H, h)
+anim = visualize_robot!(vis, model, sim.traj, sample = 1, h=h)
+@infiltrate
 
 # ## MPC setup 
 N_sample = 2
