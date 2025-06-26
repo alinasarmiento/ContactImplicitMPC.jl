@@ -94,7 +94,7 @@ function dist_tray(model::Waiter2D, p, pt)
     xdist = xdiff-model.r_tray
 
     same = max(0, sign(zdist)*sign(xdist)) # 1 if same, 0 if not
-    zchange =  min(same + sign(zdist), 1) # 1 if same or positive
+    zchange =  min(t+sign(zdist)+1, 1) # 1 if same or positive
     xchange =  min(same + sign(xdist), 1) # 1 if same or positive
     
     zdist = zdist*zchange
