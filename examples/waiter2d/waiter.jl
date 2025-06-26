@@ -53,13 +53,13 @@ sim = simulator(s, H, h=h)
 # ## Simulate -- simulates entire trajectory?
 status = simulate!(sim, q1, v1)
 # # ## Visualizer
-vis = ContactImplicitMPC.Visualizer()
-ContactImplicitMPC.render(vis)
+# vis = ContactImplicitMPC.Visualizer()
+# ContactImplicitMPC.render(vis)
 
-# ## Visualize
-vis_traj = contact_trajectory(s.model, s.env, H, h)
-anim = visualize_robot!(vis, model, sim.traj, sample = 1, h=h)
-@infiltrate
+# # ## Visualize
+# vis_traj = contact_trajectory(s.model, s.env, H, h)
+# anim = visualize_robot!(vis, model, sim.traj, sample = 1, h=h)
+# @infiltrate
 
 # ## MPC setup 
 N_sample = 2
@@ -78,6 +78,7 @@ v_vec = v_scale .* [1., 1., 1., 1., 0.] # x_ee, z_ee, x_tray, z_tray, θ_tray
 u_scale = 1.0
 u_vec = [1., 1.]
 
+print("creating objective\n")
 obj = TrackingVelocityObjective(model, env, H_mpc,
 	q = [Diagonal(q_vec .* ones(5) .* (t/H_mpc)^2) for t = 1:H_mpc-0],
 	v = [Diagonal(v_vec ./ (h^2.0)) for t = 1:H_mpc-0],
@@ -86,6 +87,7 @@ obj = TrackingVelocityObjective(model, env, H_mpc,
 	b = [Diagonal(1.0e-100 * ones(model.nc * friction_dim(env))) for t = 1:H_mpc]);
 
 # ## Policy
+print("policy\n")
 p = ci_mpc_policy(ref_traj, s, obj,
     H_mpc = H_mpc,
     N_sample = N_sample,
@@ -111,6 +113,7 @@ p = ci_mpc_policy(ref_traj, s, obj,
 q1_sim = q1
 v1_sim = v1
 
+print("simulation\n")
 # ## Simulator
 sim = simulator(s, H_sim, h=h_sim, policy=p) #, dist=d)
 

@@ -138,10 +138,10 @@ function _jacobian(model::Waiter2D, q; mode=:ee_t)
     x_ee1 = deepcopy(x_ee) - model.r
     x_ee2 = deepcopy(x_ee) + model.r
     if mode == :ee_t
-        j = SMatrix{4,5}([1.0 0.0 cos(th_t) -sin(th_t) -(x_ee1-x_t)*sin(th_t);
-                          0.0 1.0 sin(th_t) cos(th_t) (x_ee1 - x_t)*cos(th_t);
-                          -1.0 0.0 -cos(th_t) sin(th_t) (x_ee2-x_t)*sin(th_t);
-                          0.0 -1.0 -sin(th_t) -cos(th_t) -(x_ee2 - x_t)*cos(th_t)])
+        j = SMatrix{4,5}([-1.0 0.0 cos(th_t) -sin(th_t) -(x_ee1-x_t)*sin(th_t);
+                          0.0 -1.0 sin(th_t) cos(th_t) (x_ee1 - x_t)*cos(th_t);
+                          -1.0 0.0 cos(th_t) -sin(th_t) -(x_ee2-x_t)*sin(th_t);
+                          0.0 -1.0 sin(th_t) cos(th_t) (x_ee2 - x_t)*cos(th_t)])
         return j
         
     elseif mode == :t_supp
