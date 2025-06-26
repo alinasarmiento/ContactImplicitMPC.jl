@@ -54,7 +54,11 @@ function kinematics(model::Waiter2D, q; mode=:contacts)
     if mode == :contacts
         ee1 = SVector{2}([q[1]-model.r, q[2]+(model.d/2)])
         ee2 = SVector{2}([q[1]+model.r, q[2]+(model.d/2)])
-        return SVector{8}([ee1; ee2; model.supp_1; model.supp_2])
+        
+        ee3 = SVector{2}([q[1]-model.r, q[2]-(model.d/2)])
+        ee4 = SVector{2}([q[1]+model.r, q[2]-(model.d/2)])          
+        return SVector{12}([ee1; ee2; model.supp_1; model.supp_2;
+                           ee3; ee4;])
     elseif mode == :ee
         return q[1:2]
     elseif mode == :tray
@@ -121,7 +125,9 @@ function ϕ_func(model::Waiter2D, env::Environment, q)
     supp1_dist = dist_tray(model, model.supp_1, tray)
     supp2_dist = dist_tray(model, model.supp_2, tray)
     
-    return SVector{4}([ee1_dist; ee2_dist; supp1_dist; supp2_dist])
+    ee_ground = q[4]
+    
+    return SVector{6}([ee1_dist; ee2_dist; supp1_dist; supp2_dist; ee_ground; ee_ground])
 end
 
 # control Jacobian
@@ -163,13 +169,21 @@ function _jacobian(model::Waiter2D, q; mode=:ee_t)
                           0.0 0.0 cos(th_t) -sin(th_t) -(x_t-model.supp_2[1])*sin(th_t);
                           0.0 0.0 sin(th_t) cos(th_t) (x_t -model.supp_2[1])*cos(th_t)])
         return j
+    elseif mode == :ground
+        j = SMatrix{4,5}([1.0 0.0 0.0 0.0 0.0;
+                          0.0 1.0 0.0 0.0 0.0;
+                          1.0 0.0 0.0 0.0 0.0;
+                          0.0 1.0 0.0 0.0 0.0])
+        return j
+
     end
 end
 
 # contact Jacobian
 function J_func(model::Waiter2D, env::Environment, q)
-    return SMatrix{8, 5}([_jacobian(model, q, mode=:ee_t);
-                          _jacobian(model, q, mode=:t_supp);])
+    return SMatrix{12, 5}([_jacobian(model, q, mode=:ee_t);
+                          _jacobian(model, q, mode=:t_supp);
+                          _jacobian(model, q, mode=:ground);])
 end
 
 # translates the two variables normal force (γ) and tangential forces (b) into a single vector for jacobian
@@ -179,10 +193,12 @@ function contact_forces(model::Waiter2D, env::Environment{<:World, LinearizedCon
     # k: also size 2*num contacts
     
     m = friction_mapping(env) # what is this
-    SVector{8}([transpose(rotation(env, k[1:1])) * [m * b1[1:2]; γ1[1]];
-                transpose(rotation(env, k[3:3])) * [m * b1[3:4]; γ1[2]];
-                transpose(rotation(env, k[5:5])) * [m * b1[5:6]; γ1[3]];
-                transpose(rotation(env, k[7:7])) * [m * b1[7:8]; γ1[4]];])
+    SVector{12}([transpose(rotation(env, k[1:1])) * [m * b1[1:2]; γ1[1]];
+                 transpose(rotation(env, k[3:3])) * [m * b1[3:4]; γ1[2]];
+                 transpose(rotation(env, k[5:5])) * [m * b1[5:6]; γ1[3]];
+                 transpose(rotation(env, k[7:7])) * [m * b1[7:8]; γ1[4]];
+                 transpose(rotation(env, k[9:9])) * [m * b1[9:10]; γ1[5]];
+                 transpose(rotation(env, k[11:11])) * [m * b1[11:12]; γ1[6]];])
 end
 
 function velocity_stack(model::Waiter2D, env::Environment{<:World, LinearizedCone}, q1, q2, k, h)
@@ -191,11 +207,15 @@ function velocity_stack(model::Waiter2D, env::Environment{<:World, LinearizedCon
     v2_surf = rotation(env, k[3:3]) * v[3:4]
     v3_surf = rotation(env, k[5:5]) * v[5:6]
     v4_surf = rotation(env, k[7:7]) * v[7:8]
+    v5_surf = rotation(env, k[9:9]) * v[9:10]
+    v6_surf = rotation(env, k[11:11]) * v[11:12]
     
     SVector{8}([transpose(friction_mapping(env)) * v1_surf[1];
                 transpose(friction_mapping(env)) * v2_surf[1];
                 transpose(friction_mapping(env)) * v3_surf[1];
-                transpose(friction_mapping(env)) * v4_surf[1]])
+                transpose(friction_mapping(env)) * v4_surf[1];
+                transpose(friction_mapping(env)) * v5_surf[1];
+                transpose(friction_mapping(env)) * v6_surf[1];])
 end
 
 
@@ -212,7 +232,7 @@ supp2[2] += params["supp_zdim"]/2
 
 # nq, nu, nw, nc, m, g, mt, mu_world, mu_joint, r, d, r_tray, d_tray, supp1, supp2
 
-waiter_2D = Waiter2D(5, 2, 2, 4,
+waiter_2D = Waiter2D(5, 2, 2, 6,
                      params["m_ee"], params["gravity"], params["m_tray"],
                      params["mu_world"], params["mu_joint"],
                      params["r_ee"], params["d_ee"], params["r_tray"], params["d_tray"],
