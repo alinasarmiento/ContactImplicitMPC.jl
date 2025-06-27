@@ -18,7 +18,8 @@ mutable struct PushBot{T} <: Model{T}
 	base::BaseMethods
 	dyn::DynamicsMethods
 
-	joint_friction::SVector
+    joint_friction::SVector
+    I_b::T
 end
 
 
@@ -70,24 +71,26 @@ function kinematics(model::PushBot, q)
 end
 
 function lagrangian(model::PushBot, q, q̇)
-	L = 0.0
+    L = 0.0
 
-	vθ = _jacobian(model, q, mode = :com) * q̇
-	L += 0.5 * model.mb * transpose(vθ) * vθ
-	L -= model.mb * model.g * _kinematics(model, q, mode = :arm)[2]
+    vθ = _jacobian(model, q, mode = :com) * q̇
+    L += 0.5 * model.mb * transpose(vθ) * vθ
+    L -= model.mb * model.g * _kinematics(model, q, mode = :arm)[2]
 
-	vd1 = _jacobian(model, q, mode = :d) * q̇
-	L += 0.5 * model.ma * transpose(vd1) * vd1
-	L -= model.ma * model.g * _kinematics(model, q, mode = :d)[2]
+    vd1 = _jacobian(model, q, mode = :d) * q̇
+    L += 0.5 * model.ma * transpose(vd1) * vd1
+    L -= model.ma * model.g * _kinematics(model, q, mode = :d)[2]
 
-	return L
+    L += 0.5 * model.I_b * q̇[2]^2 # inertial term
+
+    return L
 end
 
 function M_func(model::PushBot, q)
     Jθ = _jacobian(model, q, mode = :com)
     Jd = _jacobian(model, q, mode = :d)
 
-    return model.mb*transpose(Jθ)*Jθ + model.ma*transpose(Jd)*Jd + (model.ma+model.mb)*sqrt(model.l^2 + q[2]^2)
+    return model.mb*transpose(Jθ)*Jθ + model.ma*transpose(Jd)*Jd + @SMatrix [model.I_b 0.0; 0.0 0.0]
 end
 
 function ϕ_func(model::PushBot, env::Environment, q)
@@ -142,7 +145,8 @@ pushbot = PushBot(nq,nu,nw,nc,
 			   mb, ma, l,
 			   μ_world, μ_joint, g,
 			   BaseMethods(), DynamicsMethods(),
-			   SVector{2}(μ_joint * [2.0; 0.5]))
+		  SVector{2}(μ_joint * [2.0; 0.5]),
+                  (1/3)*mb*(l^2))
 
 function friction_coefficients(model::PushBot) 
 	return [model.μ_world]
