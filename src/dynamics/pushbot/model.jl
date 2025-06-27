@@ -40,15 +40,15 @@ function _kinematics(model::PushBot, q; mode = :com)
 	end
 end
 
-function _jacobian(model::PushBot, q; mode = :com)
+function _jacobian(model::PushBot, q; mode = :ee)
 	θ, d = q
 
 	if mode == :d
  		return [(-model.l * cos(θ) - d * sin(θ)) cos(θ);
 		        (-model.l * sin(θ) + d * cos(θ)) sin(θ)]
  	elseif mode == :com
- 		return [-1.0 * model.l * cos(θ) 0.0;
-		        -1.0 * model.l * sin(θ) 0.0]
+ 		return [-1.0 * (model.l/2) * cos(θ) 0.0;
+		        -1.0 * (model.l/2) * sin(θ) 0.0]
 	elseif mode == :ee
 		return [-model.l * cos(θ) 0.0;
 		        -model.l * sin(θ) 0.0]
