@@ -46,8 +46,8 @@ def py_handler(lc, sim, u_lcm_channel, q0_sim=[0,0]):
         u_lcm.utime = msg.utime
         u_lcm.num_efforts = msg.num_efforts
         u_lcm.effort_names = msg.effort_names
-        u_lcm.efforts = p.u
-        print("u:",u_lcm.efforts,"t;",msg.utime)
+        u_lcm.efforts = p.u / 0.05
+        print("u:",u_lcm.efforts,"h:", sim.h, "t:",msg.utime)
         lc.publish(u_lcm_channel, u_lcm.encode())
 
     return handler

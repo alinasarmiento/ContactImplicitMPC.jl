@@ -24,7 +24,7 @@ H = 100
 ref_traj = contact_trajectory(model, env, H, h)
 ref_traj.h
 
-qref = [0.4; 0.485;
+qref = [0.5; 0.485;
         0.5; 0.5; 0.0;]
 
 ur = [0.0; 0.] #zeros(model.nu)
@@ -58,18 +58,18 @@ sim = simulator(s, H, h=h)
 status = simulate!(sim, q1, v1)
 
 ##########################
-## Visualizer
-vis = ContactImplicitMPC.Visualizer()
-ContactImplicitMPC.render(vis)
+# ## Visualizer
+# vis = ContactImplicitMPC.Visualizer()
+# ContactImplicitMPC.render(vis)
 
-# ## Visualize
-vis_traj = contact_trajectory(s.model, s.env, H, h)
-anim = visualize_robot!(vis, model, sim.traj, sample = 1, h=h)
-@infiltrate
+# # ## Visualize
+# vis_traj = contact_trajectory(s.model, s.env, H, h)
+# anim = visualize_robot!(vis, model, sim.traj, sample = 1, h=h)
+# @infiltrate
 ##########################
 
 # ## MPC setup 
-N_sample = 2
+N_sample = 1
 H_mpc = 40
 h_sim = h / N_sample
 H_sim = 100
@@ -79,15 +79,15 @@ H_sim = 100
 q_scale = 1.0
 q_vec = q_scale .* [1., 10., 0., 0., 0.] # x_ee, z_ee, x_tray, z_tray, θ_tray
 
-v_scale = 10.0
+v_scale = 1.0
 v_vec = v_scale .* [1., 1., 1., 1., 0.] # x_ee, z_ee, x_tray, z_tray, θ_tray
 
-u_scale = 10
+u_scale = 1
 u_vec = [1., 0.1]
 
 print("creating objective\n")
 obj = TrackingVelocityObjective(model, env, H_mpc,
-	q = [Diagonal(q_vec .* ones(5) .* (t/H_mpc)^2) for t = 1:H_mpc-0],
+	q = [Diagonal(q_vec .* (t/H_mpc)^4) for t = 1:H_mpc-0],
 	v = [Diagonal(v_vec ./ (h^2.0)) for t = 1:H_mpc-0],
 	u = [Diagonal(u_vec) for t = 1:H_mpc-0],
 	γ = [Diagonal(1.0e-100 * ones(model.nc)) for t = 1:H_mpc-0],

@@ -29,8 +29,8 @@ function _kinematics(model::PushBot, q; mode = :com)
 		return [-model.l * sin(θ) + d * cos(θ);
 				 model.l * cos(θ) + d * sin(θ)]
 	elseif mode == :com
-		return [-1.0 * model.l * sin(θ);
-				 1.0 * model.l * cos(θ)]
+		return [-1.0 * (model.l/2) * sin(θ);
+				 1.0 * (model.l/2) * cos(θ)]
 	elseif mode == :ee
 		return [-model.l * sin(θ);
 				 model.l * cos(θ)]

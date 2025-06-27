@@ -55,13 +55,13 @@ h_sim = 0.01 #h / N_sample
 H_sim = 10000
 κ_mpc = 1.0e-4
 
-## Slow Recovery
-# obj = TrackingVelocityObjective(model, env, H_mpc,
-# 	q = [Diagonal([120*(t/H_mpc)^2; 10.0*(t/H_mpc)^4]) for t = 1:H_mpc-0],
-# 	v = [Diagonal([1; 0.0] ./ (h^2.0)) for t = 1:H_mpc-0],
-# 	u = [Diagonal([100; 0.0]) for t = 1:H_mpc-0],
-# 	γ = [Diagonal(1.0e-100 * ones(model.nc)) for t = 1:H_mpc-0],
-# 	b = [Diagonal(1.0e-100 * ones(model.nc * friction_dim(env))) for t = 1:H_mpc]);
+# Slow Recovery
+obj = TrackingVelocityObjective(model, env, H_mpc,
+	q = [Diagonal([12*(t/H_mpc)^2; 2.0*(t/H_mpc)^4]) for t = 1:H_mpc-0],
+	v = [Diagonal([1; 0.01] ./ (h^2.0)) for t = 1:H_mpc-0],
+	u = [Diagonal([100; 1.0]) for t = 1:H_mpc-0],
+	γ = [Diagonal(1.0e-100 * ones(model.nc)) for t = 1:H_mpc-0],
+	b = [Diagonal(1.0e-100 * ones(model.nc * friction_dim(env))) for t = 1:H_mpc]);
 
 ## mass == 0.001
 # obj = TrackingVelocityObjective(model, env, H_mpc,
@@ -72,12 +72,12 @@ H_sim = 10000
 #     b = [Diagonal(1.0e-100 * ones(model.nc * friction_dim(env))) for t = 1:H_mpc]);
 
 ## mass == 1.0
-obj = TrackingVelocityObjective(model, env, H_mpc,
-    q = [Diagonal([4000*(t/H_mpc)^2; 5*(t/H_mpc)])^2 for t = 1:H_mpc-0],
-    v = [Diagonal([1.0; 0.5] ./ (h^2.0)) for t = 1:H_mpc-0],
-    u = [Diagonal([1; .0001]) for t = 1:H_mpc-0],
-    γ = [Diagonal(1.0e-10 * ones(model.nc)) for t = 1:H_mpc-0],
-    b = [Diagonal(1.0e-100 * ones(model.nc * friction_dim(env))) for t = 1:H_mpc]);
+# obj = TrackingVelocityObjective(model, env, H_mpc,
+#     q = [Diagonal([4000*(t/H_mpc)^2; 5*(t/H_mpc)])^2 for t = 1:H_mpc-0],
+#     v = [Diagonal([1.0; 0.5] ./ (h^2.0)) for t = 1:H_mpc-0],
+#     u = [Diagonal([1; .0001]) for t = 1:H_mpc-0],
+#     γ = [Diagonal(1.0e-10 * ones(model.nc)) for t = 1:H_mpc-0],
+#     b = [Diagonal(1.0e-100 * ones(model.nc * friction_dim(env))) for t = 1:H_mpc]);
 
 
 ## Policy
