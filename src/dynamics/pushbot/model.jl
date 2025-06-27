@@ -26,14 +26,20 @@ end
 function _kinematics(model::PushBot, q; mode = :com)
 	θ, d  = q
 	if mode == :d
-		return [-model.l * sin(θ) + d * cos(θ);
-				 model.l * cos(θ) + d * sin(θ)]
-	elseif mode == :com
-		return [-1.0 * (model.l/2) * sin(θ);
-				 1.0 * (model.l/2) * cos(θ)]
+	    return [-model.l * sin(θ) + d * cos(θ);
+		    model.l * cos(θ) + d * sin(θ)]
+	elseif mode == :arm
+	    return [-1.0 * (model.l/2) * sin(θ);
+		    1.0 * (model.l/2) * cos(θ)]
+        elseif mode == :com
+            l = model.l
+            ma = model.ma
+            mb = model.mb
+            return (1/(mb + ma)) .* [-(l/2)*sin(θ)*mb + (-l*sin(θ)+d*cos(θ))*ma;
+                                     (l/2)*cos(θ)*mb + (l*cos(θ)+d*sin(θ))*ma]
 	elseif mode == :ee
-		return [-model.l * sin(θ);
-				 model.l * cos(θ)]
+	    return [-model.l * sin(θ);
+		    model.l * cos(θ)]
 	else
 		@error "incorrect mode"
 	 	return zeros(2)
@@ -68,7 +74,7 @@ function lagrangian(model::PushBot, q, q̇)
 
 	vθ = _jacobian(model, q, mode = :com) * q̇
 	L += 0.5 * model.mb * transpose(vθ) * vθ
-	L -= model.mb * model.g * _kinematics(model, q, mode = :com)[2]
+	L -= model.mb * model.g * _kinematics(model, q, mode = :arm)[2]
 
 	vd1 = _jacobian(model, q, mode = :d) * q̇
 	L += 0.5 * model.ma * transpose(vd1) * vd1
@@ -78,10 +84,10 @@ function lagrangian(model::PushBot, q, q̇)
 end
 
 function M_func(model::PushBot, q)
-	Jθ = _jacobian(model, q, mode = :com)
-	Jd = _jacobian(model, q, mode = :d)
+    Jθ = _jacobian(model, q, mode = :com)
+    Jd = _jacobian(model, q, mode = :d)
 
-	return model.mb * transpose(Jθ) * Jθ + model.ma * transpose(Jd) * Jd
+    return model.mb*transpose(Jθ)*Jθ + model.ma*transpose(Jd)*Jd + (model.ma+model.mb)*sqrt(model.l^2 + q[2]^2)
 end
 
 function ϕ_func(model::PushBot, env::Environment, q)
