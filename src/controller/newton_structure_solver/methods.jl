@@ -697,7 +697,7 @@ function implicit_dynamics!(im_traj::ImplicitTrajectory, model, env, u, qa, qb, 
 		status = interior_point_solve!(im_traj.ip[t])
 
 		# !status && error("implicit dynamics failure (t = $t)")
-		!status && (@warn "implicit dynamics failure (t = $t)")
+		!status && (@warn "implicit dynamics failure METHODS (t = $t)")
 	end
 	return nothing
 end
