@@ -106,7 +106,7 @@ function rθ_approx!(s, rθ, z, θ)
     iulim = index_ulim(model)
     for i = 1:model.nu
         if u1[i] > model.u_max[i]
-            rθ[iulim[i], iu10i]] = 1.0
+            rθ[iulim[i], iu1[i]] = 1.0
         end
         if u1[i] < model.u_min[i]
             rθ[iulim[i + model.nu], iu1[i]] = -1.0
