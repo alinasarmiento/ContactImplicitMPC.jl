@@ -17,47 +17,59 @@ function res_con(model::Model, env::Environment{<:World,LinearizedCone}, z, θ, 
 end
 
 function rz_approx!(s, rz, z, θ)
-	model = s.model
-	env = s.env
-	nq = model.nq
-	nc = model.nc
-	nb = model.nc * friction_dim(env)
+    model = s.model
+    env = s.env
+    nq = model.nq
+    nc = model.nc
+    nb = model.nc * friction_dim(env)
 
-	rz .= 0.0
+    rz .= 0.0
 
-	q0, q1, u1, w1, μ, h = unpack_θ(model, θ)
-	q2, γ1, b1, ψ1, s1, η1, s2 = unpack_z(model, env, z)
+    q0, q1, u1, w1, μ, h = unpack_θ(model, θ)
+    q2, γ1, b1, ψ1, s1, η1, s2 = unpack_z(model, env, z)
 
-	k = kinematics(model, q2)
-	λ1 = contact_forces(model, env, γ1, b1, q2, k)
-	vT = velocity_stack(model, env, q1, q2, k, h)
+    k = kinematics(model, q2)
+    λ1 = contact_forces(model, env, γ1, b1, q2, k)
+    vT = velocity_stack(model, env, q1, q2, k, h)
 
-	# Dynamics
-	idyn = index_dyn(model, env, quat = false)
-	iimp = index_imp(model, env, quat = false)
-	imdp = index_mdp(model, env, quat = false)
-	ifri = index_fri(model, env, quat = false)
-	ibimp = index_bimp(model, env, quat = false)
-	ibmdp = index_bmdp(model, env, quat = false)
-	ibfri = index_bfri(model, env, quat = false)
+    # Dynamics
+    idyn = index_dyn(model, env, quat = false)
+    iimp = index_imp(model, env, quat = false)
+    imdp = index_mdp(model, env, quat = false)
+    ifri = index_fri(model, env, quat = false)
+    ibimp = index_bimp(model, env, quat = false)
+    ibmdp = index_bmdp(model, env, quat = false)
+    ibfri = index_bfri(model, env, quat = false)
 
-	iq2 = index_q2(model, env, quat = false)
-	iγ1 = index_γ1(model, env, quat = false)
-	ib1 = index_b1(model, env, quat = false)
-	iψ1 = index_ψ1(model, env, quat = false)
-	is1 = index_s1(model, env, quat = false)
-	iη1 = index_η1(model, env, quat = false)
-	is2 = index_s2(model, env, quat = false)
+    iq2 = index_q2(model, env, quat = false)
+    iγ1 = index_γ1(model, env, quat = false)
+    ib1 = index_b1(model, env, quat = false)
+    iψ1 = index_ψ1(model, env, quat = false)
+    is1 = index_s1(model, env, quat = false)
+    iη1 = index_η1(model, env, quat = false)
+    is2 = index_s2(model, env, quat = false)
 
-	rz[idyn, iq2] = model.dyn.∂q2(h, q0, q1, u1, w1, λ1, q2) + s.con.dJ(λ1, q2)
-	rz[idyn, [iq2; iγ1; ib1]] += s.con.dλ1(q2)' * s.con.dcf(γ1, b1, q2, k)
+    rz[idyn, iq2] = model.dyn.∂q2(h, q0, q1, u1, w1, λ1, q2) + s.con.dJ(λ1, q2)
+    rz[idyn, [iq2; iγ1; ib1]] += s.con.dλ1(q2)' * s.con.dcf(γ1, b1, q2, k)
 
-	# Maximum dissipation
-	rz[imdp, [iψ1; iη1]] = s.con.mdψη(vT, ψ1, η1)
-	rz[imdp, iq2] += s.con.mdvs(vT, ψ1, η1) * s.con.vsq2(q1, q2, k, h)
+    # Maximum dissipation
+    rz[imdp, [iψ1; iη1]] = s.con.mdψη(vT, ψ1, η1)
+    rz[imdp, iq2] += s.con.mdvs(vT, ψ1, η1) * s.con.vsq2(q1, q2, k, h)
 
-	# Other constraints
-	s.con.rcz(view(rz, collect([iimp; ifri; ibimp; ibmdp; ibfri]), :), z, θ)
+    # Other constraints
+    s.con.rcz(view(rz, collect([iimp; ifri; ibimp; ibmdp; ibfri]), :), z, θ)
+
+    # Torque limit gradient
+    iulim = index_ulim(model)
+    for i = 1:model.nu
+        if u1[i] > model.u_max[i]
+            rθ[iulim[i], iu1[i]] = 1.0
+        end
+        if u1[i] < model.u_min[i]
+            rθ[iulim[i + model.nu], iu1[i]] = -1.0
+        end
+    end
+
 end
 
 function rθ_approx!(s, rθ, z, θ)
