@@ -1,4 +1,4 @@
-u"""
+"""
     PushBot
 """
 mutable struct PushBot{T} <: Model{T}
