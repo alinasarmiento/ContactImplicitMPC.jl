@@ -144,7 +144,7 @@ nc = 2
 nquat = 0
 
 # Torque limits
-u_lim = SVector{2}([0.3, 30].*(0.05))
+u_lim = SVector{2}([0.3, 30].*(0.01))
 
 pushbot = PushBot(nq,nu,nw,nc,
 			   mb, ma, l,
