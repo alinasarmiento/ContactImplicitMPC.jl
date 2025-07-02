@@ -36,6 +36,7 @@ mutable struct Waiter2D{T} <: Model{T}
     joint_friction::SVector
     u_min::SVector
     u_max::SVector
+    u_vio_weight::T
 end
 
 function lagrangian(model::Waiter2D, q, q̇)
