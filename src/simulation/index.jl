@@ -268,6 +268,17 @@ function index_bfri(model::Model, env::Environment; quat::Bool = false)
 	return ibfri
 end
 
+"""
+(greysar) Returns indices of torque limits in residual r.
+"""
+function index_ulim(model::Model)
+    nulim = 2*model.nu
+    off = (nq - nquat) + nc + nb + nc + nc + nb + nc
+    iulim = Vector(off .+ (1:nulim))
+    return iulim
+end
+
+
 ################################################################################
 # Aggregated Indices
 ################################################################################

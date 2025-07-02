@@ -1,14 +1,19 @@
 
 function res_con(model::Model, env::Environment{<:World,LinearizedCone}, z, θ, κ)
-	q0, q1, u1, w1, μ, h = unpack_θ(model, θ)
-	q2, γ1, b1, ψ1, s1, η1, s2 = unpack_z(model, env, z)
+    q0, q1, u1, w1, μ, h = unpack_θ(model, θ)
+    q2, γ1, b1, ψ1, s1, η1, s2 = unpack_z(model, env, z)
 
-	# @warn "define residual order"
-	[s1 .- ϕ_func(model, env, q2);
-	 s2 .- (μ[1] * γ1 .- E_func(model, env) * b1);
-	 γ1 .* s1 .- κ;
-	 b1 .* η1 .- κ;
-	 ψ1 .* s2 .- κ]
+    u_min = model.u_min
+    u_max = model.u_max
+    ru = max.(0.0, u1 .- u_max) + max.(0.0, u_min .- u1)
+
+    # @warn "define residual order"
+    [s1 .- ϕ_func(model, env, q2);
+     s2 .- (μ[1] * γ1 .- E_func(model, env) * b1);
+     γ1 .* s1 .- κ;
+     b1 .* η1 .- κ;
+     ψ1 .* s2 .- κ;
+     ru]
 end
 
 function rz_approx!(s, rz, z, θ)
@@ -56,44 +61,56 @@ function rz_approx!(s, rz, z, θ)
 end
 
 function rθ_approx!(s, rθ, z, θ)
-	model = s.model
-	env = s.env
-	nq = model.nq
-	nc = model.nc
-	nb = model.nc * friction_dim(env)
+    model = s.model
+    env = s.env
+    nq = model.nq
+    nc = model.nc
+    nb = model.nc * friction_dim(env)
 
-	rθ .= 0.0
+    rθ .= 0.0
 
-	q0, q1, u1, w1, μ, h = unpack_θ(model, θ)
-	q2, γ1, b1, ψ1, s1, η1, s2 = unpack_z(model, env, z)
+    q0, q1, u1, w1, μ, h = unpack_θ(model, θ)
+    q2, γ1, b1, ψ1, s1, η1, s2 = unpack_z(model, env, z)
 
-	k = kinematics(model, q2)
-	λ1 = contact_forces(model, env, γ1, b1, q2, k)
-	vT = velocity_stack(model, env, q1, q2, k, h)
+    k = kinematics(model, q2)
+    λ1 = contact_forces(model, env, γ1, b1, q2, k)
+    vT = velocity_stack(model, env, q1, q2, k, h)
 
-	idyn = index_dyn(model, env, quat = false)
-	iimp = index_imp(model, env, quat = false)
-	imdp = index_mdp(model, env, quat = false)
-	ifri = index_fri(model, env, quat = false)
-	ibimp = index_bimp(model, env, quat = false)
-	ibmdp = index_bmdp(model, env, quat = false)
-	ibfri = index_bfri(model, env, quat = false)
+    idyn = index_dyn(model, env, quat = false)
+    iimp = index_imp(model, env, quat = false)
+    imdp = index_mdp(model, env, quat = false)
+    ifri = index_fri(model, env, quat = false)
+    ibimp = index_bimp(model, env, quat = false)
+    ibmdp = index_bmdp(model, env, quat = false)
+    ibfri = index_bfri(model, env, quat = false)
 
-	iq0 = index_q0(model)
-	iq1 = index_q1(model)
-	iu1 = index_u1(model)
-	iw1 = index_w1(model)
-	iμ  = index_μ(model)
-	ih  = index_h(model)
+    iq0 = index_q0(model)
+    iq1 = index_q1(model)
+    iu1 = index_u1(model)
+    iw1 = index_w1(model)
+    iμ  = index_μ(model)
+    ih  = index_h(model)
 
-	# Dynamics
-	idx = collect([iq0; iq1; iu1; iw1; ih])
-	rθ[idyn, idx] = model.dyn.dθ(h, q0, q1, u1, w1, λ1, q2)
+    # Dynamics
+    idx = collect([iq0; iq1; iu1; iw1; ih])
+    rθ[idyn, idx] = model.dyn.dθ(h, q0, q1, u1, w1, λ1, q2)
 
-	# Maximum dissipation
-	idx = collect([iq1; ih])
-	rθ[imdp, idx] = s.con.vsq1h(q1, q2, k, h)
+    # Maximum dissipation
+    idx = collect([iq1; ih])
+    rθ[imdp, idx] = s.con.vsq1h(q1, q2, k, h)
 
-	# Other constraints
-	s.con.rcθ(view(rθ, collect([iimp; ifri; ibimp; ibmdp; ibfri]), :), z, θ)
+    # Other constraints
+    s.con.rcθ(view(rθ, collect([iimp; ifri; ibimp; ibmdp; ibfri]), :), z, θ)
+
+    # Torque limit gradient
+    iulim = index_ulim(model)
+    for i = 1:model.nu
+        if u1[i] > model.u_max[i]
+            rθ[iulim[i], iu10i]] = 1.0
+        end
+        if u1[i] < model.u_min[i]
+            rθ[iulim[i + model.nu], iu1[i]] = -1.0
+        end
+    end
+    
 end

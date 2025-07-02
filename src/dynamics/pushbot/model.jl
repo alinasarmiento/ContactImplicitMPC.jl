@@ -1,4 +1,4 @@
-"""
+u"""
     PushBot
 """
 mutable struct PushBot{T} <: Model{T}
@@ -20,6 +20,8 @@ mutable struct PushBot{T} <: Model{T}
 
     joint_friction::SVector
     I_b::T
+    u_min::SVector
+    u_max::SVector
 end
 
 
@@ -141,12 +143,17 @@ nw = nq
 nc = 2
 nquat = 0
 
+# Torque limits
+u_lim = SVector{2}([0.3, 30])
+
 pushbot = PushBot(nq,nu,nw,nc,
 			   mb, ma, l,
 			   μ_world, μ_joint, g,
 			   BaseMethods(), DynamicsMethods(),
 		  SVector{2}(μ_joint * [2.0; 0.5]),
-                  (1/3)*mb*(l^2))
+                  (1/3)*mb*(l^2),
+                  -deepcopy(u_lim),
+                  deepcopy(u_lim))
 
 function friction_coefficients(model::PushBot) 
 	return [model.μ_world]

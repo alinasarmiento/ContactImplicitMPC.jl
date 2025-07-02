@@ -34,6 +34,8 @@ mutable struct Waiter2D{T} <: Model{T}
     dyn::DynamicsMethods
 
     joint_friction::SVector
+    u_min::SVector
+    u_max::SVector
 end
 
 function lagrangian(model::Waiter2D, q, q̇)
@@ -245,7 +247,9 @@ waiter_2D = Waiter2D(5, 2, 2, 6,
                      params["r_ee"], params["d_ee"], params["r_tray"], params["d_tray"],
                      SVector{2}(supp1), SVector{2}(supp2),
 	             BaseMethods(), DynamicsMethods(),
-	             SVector{5}(zeros(5)))
+	             SVector{5}(zeros(5)),
+                     SVector{2}([-20, -20]),
+                     SVector{2}([20, 20]),)
 
 function friction_coefficients(model::Waiter2D) 
 	return [model.μ_world]
