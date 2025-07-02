@@ -17,11 +17,11 @@ path_jac = joinpath(dir_sim, "flat/jacobians.jld2")
 instantiate_base!(sim.model, path_base)
 instantiate_dynamics!(sim.model, path_dyn)
 
-expr_res, rz_sp, rθ_sp = generate_residual_expressions(sim.model, sim.env, jacobians=:approx)
+expr_res, rz_sp, rθ_sp = generate_residual_expressions(sim.model, sim.env)
 save_expressions(expr_res, path_res, overwrite=true)
 isfile(path_jac) && rm(path_jac)
 ContactImplicitMPC.JLD2.save(path_jac, "rz_sp", rz_sp, "rθ_sp", rθ_sp)
-instantiate_residual!(sim, path_res, path_jac, jacobians=:approx)
+instantiate_residual!(sim, path_res, path_jac)
 
 ################################################################################
 # Waiter2D

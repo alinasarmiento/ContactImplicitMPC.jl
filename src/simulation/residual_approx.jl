@@ -5,14 +5,15 @@ function res_con(model::Model, env::Environment{<:World,LinearizedCone}, z, θ, 
 
     u_min = model.u_min
     u_max = model.u_max
-    ru = max.(0.0, u1 .- u_max) + max.(0.0, u_min .- u1)
+    u_vio_weight = model.u_vio_weight
+    ru = u_vio_weight * (max.(0.0, u1 .- u_max) + max.(0.0, u_min .- u1))
 
     # @warn "define residual order"
     [s1 .- ϕ_func(model, env, q2);
      s2 .- (μ[1] * γ1 .- E_func(model, env) * b1);
      γ1 .* s1 .- κ;
      b1 .* η1 .- κ;
-     ψ1 .* s2 .- κ;
+     ψ1 .* s2 .- κ]
      ru]
 end
 
@@ -57,8 +58,8 @@ function rz_approx!(s, rz, z, θ)
     rz[imdp, iq2] += s.con.mdvs(vT, ψ1, η1) * s.con.vsq2(q1, q2, k, h)
 
     # Other constraints
-    iulim = index_ulim(model)
-    s.con.rcz(view(rz, collect([iimp; ifri; ibimp; ibmdp; ibfri; iulim]), :), z, θ)
+    # iulim = index_ulim(model)
+    s.con.rcz(view(rz, collect([iimp; ifri; ibimp; ibmdp; ibfri]), :), z, θ)
 
 end
 
@@ -102,18 +103,7 @@ function rθ_approx!(s, rθ, z, θ)
     rθ[imdp, idx] = s.con.vsq1h(q1, q2, k, h)
 
     # Other constraints
-    iulim = index_ulim(model)
-    s.con.rcθ(view(rθ, collect([iimp; ifri; ibimp; ibmdp; ibfri; iulim]), :), z, θ)
-
-    # # Torque limit gradient
     # iulim = index_ulim(model)
-    # for i = 1:model.nu
-    #     if u1[i] > model.u_max[i]
-    #         rθ[iulim[i], iu1[i]] = 1.0
-    #     end
-    #     if u1[i] < model.u_min[i]
-    #         rθ[iulim[i + model.nu], iu1[i]] = -1.0
-    #     end
-    # end
+    s.con.rcθ(view(rθ, collect([iimp; ifri; ibimp; ibmdp; ibfri]), :), z, θ)
     
 end

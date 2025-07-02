@@ -22,6 +22,7 @@ mutable struct PushBot{T} <: Model{T}
     I_b::T
     u_min::SVector
     u_max::SVector
+    u_vio_weight::T
 end
 
 
@@ -153,7 +154,8 @@ pushbot = PushBot(nq,nu,nw,nc,
 		  SVector{2}(μ_joint * [2.0; 0.5]),
                   (1/3)*mb*(l^2),
                   -deepcopy(u_lim),
-                  deepcopy(u_lim))
+                  deepcopy(u_lim),
+                  10.0)
 
 function friction_coefficients(model::PushBot) 
 	return [model.μ_world]
