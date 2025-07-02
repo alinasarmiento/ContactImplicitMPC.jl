@@ -59,17 +59,6 @@ function rz_approx!(s, rz, z, θ)
     # Other constraints
     s.con.rcz(view(rz, collect([iimp; ifri; ibimp; ibmdp; ibfri]), :), z, θ)
 
-    # Torque limit gradient
-    iulim = index_ulim(model)
-    for i = 1:model.nu
-        if u1[i] > model.u_max[i]
-            rθ[iulim[i], iu1[i]] = 1.0
-        end
-        if u1[i] < model.u_min[i]
-            rθ[iulim[i + model.nu], iu1[i]] = -1.0
-        end
-    end
-
 end
 
 function rθ_approx!(s, rθ, z, θ)
