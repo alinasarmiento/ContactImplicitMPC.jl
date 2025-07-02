@@ -14,7 +14,7 @@ using PyCall
 using Infiltrator
 
 # ## Simulation
-s = get_simulation("pushbot", "flat_2D_lc", "flat");
+s = get_simulation("pushbot", "flat_2D_lc", "flat", approx=true);
 model = s.model
 env = s.env
 # @infiltrate
