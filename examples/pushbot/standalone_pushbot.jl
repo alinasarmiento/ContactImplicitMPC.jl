@@ -14,7 +14,7 @@ using PyCall
 using Infiltrator
 
 # ## Simulation
-s = get_simulation("pushbot", "flat_2D_lc", "flat", approx=true);
+s = get_simulation("pushbot", "flat_2D_lc", "flat");
 model = s.model
 env = s.env
 # @infiltrate
@@ -59,7 +59,7 @@ H_sim = 10000
 obj = TrackingVelocityObjective(model, env, H_mpc,
 	q = [Diagonal([150*(t/H_mpc)^2; 40.0*(t/H_mpc)^2]) for t = 1:H_mpc-0],
 	v = [Diagonal([.5; .5] ./ (h^2.0)) for t = 1:H_mpc-0],
-	u = [Diagonal([1000; .1]) for t = 1:H_mpc-0],
+	u = [Diagonal([2000; 10]) for t = 1:H_mpc-0],
 	γ = [Diagonal(1.0e-100 * ones(model.nc)) for t = 1:H_mpc-0],
 	b = [Diagonal(1.0e-100 * ones(model.nc * friction_dim(env))) for t = 1:H_mpc]);
 

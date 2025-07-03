@@ -3,8 +3,10 @@ jl = Julia(compiled_modules=False)
 from julia import Main
 from julia import convert as jlconvert
 Main.eval('using ContactImplicitMPC')
+Main.eval('using RoboDojo')
 Main.eval('using StaticArrays')
 import julia.ContactImplicitMPC as cimpc
+import julia.RoboDojo as rodo
 
 import sys
 import os
@@ -34,23 +36,21 @@ def py_handler(lc, sim, u_lcm_channel, q0_sim=[0,0]):
             cimpc.rot_n_stride_b(p.traj, p.traj_cache, p.stride)
             cimpc.update_q0_u_b(p, q1)
 
-        # apply B to u
-        # B = sim.model.base.B([0,0]) # q doesnt matter
-        # B = jlconvert(Main.Matrix, B)
-        # B = np.array(B)
-        # u = np.array(p.u)
-        # u = B @ u
-
+        # sim_t = int(t_now/sim.h)
+        # status = rodo.step_b(sim, sim_t+1)
+        # q, gam, b, psi, s1, eta, s2 = cimpc.unpack_z(model, env, z)
+        
         # lcm broadcast p.u
         u_lcm = lcmt_robot_input()
         u_lcm.utime = msg.utime
         u_lcm.num_efforts = msg.num_efforts
         u_lcm.effort_names = msg.effort_names
         u_lcm.efforts = p.u / 0.01
-        if np.abs(u_lcm.efforts[0]) > 0.3:
-            u_lcm.efforts[0] = 0.3*np.sign(u_lcm.efforts[0])
-            print('#################### caught. p.u:', p.u)
+        # if np.abs(u_lcm.efforts[0]) > 0.3:
+        #     u_lcm.efforts[0] = 0.3*np.sign(u_lcm.efforts[0])
+            # print('#################### caught. p.u:', p.u)
         print("u:",u_lcm.efforts,"h:", sim.h, "t:",t_now)
+        # print('lbd:', sim.traj.γ[sim_t])
         lc.publish(u_lcm_channel, u_lcm.encode())
 
     return handler

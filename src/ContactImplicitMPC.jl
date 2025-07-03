@@ -231,6 +231,7 @@ export
     index_bimp,
     index_bmdp,
     index_bfri,
+    index_ulim,
     linearization_var_index,
     linearization_term_index,
     index_ort,

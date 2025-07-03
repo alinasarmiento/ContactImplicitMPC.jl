@@ -131,30 +131,36 @@ function E_func(model::Model, env::Environment{<:World,LinearizedCone})
 end
 
 function residual(model::Model, env::Environment{<:World,LinearizedCone}, z, θ, κ)
-	nc = model.nc
-	nb = nc * friction_dim(env)
-	nf = Int(nb / nc)
-	np = dim(env)
+    nc = model.nc
+    nb = nc * friction_dim(env)
+    nf = Int(nb / nc)
+    np = dim(env)
 
-	q0, q1, u1, w1, μ, h = unpack_θ(model, θ)
-	q2, γ1, b1, ψ1, s1, η1, s2 = unpack_z(model, env, z)
+    q0, q1, u1, w1, μ, h = unpack_θ(model, θ)
+    q2, γ1, b1, ψ1, s1, η1, s2 = unpack_z(model, env, z)
 
-	ϕ = ϕ_func(model, env, q2)
+    ϕ = ϕ_func(model, env, q2)
 
-	k = kinematics(model, q2)
-	λ1 = contact_forces(model, env, γ1, b1, q2, k)
-	Λ1 = transpose(J_func(model, env, q2)) * λ1 #@@@@ maybe need to use J_fast
-	vT_stack = velocity_stack(model, env, q1, q2, k, h)
-	ψ_stack = transpose(E_func(model, env)) * ψ1
+    k = kinematics(model, q2)
+    λ1 = contact_forces(model, env, γ1, b1, q2, k)
+    Λ1 = transpose(J_func(model, env, q2)) * λ1 #@@@@ maybe need to use J_fast
+    vT_stack = velocity_stack(model, env, q1, q2, k, h)
+    ψ_stack = transpose(E_func(model, env)) * ψ1
 
-	# @warn "define residual order"
-	[model.dyn.d(h, q0, q1, u1, w1, Λ1, q2);
-	 s1 - ϕ;
-	 η1 - vT_stack - ψ_stack;
-	 s2 .- (μ[1] * γ1 .- E_func(model, env) * b1);
-	 γ1 .* s1 .- κ[1];
-	 b1 .* η1 .- κ[1];
-	 ψ1 .* s2 .- κ[1]]
+    u_min = model.u_min
+    u_max = model.u_max
+    u_vio_weight = model.u_vio_weight
+    ru = max.(0.0, u1 .- u_max) + max.(0.0, u_min .- u1)
+
+    # @warn "define residual order"
+    [model.dyn.d(h, q0, q1, u1, w1, Λ1, q2);
+     s1 - ϕ;
+     η1 - vT_stack - ψ_stack;
+     s2 .- (μ[1] * γ1 .- E_func(model, env) * b1);
+     γ1 .* s1 .- κ[1];
+     b1 .* η1 .- κ[1];
+     ψ1 .* s2 .- κ[1];
+     ru]
 end
 
 function residual(model::Model, env::Environment{<:World,NonlinearCone}, z, θ, κ)
