@@ -32,8 +32,8 @@ function TrackingVelocityObjective(model, env, H::Int;
     return TrackingVelocityObjective(q, v, u, γ, b)
 end
 
-function eval_obj(model, env, im_traj::ImplicitTrajectory, H::Int, obj::Objective)
-    z = im_traj.lin[H].z
+function eval_obj(model, env, im_traj::ImplicitTrajectory, H::Int, obj::Objective, t::T)
+    z = im_traj.lin[t].z
     q2, γ1, b1, ψ1, s1, η1, s2 = unpack_z(model, env, z)
     print(z)
     # qobj = transpose(q2) * obj.q * q2

@@ -36,7 +36,7 @@ def py_handler(lc, sim, model, env, u_lcm_channel, q0_sim=[0,0]):
             cimpc.rot_n_stride_b(p.traj, p.traj_cache, p.stride)
             cimpc.update_q0_u_b(p, q1)
 
-            cimpc.eval_obj(model, env, p.im_traj, p.traj.H, p.newton.obj)
+            cimpc.eval_obj(model, env, p.im_traj, p.traj.H, p.newton.obj, t_now)
 
         # sim_t = int(t_now/sim.h)
         # status = rodo.step_b(sim, sim_t+1)
