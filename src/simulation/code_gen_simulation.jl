@@ -146,7 +146,6 @@ function generate_residual_expressions(model::Model, env::Environment;
 		rz = rz * m
 		rz = simplify.(rz)
 
-
 		rθ = Symbolics.jacobian(r, θ, simplify = true) # TODO: sparse version
 
 		rz_sp = similar(rz, T)

@@ -46,9 +46,9 @@ def py_handler(lc, sim, u_lcm_channel, q0_sim=[0,0]):
         u_lcm.num_efforts = msg.num_efforts
         u_lcm.effort_names = msg.effort_names
         u_lcm.efforts = p.u / 0.01
-        # if np.abs(u_lcm.efforts[0]) > 0.3:
-        #     u_lcm.efforts[0] = 0.3*np.sign(u_lcm.efforts[0])
-            # print('#################### caught. p.u:', p.u)
+        if np.abs(u_lcm.efforts[0]) > 0.3:
+            u_lcm.efforts[0] = 0.3*np.sign(u_lcm.efforts[0])
+            print('#################### caught. p.u:', p.u)
         print("u:",u_lcm.efforts,"h:", sim.h, "t:",t_now)
         # print('lbd:', sim.traj.γ[sim_t])
         lc.publish(u_lcm_channel, u_lcm.encode())
