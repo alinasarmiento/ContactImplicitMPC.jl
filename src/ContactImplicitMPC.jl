@@ -146,6 +146,7 @@ export
     implicit_dynamics!,
     TrackingObjective,
     TrackingVelocityObjective,
+    eval_obj,
     second_order_cone_product,
     generate_base_expressions,
     RLin,
