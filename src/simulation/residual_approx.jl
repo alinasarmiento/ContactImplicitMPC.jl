@@ -13,7 +13,7 @@ function res_con(model::Model, env::Environment{<:World,LinearizedCone}, z, θ, 
      s2 .- (μ[1] * γ1 .- E_func(model, env) * b1);
      γ1 .* s1 .- κ;
      b1 .* η1 .- κ;
-     ψ1 .* s2 .- κ]
+     ψ1 .* s2 .- κ;
      ru]
 end
 
