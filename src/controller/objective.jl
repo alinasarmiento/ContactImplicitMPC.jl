@@ -35,7 +35,7 @@ end
 function eval_obj(model, env, im_traj::ImplicitTrajectory, H::Int, obj::Objective)
     z = im_traj.lin[H].z
     q2, γ1, b1, ψ1, s1, η1, s2 = unpack_z(model, env, z)
-    print(q2)
+    print(z)
     # qobj = transpose(q2) * obj.q * q2
 end
 
