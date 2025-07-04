@@ -36,9 +36,9 @@ def py_handler(lc, sim, model, env, u_lcm_channel, q0_sim=[0,0]):
             cimpc.rot_n_stride_b(p.traj, p.traj_cache, p.stride)
             cimpc.update_q0_u_b(p, q1)
 
-        sim_t = int(t_now/sim.h)
-        cimpc.update_sim_b(p, sim, sim_t+1)
-        cimpc.eval_obj(model, env, sim.ip.z, p.newton.obj)
+        # sim_t = int(t_now/sim.h)
+        # cimpc.update_sim_b(p, sim, sim_t+1)
+        # gam = cimpc.eval_obj(model, env, sim.ip.z, q1, p, p.newton.obj)
         
         # lcm broadcast p.u
         u_lcm = lcmt_robot_input()
