@@ -1,3 +1,5 @@
+using RoboDojo
+
 function update_q0_u!(p, q1)
     p.q0 .= q1
 
@@ -15,7 +17,7 @@ end
 
 function update_sim!(p, sim, t)
     sim.traj.u[t] .= p.u
-    status = step!(sim, t)
+    status = RoboDojo.step!(sim, t)
 end
 
 function set_initial_q0!(p, q0)
