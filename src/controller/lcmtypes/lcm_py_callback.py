@@ -20,7 +20,7 @@ def py_handler(lc, sim, model, env, u_lcm_channel, q0_sim=[0,0]):
         # print("\n received")
         msg = lcmt_robot_output.decode(msg)
         p = sim.policy
-        traj = sim.traj
+        # traj = sim.traj
         q1 = msg.position
         # print("\n pos:",q1)
         q1 = jlconvert(Main.Vector, list(q1))
@@ -36,10 +36,11 @@ def py_handler(lc, sim, model, env, u_lcm_channel, q0_sim=[0,0]):
             cimpc.rot_n_stride_b(p.traj, p.traj_cache, p.stride)
             cimpc.update_q0_u_b(p, q1)
 
-            cimpc.eval_obj(model, env, p.im_traj, p.traj.H, p.newton.obj, int(t_now/0.05)+1)
+            # cimpc.eval_obj(model, env, p.im_traj, p.traj.H, p.newton.obj, int(t_now/0.05)+1)
+            # print(p.traj.H)
 
-        # sim_t = int(t_now/sim.h)
-        # status = rodo.step_b(sim, sim_t+1)
+        sim_t = int(t_now/sim.h)
+        cimpc.update_sim_b(p, sim, sim_t+1)
         # q, gam, b, psi, s1, eta, s2 = cimpc.unpack_z(model, env, z)
         
         # lcm broadcast p.u
@@ -52,7 +53,8 @@ def py_handler(lc, sim, model, env, u_lcm_channel, q0_sim=[0,0]):
             u_lcm.efforts[0] = 0.3*np.sign(u_lcm.efforts[0])
             print('#################### caught. p.u:', p.u)
         print("u:",u_lcm.efforts,"h:", sim.h, "t:",t_now)
-        # print('lbd:', sim.traj.γ[sim_t])
+        
+        print('lbd:', sim.traj.z[sim_t])
         lc.publish(u_lcm_channel, u_lcm.encode())
 
     return handler

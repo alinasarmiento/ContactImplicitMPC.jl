@@ -291,6 +291,7 @@ export
     callback_sim,
     debug_callback,
     update_q0_u!,
+    update_sim!,
     set_initial_q0!
 
 end # module

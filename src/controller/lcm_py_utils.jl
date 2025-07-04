@@ -13,6 +13,11 @@ function update_q0_u!(p, q1)
     end
 end
 
+function update_sim!(p, sim, t)
+    sim.traj.u[t] .= p.u
+    status = step!(sim, t)
+end
+
 function set_initial_q0!(p, q0)
     p.q0 .= q0
     set_trajectory!(p.traj, p.ref_traj)
