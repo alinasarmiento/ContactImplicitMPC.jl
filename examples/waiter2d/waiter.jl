@@ -44,8 +44,8 @@ end
 # q0 = ContactImplicitMPC.SVector{2}([0.0 * π, 0.0])
 # for instantiation BEFORE controller created
 
-q1 = [0.5; 0.43;
-      0.65; 0.484; 0.0;]
+q1 = [0.5; 0.42;
+      0.7; 0.6; 0.0;] #0.483
 # q1 = [0.5; 0.6;
 #         0.5; 0.616; 0.0;]
 v1 = [0.0; 0.0;
@@ -58,7 +58,7 @@ sim = simulator(s, H, h=h)
 status = simulate!(sim, q1, v1)
 
 ##########################
-## Visualizer
+Visualizer
 vis = ContactImplicitMPC.Visualizer()
 ContactImplicitMPC.render(vis)
 
