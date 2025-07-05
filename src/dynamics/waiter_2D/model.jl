@@ -116,7 +116,7 @@ function dist_tray(model::Waiter2D, p, pt)
     dz = max(p[2]-tl[2], br[2]-p[2])
     normd = norm([ max(0,dx), max(0,dz) ])
     dneg = min(0, max(dx,dz))
-    return normd + dneg
+    return normd #+ dneg
     
     
     # same = max(0, sign(zdist)*sign(xdist)) # 1 if same, 0 if not
