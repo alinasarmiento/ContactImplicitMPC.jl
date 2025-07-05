@@ -56,28 +56,19 @@ H_sim = 10000
 κ_mpc = 1.0e-4
 
 # Slow Recovery
+# obj = TrackingVelocityObjective(model, env, H_mpc,
+# 	q = [Diagonal([300*(t/H_mpc)^2; 40.0*(t/H_mpc)^2]) for t = 1:H_mpc-0],
+# 	v = [Diagonal([.5; .5] ./ (h^2.0)) for t = 1:H_mpc-0],
+# 	u = [Diagonal([3000; 1]) for t = 1:H_mpc-0],
+# 	γ = [Diagonal(1.0e-100 * ones(model.nc)) for t = 1:H_mpc-0],
+# 	b = [Diagonal(1.0e-100 * ones(model.nc * friction_dim(env))) for t = 1:H_mpc]);
+
 obj = TrackingVelocityObjective(model, env, H_mpc,
-	q = [Diagonal([150*(t/H_mpc)^2; 40.0*(t/H_mpc)^2]) for t = 1:H_mpc-0],
-	v = [Diagonal([.5; .5] ./ (h^2.0)) for t = 1:H_mpc-0],
-	u = [Diagonal([2000; 10]) for t = 1:H_mpc-0],
-	γ = [Diagonal(1.0e-100 * ones(model.nc)) for t = 1:H_mpc-0],
-	b = [Diagonal(1.0e-100 * ones(model.nc * friction_dim(env))) for t = 1:H_mpc]);
-
-## mass == 0.001
-# obj = TrackingVelocityObjective(model, env, H_mpc,
-#     q = [Diagonal([40*(t/H_mpc)^2; 5*(t/H_mpc)])^2 for t = 1:H_mpc-0],
-#     v = [Diagonal([1.0; 0.5] ./ (h^2.0)) for t = 1:H_mpc-0],
-#     u = [Diagonal([10; .001]) for t = 1:H_mpc-0],
-#     γ = [Diagonal(1.0e-100 * ones(model.nc)) for t = 1:H_mpc-0],
-#     b = [Diagonal(1.0e-100 * ones(model.nc * friction_dim(env))) for t = 1:H_mpc]);
-
-## mass == 1.0
-# obj = TrackingVelocityObjective(model, env, H_mpc,
-#     q = [Diagonal([4000*(t/H_mpc)^2; 5*(t/H_mpc)])^2 for t = 1:H_mpc-0],
-#     v = [Diagonal([1.0; 0.5] ./ (h^2.0)) for t = 1:H_mpc-0],
-#     u = [Diagonal([1; .0001]) for t = 1:H_mpc-0],
-#     γ = [Diagonal(1.0e-10 * ones(model.nc)) for t = 1:H_mpc-0],
-#     b = [Diagonal(1.0e-100 * ones(model.nc * friction_dim(env))) for t = 1:H_mpc]);
+    q = [Diagonal([12*(t/H_mpc)^2; 12*(t/H_mpc)])^2 for t = 1:H_mpc-0],
+    v = [Diagonal([1; 0.01] ./ (h^2.0)) for t = 1:H_mpc-0],
+    u = [Diagonal([100; 1]) for t = 1:H_mpc-0],
+    γ = [Diagonal(1.0e-100 * ones(model.nc)) for t = 1:H_mpc-0],
+    b = [Diagonal(1.0e-100 * ones(model.nc * friction_dim(env))) for t = 1:H_mpc]);
 
 
 ## Policy

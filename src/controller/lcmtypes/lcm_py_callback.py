@@ -27,11 +27,12 @@ def py_handler(lc, sim, model, env, u_lcm_channel, q0_sim=[0,0]):
 
         # check if utime is next h
         t_now = msg.utime/1e6
+        t_ctrl = int(t_now / 0.05)
         if t_now%0.05 <= 0.0101:
             # if t_now == 0:
             #     cimpc.set_initial_q0_b(p,q0_sim)
             cimpc.newton_solve_b(p.newton, p.s, p.q0, q1,
-                                p.im_traj, p.traj, warm_start=True)
+                                 p.im_traj, p.traj, warm_start=t_ctrl>0)
             cimpc.update_b(p.im_traj, p.traj, p.s, p.altitude, p.κ[0], p.traj.H)
             cimpc.rot_n_stride_b(p.traj, p.traj_cache, p.stride)
             cimpc.update_q0_u_b(p, q1)
@@ -49,7 +50,7 @@ def py_handler(lc, sim, model, env, u_lcm_channel, q0_sim=[0,0]):
         if np.abs(u_lcm.efforts[0]) > 0.3:
             u_lcm.efforts[0] = 0.3*np.sign(u_lcm.efforts[0])
             print('#################### caught. p.u:', p.u)
-        print("u:",u_lcm.efforts,"h:", sim.h, "t:",t_now)
+        print("u:",u_lcm.efforts,"h:", sim.h, "t:", t_now%0.05)
     
         lc.publish(u_lcm_channel, u_lcm.encode())
 

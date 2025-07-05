@@ -19,7 +19,7 @@ model = s.model
 env = s.env
 
 # ## Reference Trajectory
-h = 0.005
+h = 0.001
 H = 100
 ref_traj = contact_trajectory(model, env, H, h)
 ref_traj.h
@@ -69,11 +69,11 @@ status = simulate!(sim, q1, v1)
 ##########################
 
 # ## MPC setup 
-N_sample = 1
+N_sample = 2
 H_mpc = 40
 h_sim = h / N_sample
-H_sim = 100
-κ_mpc = 1.0e-4
+H_sim = 200
+κ_mpc = 2.0e-4
 
 ## Cost
 q_scale = 1.0
@@ -100,7 +100,7 @@ p = ci_mpc_policy(ref_traj, s, obj,
     N_sample = N_sample,
     κ_mpc = κ_mpc,
     n_opts = NewtonOptions(
-		r_tol = 3e-3,
+		r_tol = 3e-4,
 		max_iter = 10,
 		max_time = ref_traj.h/2, # HARD REAL TIME
 		),
