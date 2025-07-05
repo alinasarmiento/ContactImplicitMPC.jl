@@ -103,22 +103,33 @@ function dist_tray(model::Waiter2D, p, pt)
     # zdiff = abs(zdiff)
         
     zdiff = abs(norm(diff)*cos(beta))
-    zdist = zdiff-(model.d_tray/2) + 1e-11
+    zdist = zdiff-(model.d_tray/2)
 
     xdiff = abs(norm(diff)*sin(beta))
-    xdist = xdiff-model.r_tray + 1e-11
+    xdist = xdiff-model.r_tray
 
-    same = max(0, sign(zdist)*sign(xdist)) # 1 if same, 0 if not
-    zchange =  min(same+sign(zdist)+1, 1) # 1 if same or positive
-    xchange =  min(same+sign(xdist)+1, 1) # 1 if same or positive
+    tl = SVector{2}([-model.r_tray, model.d_tray/2])
+    br = SVector{2}([model.r_tray, -model.d_tray/2])
+    p = [xdiff, zdiff]
+
+    dx = max(tl[1]-p[1], p[1]-br[1])
+    dz = max(p[2]-tl[2], br[2]-p[2])
+    normd = norm([ max(0,dx), max(0,dy) ])
+    dneg = min(0, max(dx,dz))
+    return normd + dneg
     
-    zdist = zdist*zchange
-    xdist = xdist*xchange
     
-    both_negative = max(0, min(sign(-zdist), sign(-xdist))) # 1 if both negative, 0 otherwise
-    penetration_sign = 1 - 2*both_negative
+    # same = max(0, sign(zdist)*sign(xdist)) # 1 if same, 0 if not
+    # zchange =  min(same+sign(zdist)+1, 1) # 1 if same or positive
+    # xchange =  min(same+sign(xdist)+1, 1) # 1 if same or positive
     
-    return penetration_sign*norm([xdist, zdist])
+    # zdist = zdist*zchange
+    # xdist = xdist*xchange
+    
+    # both_negative = max(0, min(sign(-zdist), sign(-xdist))) # 1 if both negative, 0 otherwise
+    # penetration_sign = 1 - 2*both_negative
+    
+    # return penetration_sign*norm([xdist, zdist])
     # return zdist
 end
 
