@@ -89,7 +89,7 @@ function contact_point(model::Waiter2D, q::AbstractVector; d=params["d_ee"], r=p
     sx = deepcopy(params["supp_xdim"])
     sz = deepcopy(params["supp_zdim"])
     p_supp1 = [sp[1]-(sx/2), 0.0, sp[2]+(sz/2)]
-    p_supp2 = [sp[1]-(sx/2)+0.2, 0.0, sp[2]+(sz/2)]
+    p_supp2 = [sp[1]-(sx/2)+0.1, 0.0, sp[2]+(sz/2)]
     pc = [p_back, p_front, p_supp1, p_supp2, p_ground1, p_ground2]
     
     return pc
