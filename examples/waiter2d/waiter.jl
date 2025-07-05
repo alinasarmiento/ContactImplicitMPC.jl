@@ -19,8 +19,8 @@ model = s.model
 env = s.env
 
 # ## Reference Trajectory
-h = 0.001
-H = 1000
+h = 0.04
+H = 100
 ref_traj = contact_trajectory(model, env, H, h)
 ref_traj.h
 
@@ -45,7 +45,7 @@ end
 # for instantiation BEFORE controller created
 
 q1 = [0.5; 0.43;
-      0.65; 0.483; 0.0;]
+      0.65; 0.484; 0.0;]
 # q1 = [0.5; 0.6;
 #         0.5; 0.616; 0.0;]
 v1 = [0.0; 0.0;
