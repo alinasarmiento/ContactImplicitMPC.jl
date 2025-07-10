@@ -142,7 +142,7 @@ function dist_tray(model::Waiter2D, p, pt)
     xdist = max(0, xdist)
     
     # return penetration_sign*norm([xdist, zdist])
-    return norm([xdist, zdist]) + dist_neg
+    return norm([xdist, zdist]) #+ dist_neg
 end
 
 # signed distance function
