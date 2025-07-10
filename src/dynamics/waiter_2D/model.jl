@@ -97,11 +97,11 @@ end
 function dist_tray(model::Waiter2D, p, pt)
     # p: [x, z], pt: [xtray, ztray, θtray]
 
-    diff = p-pt[1:2]
-    beta = atan(diff[1]/diff[2]) + pt[3] # angle between vector and tray-vertical
-    # xdiff, zdiff = (transpose(RotMatrix{2}(pt[3])) * p) - pt[1:2]
-    # xdiff = abs(xdiff)
-    # zdiff = abs(zdiff)
+    # diff = p-pt[1:2]
+    # beta = atan(diff[1]/diff[2]) + pt[3] # angle between vector and tray-vertical
+    xdiff, zdiff = (transpose(RotMatrix{2}(pt[3])) * p) - pt[1:2]
+    xdiff = abs(xdiff)
+    zdiff = abs(zdiff)
 
     ### POINT METHOD
     # zdiff = abs(norm(diff)*cos(beta))
@@ -121,10 +121,10 @@ function dist_tray(model::Waiter2D, p, pt)
     # return normd #+ dneg
     #########################################
         
-    zdiff = abs(norm(diff)*cos(beta))
+    # zdiff = abs(norm(diff)*cos(beta))
     zdist = zdiff-(model.d_tray/2)
 
-    xdiff = abs(norm(diff)*sin(beta))
+    # xdiff = abs(norm(diff)*sin(beta))
     xdist = xdiff-model.r_tray
         
     same = max(0, sign(zdist)*sign(xdist)) # 1 if same, 0 if not
@@ -134,11 +134,15 @@ function dist_tray(model::Waiter2D, p, pt)
     zdist = zdist*zchange
     xdist = xdist*xchange
     
-    both_negative = max(0, min(sign(-zdist), sign(-xdist))) # 1 if both negative, 0 otherwise
-    penetration_sign = 1 - 2*both_negative
+    # both_negative = max(0, min(sign(-zdist), sign(-xdist))) # 1 if both negative, 0 otherwise
+    # penetration_sign = 1 - 2*both_negative
+    dist_neg = min(0, max(xdist, zdist))
     
-    return penetration_sign*norm([xdist, zdist])
-    # return zdist
+    zdist = max(0, zdist)
+    xdist = max(0, xdist)
+    
+    # return penetration_sign*norm([xdist, zdist])
+    return norm([xdist, zdist]) + dist_neg
 end
 
 # signed distance function
