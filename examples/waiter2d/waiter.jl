@@ -24,10 +24,12 @@ H = 100
 ref_traj = contact_trajectory(model, env, H, h)
 ref_traj.h
 
-qref = [0.5; 0.485;
-        0.5; 0.5; 0.0;]
+# qref = [0.5; 0.485;
+#         0.5; 0.5; 0.0;]
+qref = [0.5; 0.42;
+        0.65; 0.4831; 0.0;]
 
-ur = [0.0; 0.] #zeros(model.nu)
+ur = [0.0; 0.37*9.81*h] #zeros(model.nu)
 γr = zeros(model.nc)
 br = zeros(model.nc * friction_dim(env))
 ψr = zeros(model.nc)
@@ -45,7 +47,7 @@ end
 # for instantiation BEFORE controller created
 
 q1 = [0.5; 0.42;
-      0.7; 0.4831; 0.0;] #0.483
+      0.65; 0.4831; 0.0;] #0.483
 # q1 = [0.5; 0.6;
 #         0.5; 0.616; 0.0;]
 v1 = [0.0; 0.0;
@@ -58,18 +60,18 @@ sim = simulator(s, H, h=h)
 status = simulate!(sim, q1, v1, verbose=true)
 
 ##########################
-Visualizer
-vis = ContactImplicitMPC.Visualizer()
-ContactImplicitMPC.render(vis)
+# Visualizer
+# vis = ContactImplicitMPC.Visualizer()
+# ContactImplicitMPC.render(vis)
 
-# ## Visualize
-vis_traj = contact_trajectory(s.model, s.env, H, h)
-anim = visualize_robot!(vis, model, sim.traj, sample = 1, h=h)
-@infiltrate
+# # ## Visualize
+# vis_traj = contact_trajectory(s.model, s.env, H, h)
+# anim = visualize_robot!(vis, model, sim.traj, sample = 1, h=h)
+# @infiltrate
 ##########################
 
 # ## MPC setup 
-N_sample = 2
+N_sample = 1
 H_mpc = 40
 h_sim = h / N_sample
 H_sim = 200

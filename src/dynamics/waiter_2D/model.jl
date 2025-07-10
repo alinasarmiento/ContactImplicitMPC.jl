@@ -96,40 +96,48 @@ end
 
 function dist_tray(model::Waiter2D, p, pt)
     # p: [x, z], pt: [xtray, ztray, θtray]
+
     diff = p-pt[1:2]
     beta = atan(diff[1]/diff[2]) + pt[3] # angle between vector and tray-vertical
     # xdiff, zdiff = (transpose(RotMatrix{2}(pt[3])) * p) - pt[1:2]
     # xdiff = abs(xdiff)
     # zdiff = abs(zdiff)
+
+    ### POINT METHOD
+    # zdiff = abs(norm(diff)*cos(beta))
+    # zdist = zdiff-(model.d_tray/2)
+
+    # xdiff = abs(norm(diff)*sin(beta))
+    # xdist = xdiff-model.r_tray
+
+    # tl = SVector{2}([-model.r_tray, model.d_tray/2])
+    # br = SVector{2}([model.r_tray, -model.d_tray/2])
+    # p = [xdiff, zdiff]
+
+    # dx = max(tl[1]-p[1], p[1]-br[1])
+    # dz = max(p[2]-tl[2], br[2]-p[2])
+    # normd = norm([ max(0,dx), max(0,dz) ])
+    # dneg = min(0, max(dx,dz))
+    # return normd #+ dneg
+    #########################################
         
     zdiff = abs(norm(diff)*cos(beta))
     zdist = zdiff-(model.d_tray/2)
 
     xdiff = abs(norm(diff)*sin(beta))
     xdist = xdiff-model.r_tray
-
-    tl = SVector{2}([-model.r_tray, model.d_tray/2])
-    br = SVector{2}([model.r_tray, -model.d_tray/2])
-    p = [xdiff, zdiff]
-
-    dx = max(tl[1]-p[1], p[1]-br[1])
-    dz = max(p[2]-tl[2], br[2]-p[2])
-    normd = norm([ max(0,dx), max(0,dz) ])
-    dneg = min(0, max(dx,dz))
-    return normd #+ dneg
+        
+    same = max(0, sign(zdist)*sign(xdist)) # 1 if same, 0 if not
+    zchange =  min(same+sign(zdist)+1, 1) # 1 if same or positive
+    xchange =  min(same+sign(xdist)+1, 1) # 1 if same or positive
     
+    zdist = zdist*zchange
+    xdist = xdist*xchange
     
-    # same = max(0, sign(zdist)*sign(xdist)) # 1 if same, 0 if not
-    # zchange =  min(same+sign(zdist)+1, 1) # 1 if same or positive
-    # xchange =  min(same+sign(xdist)+1, 1) # 1 if same or positive
+    both_negative = max(0, min(sign(-zdist), sign(-xdist))) # 1 if both negative, 0 otherwise
+    penetration_sign = 1 - 2*both_negative
     
-    # zdist = zdist*zchange
-    # xdist = xdist*xchange
-    
-    # both_negative = max(0, min(sign(-zdist), sign(-xdist))) # 1 if both negative, 0 otherwise
-    # penetration_sign = 1 - 2*both_negative
-    
-    # return penetration_sign*norm([xdist, zdist])
+    return penetration_sign*norm([xdist, zdist])
     # return zdist
 end
 
