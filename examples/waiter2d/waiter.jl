@@ -50,7 +50,7 @@ q1 = [0.5; 0.42;
       0.65; 0.4831; 0.0;] #0.483
 # q1 = [0.5; 0.6;
 #         0.5; 0.616; 0.0;]
-v1 = [0.0; 0.0;
+v1 = [0.0; 3.0;
       0.0; 0.0; 0.0;]
 
 # ## Simulator
@@ -61,13 +61,13 @@ status = simulate!(sim, q1, v1, verbose=true)
 
 ##########################
 # Visualizer
-# vis = ContactImplicitMPC.Visualizer()
-# ContactImplicitMPC.render(vis)
+vis = ContactImplicitMPC.Visualizer()
+ContactImplicitMPC.render(vis)
 
-# # ## Visualize
-# vis_traj = contact_trajectory(s.model, s.env, H, h)
-# anim = visualize_robot!(vis, model, sim.traj, sample = 1, h=h)
-# @infiltrate
+# ## Visualize
+vis_traj = contact_trajectory(s.model, s.env, H, h)
+anim = visualize_robot!(vis, model, sim.traj, sample = 1, h=h)
+@infiltrate
 ##########################
 
 # ## MPC setup 
@@ -85,7 +85,7 @@ v_scale = 1e-1
 v_vec = v_scale .* [1., 1., 1., 1., 1.] # x_ee, z_ee, x_tray, z_tray, θ_tray
 
 u_scale = 10
-u_vec = [1, 1]
+u_vec = [1, .01]
 
 print("creating objective\n")
 obj = TrackingVelocityObjective(model, env, H_mpc,
