@@ -19,7 +19,7 @@ model = s.model
 env = s.env
 
 # ## Reference Trajectory
-h = 0.0005
+h = 0.01
 H = 100
 ref_traj = contact_trajectory(model, env, H, h)
 ref_traj.h
