@@ -5,3 +5,4 @@ DO NOT MODIFY BY HAND!!!!
 
 from .lcmt_robot_input import lcmt_robot_input
 from .lcmt_robot_output import lcmt_robot_output
+from .lcmt_object_state import lcmt_object_state
