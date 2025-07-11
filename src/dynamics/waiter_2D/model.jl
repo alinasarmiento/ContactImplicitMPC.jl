@@ -53,7 +53,7 @@ function lagrangian(model::Waiter2D, q, q̇)
     h_t = model.d_tray
     w_t = 2*model.r_tray
     I_tray = (1/12)*mt*(h_t^2 + w_t^2)
-    L += I_tray*q̇[5]^2
+    L += 0.5*I_tray*q̇[5]^2
 
     return L
 end
