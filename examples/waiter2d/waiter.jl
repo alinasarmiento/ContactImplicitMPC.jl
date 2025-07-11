@@ -61,28 +61,34 @@ status = simulate!(sim, q1, v1, verbose=true)
 
 ##########################
 # Visualizer
-# vis = ContactImplicitMPC.Visualizer()
-# ContactImplicitMPC.render(vis)
+vis = ContactImplicitMPC.Visualizer()
+ContactImplicitMPC.render(vis)
 
-# # ## Visualize
-# vis_traj = contact_trajectory(s.model, s.env, H, h)
-# anim = visualize_robot!(vis, model, sim.traj, sample = 1, h=h)
-# @infiltrate
+# ## Visualize
+vis_traj = contact_trajectory(s.model, s.env, H, h)
+anim = visualize_robot!(vis, model, sim.traj, sample = 1, h=h)
+u_mat = mapreduce(permutedims, vcat, sim.traj.u)
+v_mat = mapreduce(permutedims, vcat, sim.traj.v)
+q_mat = mapreduce(permutedims, vcat, sim.traj.q)
+force_mat = mapreduce(permutedims, vcat, sim.traj.γ)
+tanf_mat = mapreduce(permutedims, vcat, sim.traj.b)
+
+@infiltrate
 ##########################
 
 # ## MPC setup 
-N_sample = 2
+N_sample = 1
 H_mpc = 40
 h_sim = h / N_sample
 H_sim = 200
-κ_mpc = 1.0e-6
+κ_mpc = 1.0e-7
 
 ## Cost
 q_scale = 1e-1
-q_vec = q_scale .* [1., 1., 1., 1., 1.] # x_ee, z_ee, x_tray, z_tray, θ_tray
+q_vec = q_scale .* [1., 1., 0., 0., 0.] # x_ee, z_ee, x_tray, z_tray, θ_tray
 
 v_scale = 1e-1
-v_vec = v_scale .* [1., 1., 1., 1., 1.] # x_ee, z_ee, x_tray, z_tray, θ_tray
+v_vec = v_scale .* [1., 1., 0., 0., 0.] # x_ee, z_ee, x_tray, z_tray, θ_tray
 
 u_scale = 10
 u_vec = [1, .01]
@@ -141,7 +147,18 @@ ContactImplicitMPC.render(vis)
 # ## Visualize
 vis_traj = contact_trajectory(s.model, s.env, H_sim, h_sim)
 anim = visualize_robot!(vis, model, sim.traj, sample = 1, h=h_sim)
-@infiltrate
+# @infiltrate
+
+using StaticArrays
+function find_JTf(mod, envi, q, f, b, idx)
+    cf = []
+    for i in 1:6
+        cf = push!(cf, b[idx, 2*i-1]+b[idx, 2*i])
+        cf = push!(cf, f[idx,i])
+    end
+    ff = SVector{12}(cf)
+    return transpose(ContactImplicitMPC.J_func(mod, envi, q[idx-1,1:end])) * ff
+end
 
 # ## Timing result
 
