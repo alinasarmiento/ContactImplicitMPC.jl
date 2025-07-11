@@ -145,10 +145,10 @@ end
 
 # control Jacobian
 function B_func(model::Waiter2D, q)
-    B = zeros(5,2)
+    B = zeros(2,5)
     B[1,1] = 1
     B[2,2] = 1
-    B = SMatrix{5,2}(B)
+    B = SMatrix{2,5}(B)
     return B
 end
 
