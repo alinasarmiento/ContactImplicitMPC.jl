@@ -61,42 +61,48 @@ status = simulate!(sim, q1, v1, verbose=true)
 
 ##########################
 # Visualizer
-vis = ContactImplicitMPC.Visualizer()
-ContactImplicitMPC.render(vis)
+# vis = ContactImplicitMPC.Visualizer()
+# ContactImplicitMPC.render(vis)
 
-# ## Visualize
-vis_traj = contact_trajectory(s.model, s.env, H, h)
-anim = visualize_robot!(vis, model, sim.traj, sample = 1, h=h)
-u_mat = mapreduce(permutedims, vcat, sim.traj.u)
-v_mat = mapreduce(permutedims, vcat, sim.traj.v)
-q_mat = mapreduce(permutedims, vcat, sim.traj.q)
-force_mat = mapreduce(permutedims, vcat, sim.traj.γ)
-tanf_mat = mapreduce(permutedims, vcat, sim.traj.b)
+# # ## Visualize
+# vis_traj = contact_trajectory(s.model, s.env, H, h)
+# anim = visualize_robot!(vis, model, sim.traj, sample = 1, h=h)
+# u_mat = mapreduce(permutedims, vcat, sim.traj.u)
+# v_mat = mapreduce(permutedims, vcat, sim.traj.v)
+# q_mat = mapreduce(permutedims, vcat, sim.traj.q)
+# force_mat = mapreduce(permutedims, vcat, sim.traj.γ)
+# tanf_mat = mapreduce(permutedims, vcat, sim.traj.b)
 
-@infiltrate
+# @infiltrate
 ##########################
 
 # ## MPC setup 
-N_sample = 1
+N_sample = 2
 H_mpc = 40
 h_sim = h / N_sample
 H_sim = 200
-κ_mpc = 1.0e-7
+κ_mpc = 2.0e-4
 
 ## Cost
 q_scale = 1e-1
 q_vec = q_scale .* [1., 1., 0., 0., 0.] # x_ee, z_ee, x_tray, z_tray, θ_tray
 
-v_scale = 1e-1
+v_scale = 1e-0
 v_vec = v_scale .* [1., 1., 0., 0., 0.] # x_ee, z_ee, x_tray, z_tray, θ_tray
 
-u_scale = 10
-u_vec = [1, .01]
+u_scale = 1e-1
+u_vec = [1, 1]
 
 print("creating objective\n")
+# obj = TrackingVelocityObjective(model, env, H_mpc,
+# 	q = [Diagonal(q_vec .* (t/H_mpc)^2) for t = 1:H_mpc-0],
+# 	v = [Diagonal(v_vec ./ (h^2.0)) for t = 1:H_mpc-0],
+# 	u = [Diagonal(u_vec) for t = 1:H_mpc-0],
+# 	γ = [Diagonal(1.0e-100 * ones(model.nc)) for t = 1:H_mpc-0],
+# 	b = [Diagonal(1.0e-100 * ones(model.nc * friction_dim(env))) for t = 1:H_mpc]);
 obj = TrackingVelocityObjective(model, env, H_mpc,
-	q = [Diagonal(q_vec .* (t/H_mpc)^2) for t = 1:H_mpc-0],
-	v = [Diagonal(v_vec ./ (h^2.0)) for t = 1:H_mpc-0],
+	q = [Diagonal(q_vec) for t = 1:H_mpc-0],
+	v = [Diagonal(v_vec) for t = 1:H_mpc-0],
 	u = [Diagonal(u_vec) for t = 1:H_mpc-0],
 	γ = [Diagonal(1.0e-100 * ones(model.nc)) for t = 1:H_mpc-0],
 	b = [Diagonal(1.0e-100 * ones(model.nc * friction_dim(env))) for t = 1:H_mpc]);
@@ -128,14 +134,15 @@ v1_sim = v1
 
 print("simulation\n")
 # ## Simulator
-# sim_ip_opts = InteriorPointOptions(
-#     undercut = 1.0,
-#     κ_tol = κ_mpc,
-#     r_tol = 1.0e-8,
-#     diff_sol = true,
-#     max_time = 1e5,)
+sim_ip_opts = InteriorPointOptions(
+    undercut = 1.0,
+    κ_tol = κ_mpc,
+    r_tol = 1.0e-8,
+    diff_sol = true,
+    max_time = 1e5,)
 
-sim = simulator(s, H_sim, h=h_sim, policy=p) #, solver_opts=sim_ip_opts) #, dist=d)
+sim = simulator(s, H_sim, h=h_sim, policy=p)
+# sim = simulator(s, H_sim, h=h_sim, policy=p, solver_opts=sim_ip_opts) #, dist=d)
 
 # ## Simulate
 status = simulate!(sim, q1_sim, v1_sim, verbose=true)
