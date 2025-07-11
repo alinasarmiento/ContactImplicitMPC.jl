@@ -50,6 +50,11 @@ function lagrangian(model::Waiter2D, q, q̇)
     L += 0.5 * model.m_tray * transpose(q̇[3:4]) * q̇[3:4]
     L -= model.m_tray * model.g * q[4]
 
+    h_t = model.d_tray
+    w_t = 2*model.r_tray
+    I_tray = (1/12)*mt*(h_t^2 + w_t^2)
+    L += I_tray*q̇[5]^2
+
     return L
 end
 
@@ -97,10 +102,10 @@ end
 function dist_tray(model::Waiter2D, p, pt)
     # p: [x, z], pt: [xtray, ztray, θtray]
 
-    diff = p-pt[1:2]
+    differ = p-pt[1:2]
     # beta = atan(diff[1]/diff[2]) + pt[3] # angle between vector and tray-vertical
     R = [cos(pt[3]) -sin(pt[3]); sin(pt[3]) cos(pt[3])];
-    xdiff,zdiff = R*(diff)
+    xdiff,zdiff = R*(differ)
     xdiff = abs(xdiff)
     zdiff = abs(zdiff)
         
@@ -177,10 +182,10 @@ function _jacobian(model::Waiter2D, q; mode=:ee_t)
     #                       0.0 0.0 sin(th_t) cos(th_t) (x_t -model.supp_2[1])*cos(th_t)])
     #     return j
     if mode == :ee_t
-        j = SMatrix{4,5}([1.0 0.0 1.0 0.0 -(x_t-x_ee1)*tan(th_t);
-                          0.0 1.0 0.0 1.0 (x_t-x_ee1);
-                          1.0 0.0 1.0 0.0 -(x_t-x_ee2)*tan(th_t);
-                          0.0 1.0 0.0 1.0 (x_t-x_ee2)])
+        j = SMatrix{4,5}([-1.0 0.0 1.0 0.0 -(x_t-x_ee1)*tan(th_t);
+                          0.0 -1.0 0.0 1.0 (x_t-x_ee1);
+                          -1.0 0.0 1.0 0.0 -(x_t-x_ee2)*tan(th_t);
+                          0.0 -1.0 0.0 1.0 (x_t-x_ee2)])
         return j
         
     elseif mode == :t_supp
