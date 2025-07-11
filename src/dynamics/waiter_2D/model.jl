@@ -85,8 +85,8 @@ function M_func(model::Waiter2D, q)
     mt = model.m_tray
     h_t = model.d_tray
     w_t = 2*model.r_tray
-    # I_tray = (1/12)*mt*(h_t^2 + w_t^2)
-    I_tray = 0.0
+    I_tray = (1/12)*mt*(h_t^2 + w_t^2)
+    # I_tray = 0.0
 
     Diagonal(@SVector [m, m, mt, mt, I_tray])
 end
