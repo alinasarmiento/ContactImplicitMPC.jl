@@ -84,13 +84,13 @@ H_sim = 200
 κ_mpc = 2.0e-4
 
 ## Cost
-q_scale = 1e-1
+q_scale = 1e-0
 q_vec = q_scale .* [1., 1., 0., 0., 0.] # x_ee, z_ee, x_tray, z_tray, θ_tray
 
-v_scale = 1e-0
+v_scale = 1e-2
 v_vec = v_scale .* [1., 1., 0., 0., 0.] # x_ee, z_ee, x_tray, z_tray, θ_tray
 
-u_scale = 1e-1
+u_scale = 1e-2
 u_vec = [1, 1]
 
 print("creating objective\n")
@@ -101,7 +101,7 @@ print("creating objective\n")
 # 	γ = [Diagonal(1.0e-100 * ones(model.nc)) for t = 1:H_mpc-0],
 # 	b = [Diagonal(1.0e-100 * ones(model.nc * friction_dim(env))) for t = 1:H_mpc]);
 obj = TrackingVelocityObjective(model, env, H_mpc,
-	q = [Diagonal(q_vec) for t = 1:H_mpc-0],
+	q = [Diagonal(q_vec) .* (t/H_mpc)^2 for t = 1:H_mpc-0],
 	v = [Diagonal(v_vec) for t = 1:H_mpc-0],
 	u = [Diagonal(u_vec) for t = 1:H_mpc-0],
 	γ = [Diagonal(1.0e-100 * ones(model.nc)) for t = 1:H_mpc-0],
