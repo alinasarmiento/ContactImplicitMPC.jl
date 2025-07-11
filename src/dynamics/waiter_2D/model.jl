@@ -50,10 +50,10 @@ function lagrangian(model::Waiter2D, q, q̇)
     L += 0.5 * model.m_tray * transpose(q̇[3:4]) * q̇[3:4]
     L -= model.m_tray * model.g * q[4]
 
-    h_t = model.d_tray
-    w_t = 2*model.r_tray
-    I_tray = (1/12)*mt*(h_t^2 + w_t^2)
-    L += 0.5*I_tray*q̇[5]^2
+    # h_t = model.d_tray
+    # w_t = 2*model.r_tray
+    # I_tray = (1/12)*mt*(h_t^2 + w_t^2)
+    # L += 0.5*I_tray*q̇[5]^2
 
     return L
 end
@@ -85,7 +85,8 @@ function M_func(model::Waiter2D, q)
     mt = model.m_tray
     h_t = model.d_tray
     w_t = 2*model.r_tray
-    I_tray = (1/12)*mt*(h_t^2 + w_t^2)
+    # I_tray = (1/12)*mt*(h_t^2 + w_t^2)
+    I_tray = 0.0
 
     Diagonal(@SVector [m, m, mt, mt, I_tray])
 end
