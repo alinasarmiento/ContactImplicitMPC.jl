@@ -8,7 +8,7 @@ m_tray: 1.0
 r_ee: 0.0725
 d_ee: 0.01
 r_tray: 0.2286
-d_tray: 0.022
+d_tray: 0.044 #0.022
 
 supp_pos: [0.8, 0.447]
 supp_xdim: 0.4
