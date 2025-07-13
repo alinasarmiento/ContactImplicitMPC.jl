@@ -82,15 +82,16 @@ status = simulate!(sim, q1, v1, verbose=true)
 # @infiltrate
 ##########################
 
+cost_terms = YAML.load_file(joinpath(@__DIR__,"waiter_costs.yaml"))
+
 # ## MPC setup 
 N_sample = 2
-H_mpc = 10
+H_mpc = cost_terms["H_mpc"]
 h_sim = h / N_sample
-H_sim = 900
+H_sim = 1500
 κ_mpc = 1.0e-4
 
 ## Cost
-cost_terms = YAML.load_file(joinpath(@__DIR__,"waiter_costs.yaml"))
 q_scale = deepcopy(cost_terms["q_scale"])
 q_vec = q_scale .* cost_terms["q_vec"]
 v_scale = deepcopy(cost_terms["v_scale"])
