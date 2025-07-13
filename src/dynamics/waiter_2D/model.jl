@@ -109,7 +109,7 @@ function dist_tray(model::Waiter2D, p, pt)
     xdiff,zdiff = R*(differ)
 
     ## just halfplane
-    zdist = -zdiff - model.d_tray/2q
+    zdist = -zdiff - model.d_tray/2
     
     ## full
     # xdiff = abs(xdiff)
