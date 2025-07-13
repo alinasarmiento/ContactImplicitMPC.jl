@@ -103,7 +103,7 @@ pushfirst!(sys."path","")
 lcm = pyimport("lcm")
 lcm_py_callback = pyimport("lcmtypes.lcm_py_callback")
 lc = lcm.LCM()
-subscription = lc.subscribe(x_lcm_channel, lcm_py_callback.py_handler(lc, sim, model, env, u_lcm_channel, q1_sim))
+subscription = lc.subscribe(x_lcm_channel, lcm_py_callback.py_handler_pushbot(lc, sim, model, env, u_lcm_channel, q1_sim))
 print("\n LCM ready.")
 
 while true

@@ -112,18 +112,18 @@ function dist_tray(model::Waiter2D, p, pt)
     zdist = -zdiff - model.d_tray/2
     
     ## full
-    # xdiff = abs(xdiff)
-    # zdiff = abs(zdiff)        
-    # zdist = zdiff-(model.d_tray/2)
-    # xdist = xdiff-model.r_tray
+    xdiff = abs(xdiff)
+    zdiff = abs(zdiff)        
+    zdist = zdiff-(model.d_tray/2)
+    xdist = xdiff-model.r_tray
 
-    # dist_neg = min(0, max(xdist, zdist))
+    dist_neg = min(0, max(xdist, zdist))
     
-    # zdist = max(0, zdist)
-    # xdist = max(0, xdist)
+    zdist = max(0, zdist)
+    xdist = max(0, xdist)
     
-    # return norm([xdist, zdist]) + dist_neg
-    return zdist
+    return norm([xdist, zdist]) + dist_neg
+#    return zdist
 end
 
 # signed distance function

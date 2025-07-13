@@ -20,7 +20,7 @@ env = s.env
 # @infiltrate
 
 # ## Reference Trajectory
-h = 0.01
+h = 0.005
 H = 100
 ref_traj = contact_trajectory(model, env, H, h)
 ref_traj.h
@@ -52,26 +52,26 @@ sim = simulator(s, H, h=h)
 status = simulate!(sim, q1, v1)
 
 # ## MPC setup 
-N_sample = 2
+N_sample = 1
 H_mpc = 40
 h_sim = h / N_sample
 H_sim = 200
-κ_mpc = 1.0e-5
+κ_mpc = 2.0e-4
 
 ## Cost
-q_scale = 1.0
-q_vec = q_scale .* [1., 10., 1., 1., 1.] # x_ee, z_ee, x_tray, z_tray, θ_tray
+q_scale = 1e0
+q_vec = q_scale .* [1., 1., 0., 0., 0.] # x_ee, z_ee, x_tray, z_tray, θ_tray
 
-v_scale = 1.0
-v_vec = v_scale .* [1., 1., 1., 1., 1.] # x_ee, z_ee, x_tray, z_tray, θ_tray
+v_scale = 1e-2
+v_vec = v_scale .* [1., 1., 0., 0., 0.] # x_ee, z_ee, x_tray, z_tray, θ_tray
 
-u_scale = 1
-u_vec = [1e-8, 1e-8]
+u_scale = 1e-2
+u_vec = [1, 1]
 
 print("creating objective\n")
 obj = TrackingVelocityObjective(model, env, H_mpc,
         q = [Diagonal(q_vec .* (t/H_mpc)^2) for t = 1:H_mpc-0],
-        v = [Diagonal(v_vec ./ (h^2.0)) for t = 1:H_mpc-0],
+        v = [Diagonal(v_vec) for t = 1:H_mpc-0],
         u = [Diagonal(u_vec) for t = 1:H_mpc-0],
         γ = [Diagonal(1.0e-100 * ones(model.nc)) for t = 1:H_mpc-0],
         b = [Diagonal(1.0e-100 * ones(model.nc * friction_dim(env))) for t = 1:H_mpc]);
@@ -82,13 +82,6 @@ p = ci_mpc_policy(ref_traj, s, obj,
     H_mpc = H_mpc,
     N_sample = N_sample,
     κ_mpc = κ_mpc,
-    ip_opts = InteriorPointOptions(
-                          undercut = 1.0,
-                          κ_tol = κ_mpc,
-                          r_tol = 1.0e-8,
-                          diff_sol = true,
-                          solver = :empty_solver,
-                          max_time = 1e5,),
     n_opts = NewtonOptions(
                 r_tol = 3e-4,
                 max_iter = 10,
@@ -109,7 +102,7 @@ sim_ip_opts = InteriorPointOptions(
                           diff_sol = true,
                           # solver = :empty_solver,
                           max_time = 1e5,)
-sim = simulator(s, H_sim, h=h_sim, policy=p, solver_opts=sim_ip_opts) #, dist=d)
+sim = simulator(s, H_sim, h=h_sim, policy=p) #, solver_opts=sim_ip_opts) #, dist=d)
 
 # set up for warm start
 newton_solve!(sim.policy.newton, sim.policy.s, sim.policy.q0, q1_sim,
@@ -124,13 +117,13 @@ pushfirst!(sys."path","")
 lcm = pyimport("lcm")
 lcm_py_callback = pyimport("lcmtypes.lcm_py_callback")
 lc = lcm.LCM()
-subscription = lc.subscribe(x_lcm_channel, lcm_py_callback.py_handler(lc,
+subscription = lc.subscribe(x_lcm_channel, lcm_py_callback.py_handler_waiter(lc,
                                                                       sim,
                                                                       model,
                                                                       env,
                                                                       u_lcm_channel,
                                                                       q0_sim=q1,
-                                                                      hp=0.01))
+                                                                      hp=0.005))
 print("\n LCM ready.")
 
 while true

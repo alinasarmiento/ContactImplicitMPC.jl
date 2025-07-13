@@ -26,10 +26,12 @@ ref_traj.h
 
 # qref = [0.5; 0.485;
 #         0.5; 0.5; 0.0;]
-qref = [0.5; 0.42;
-        0.65; 0.4831; 0.0;]
+qref = [0.5; 0.4;
+        0.65; 0.483; 0.0;]
+# qref = [0.5; 0.42;
+#         0.65; 0.483; 0.0;]
 
-ur = zeros(model.nu)
+ur = ones(model.nu).*[0.0, 0.37*9.81*h] #zeros(model.nu) 
 γr = zeros(model.nc)
 br = zeros(model.nc * friction_dim(env))
 ψr = zeros(model.nc)
@@ -46,7 +48,7 @@ end
 # q0 = ContactImplicitMPC.SVector{2}([0.0 * π, 0.0])
 # for instantiation BEFORE controller created
 
-q1 = [0.5; 0.42;
+q1 = [0.5; 0.4; #0.42
       0.65; 0.4831; 0.0;] #0.483
 # q1 = [0.5; 0.6;
 #         0.5; 0.616; 0.0;]
@@ -78,20 +80,20 @@ status = simulate!(sim, q1, v1, verbose=true)
 
 # ## MPC setup 
 N_sample = 2
-H_mpc = 40
+H_mpc = 10
 h_sim = h / N_sample
 H_sim = 200
-κ_mpc = 2.0e-4
+κ_mpc = 1.0e-5
 
 ## Cost
 q_scale = 1e-0
-q_vec = q_scale .* [1., 1., 0., 0., 0.] # x_ee, z_ee, x_tray, z_tray, θ_tray
+q_vec = q_scale .* [6., 6., 0., 0., 0.] # x_ee, z_ee, x_tray, z_tray, θ_tray
 
 v_scale = 1e-2
 v_vec = v_scale .* [1., 1., 0., 0., 0.] # x_ee, z_ee, x_tray, z_tray, θ_tray
 
-u_scale = 1e-2
-u_vec = [1, 1]
+u_scale = 1e-1
+u_vec = [2, .1]
 
 print("creating objective\n")
 # obj = TrackingVelocityObjective(model, env, H_mpc,
@@ -101,8 +103,8 @@ print("creating objective\n")
 # 	γ = [Diagonal(1.0e-100 * ones(model.nc)) for t = 1:H_mpc-0],
 # 	b = [Diagonal(1.0e-100 * ones(model.nc * friction_dim(env))) for t = 1:H_mpc]);
 obj = TrackingVelocityObjective(model, env, H_mpc,
-	q = [Diagonal(q_vec) .* (t/H_mpc)^2 for t = 1:H_mpc-0],
-	v = [Diagonal(v_vec) for t = 1:H_mpc-0],
+	q = [Diagonal(q_vec) .* (t/H_mpc)^4 for t = 1:H_mpc-0],
+	v = [Diagonal(v_vec) .* (t/H_mpc)^2 for t = 1:H_mpc-0],
 	u = [Diagonal(u_vec) for t = 1:H_mpc-0],
 	γ = [Diagonal(1.0e-100 * ones(model.nc)) for t = 1:H_mpc-0],
 	b = [Diagonal(1.0e-100 * ones(model.nc * friction_dim(env))) for t = 1:H_mpc]);
