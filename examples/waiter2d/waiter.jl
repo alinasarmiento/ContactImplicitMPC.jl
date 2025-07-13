@@ -24,11 +24,9 @@ H = 100
 ref_traj = contact_trajectory(model, env, H, h)
 ref_traj.h
 
-# qref = [0.5; 0.485;
-#         0.5; 0.5; 0.0;]
-qref = [0.5; 0.4;
-        0.65; 0.483; 0.0;]
-# qref = [0.5; 0.42;
+qref = [0.5; 0.485;
+        0.5; 0.5; 0.0;]
+# qref = [0.5; 0.4;
 #         0.65; 0.483; 0.0;]
 
 ur = ones(model.nu).*[0.0, 0.37*9.81*h] #zeros(model.nu) 
@@ -42,13 +40,18 @@ wr = zeros(model.nw)
 for t = 1:H
     ref_traj.z[t] = pack_z(model, env, qref, γr, br, ψr, ηr)
     ref_traj.θ[t] = pack_θ(model, qref, qref, ur, wr, model.μ_world, ref_traj.h)
+    ref_traj.q[t] = qref
+    ref_traj.u[t] = ur
 end
+ref_traj.q[H+1] = qref
+ref_traj.q[H+2] = qref
+update_friction_coefficient!(ref_traj, model, env)
 
 # ## Initial conditions
 # q0 = ContactImplicitMPC.SVector{2}([0.0 * π, 0.0])
 # for instantiation BEFORE controller created
 
-q1 = [0.5; 0.4; #0.42
+q1 = [0.5; 0.4;
       0.65; 0.4831; 0.0;] #0.483
 # q1 = [0.5; 0.6;
 #         0.5; 0.616; 0.0;]
@@ -82,28 +85,22 @@ status = simulate!(sim, q1, v1, verbose=true)
 N_sample = 2
 H_mpc = 10
 h_sim = h / N_sample
-H_sim = 200
+H_sim = 900
 κ_mpc = 1.0e-4
 
 ## Cost
-q_scale = 1e-0
-q_vec = q_scale .* [6., 6., 0., 0., 0.] # x_ee, z_ee, x_tray, z_tray, θ_tray
+q_scale = 1e-2
+q_vec = q_scale .* [30., 25., 55., 25., 2.] # x_ee, z_ee, x_tray, z_tray, θ_tray
 
-v_scale = 1e-2
-v_vec = v_scale .* [1., 1., 0., 0., 0.] # x_ee, z_ee, x_tray, z_tray, θ_tray
+v_scale = 1e-3
+v_vec = v_scale .* [.5, 2., .01, .1, 5.] # x_ee, z_ee, x_tray, z_tray, θ_tray
 
-u_scale = 1e-1
-u_vec = [2, .1]
+u_scale = 1e-2
+u_vec = [.5, .1]
 
 print("creating objective\n")
-# obj = TrackingVelocityObjective(model, env, H_mpc,
-# 	q = [Diagonal(q_vec .* (t/H_mpc)^2) for t = 1:H_mpc-0],
-# 	v = [Diagonal(v_vec ./ (h^2.0)) for t = 1:H_mpc-0],
-# 	u = [Diagonal(u_vec) for t = 1:H_mpc-0],
-# 	γ = [Diagonal(1.0e-100 * ones(model.nc)) for t = 1:H_mpc-0],
-# 	b = [Diagonal(1.0e-100 * ones(model.nc * friction_dim(env))) for t = 1:H_mpc]);
 obj = TrackingVelocityObjective(model, env, H_mpc,
-	q = [Diagonal(q_vec) .* (t/H_mpc)^4 for t = 1:H_mpc-0],
+	q = [Diagonal(q_vec) .* (t/H_mpc) for t = 1:H_mpc-0],
 	v = [Diagonal(v_vec) .* (t/H_mpc)^2 for t = 1:H_mpc-0],
 	u = [Diagonal(u_vec) for t = 1:H_mpc-0],
 	γ = [Diagonal(1.0e-100 * ones(model.nc)) for t = 1:H_mpc-0],
