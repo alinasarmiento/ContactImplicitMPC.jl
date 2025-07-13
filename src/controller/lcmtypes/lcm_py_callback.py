@@ -92,13 +92,13 @@ def py_handler_waiter(lc, sim, model, env, u_lcm_channel, q0_sim=[0,0], hp=0.005
         t_now = msg.utime/1e6
         t_ctrl = int(t_now / hp)
         print(t_now)
-        if t_now%hp <= hp*1.01:
+        # if t_now%hp <= hp*1.01:
                 
-            cimpc.newton_solve_b(p.newton, p.s, p.q0, q1,
-                                 p.im_traj, p.traj, warm_start=t_ctrl>0)
-            cimpc.update_b(p.im_traj, p.traj, p.s, p.altitude, p.κ[0], p.traj.H)
-            cimpc.rot_n_stride_b(p.traj, p.traj_cache, p.stride)
-            cimpc.update_q0_u_b(p, q1)
+        cimpc.newton_solve_b(p.newton, p.s, p.q0, q1,
+                             p.im_traj, p.traj, warm_start=t_ctrl>0)
+        cimpc.update_b(p.im_traj, p.traj, p.s, p.altitude, p.κ[0], p.traj.H)
+        cimpc.rot_n_stride_b(p.traj, p.traj_cache, p.stride)
+        cimpc.update_q0_u_b(p, q1)
         
         # lcm broadcast p.u
         u_lcm = lcmt_robot_input()
@@ -109,7 +109,7 @@ def py_handler_waiter(lc, sim, model, env, u_lcm_channel, q0_sim=[0,0], hp=0.005
         u_lcm.efforts = p.u / (hp/p.N_sample)
         if any(u_lcm.efforts == np.nan):
             u_lcm.efforts = [0.0,0.0]
-        print("u:",u_lcm.efforts,"h:", sim.h, "t:", t_now%hp)
+        print("u:",u_lcm.efforts,"h:", sim.h, "t:", t_now)
     
         lc.publish(u_lcm_channel, u_lcm.encode())
 

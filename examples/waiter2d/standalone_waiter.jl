@@ -11,6 +11,7 @@ using LinearAlgebra
 using LCMCore
 import ContactImplicitMPC: callback_sim, lcmt_robot_output, lcmt_robot_input, debug_callback, callback_sim_py
 using PyCall
+using YAML
 using Infiltrator
 
 # ## Simulation
@@ -24,9 +25,12 @@ h = 0.005
 H = 100
 ref_traj = contact_trajectory(model, env, H, h)
 ref_traj.h
-qref = [0.5; 0.42;
-        0.65; 0.4831; 0.0;]
-ur = zeros(model.nu)
+qref = [0.5; 0.485;
+        0.5; 0.5; 0.0;]
+# qref = [0.5; 0.42;
+#         0.65; 0.483; 0.0;]
+
+ur = ones(model.nu).*[0.0, 0.37*9.81*h] #zeros(model.nu)
 γr = zeros(model.nc)
 br = zeros(model.nc * friction_dim(env))
 ψr = zeros(model.nc)
@@ -35,9 +39,14 @@ wr = zeros(model.nw)
 
 ## Set Reference
 for t = 1:H
-	ref_traj.z[t] = pack_z(model, env, qref, γr, br, ψr, ηr)
-	ref_traj.θ[t] = pack_θ(model, qref, qref, ur, wr, model.μ_world, ref_traj.h)
+    ref_traj.z[t] = pack_z(model, env, qref, γr, br, ψr, ηr)
+    ref_traj.θ[t] = pack_θ(model, qref, qref, ur, wr, model.μ_world, ref_traj.h)
+    ref_traj.q[t] = qref
+    ref_traj.u[t] = ur
 end
+ref_traj.q[H+1] = qref
+ref_traj.q[H+2] = qref
+update_friction_coefficient!(ref_traj, model, env)
 
 ## Initial conditions
 q1 = [0.5; 0.42;
@@ -52,26 +61,27 @@ sim = simulator(s, H, h=h)
 status = simulate!(sim, q1, v1)
 
 # ## MPC setup 
-N_sample = 1
-H_mpc = 40
+N_sample = 2
+H_mpc = 10
 h_sim = h / N_sample
 H_sim = 200
-κ_mpc = 2.0e-4
+κ_mpc = 1.0e-4
 
 ## Cost
-q_scale = 1e0
-q_vec = q_scale .* [1., 1., 0., 0., 0.] # x_ee, z_ee, x_tray, z_tray, θ_tray
+cost_terms = YAML.load_file(joinpath(@__DIR__,"waiter_costs.yaml"))
+q_scale = deepcopy(cost_terms["q_scale"])
+q_vec = q_scale .* cost_terms["q_vec"]
 
-v_scale = 1e-2
-v_vec = v_scale .* [1., 1., 0., 0., 0.] # x_ee, z_ee, x_tray, z_tray, θ_tray
+v_scale = deepcopy(cost_terms["v_scale"])
+v_vec = v_scale .* cost_terms["v_vec"]
 
-u_scale = 1e-2
-u_vec = [1, 1]
+u_scale = deepcopy(cost_terms["u_scale"])
+u_vec = u_scale .* cost_terms["u_vec"]
 
 print("creating objective\n")
 obj = TrackingVelocityObjective(model, env, H_mpc,
-        q = [Diagonal(q_vec .* (t/H_mpc)^2) for t = 1:H_mpc-0],
-        v = [Diagonal(v_vec) for t = 1:H_mpc-0],
+        q = [Diagonal(q_vec .* (t/H_mpc)) for t = 1:H_mpc-0],
+        v = [Diagonal(v_vec) .* (t/H_mpc)^2 for t = 1:H_mpc-0],
         u = [Diagonal(u_vec) for t = 1:H_mpc-0],
         γ = [Diagonal(1.0e-100 * ones(model.nc)) for t = 1:H_mpc-0],
         b = [Diagonal(1.0e-100 * ones(model.nc * friction_dim(env))) for t = 1:H_mpc]);

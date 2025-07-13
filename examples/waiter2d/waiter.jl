@@ -11,6 +11,7 @@ using LinearAlgebra
 using Infiltrator
 using DelimitedFiles
 using MeshCat
+using YAML
 using Sockets
 
 # ## Simulation
@@ -89,14 +90,22 @@ H_sim = 900
 κ_mpc = 1.0e-4
 
 ## Cost
-q_scale = 1e-2
-q_vec = q_scale .* [30., 25., 55., 25., 2.] # x_ee, z_ee, x_tray, z_tray, θ_tray
+cost_terms = YAML.load_file(joinpath(@__DIR__,"waiter_costs.yaml"))
+q_scale = deepcopy(cost_terms["q_scale"])
+q_vec = q_scale .* cost_terms["q_vec"]
+v_scale = deepcopy(cost_terms["v_scale"])
+v_vec = v_scale .* cost_terms["v_vec"]
+u_scale = deepcopy(cost_terms["u_scale"])
+u_vec = u_scale .* cost_terms["u_vec"]
 
-v_scale = 1e-3
-v_vec = v_scale .* [.5, 2., .01, .1, 5.] # x_ee, z_ee, x_tray, z_tray, θ_tray
+# q_scale = 1e-2
+# q_vec = q_scale .* [70., 75., 60., 70., 10.] # x_ee, z_ee, x_tray, z_tray, θ_tray
 
-u_scale = 1e-2
-u_vec = [.5, .1]
+# v_scale = 1e-3
+# v_vec = v_scale .* [.2, 5., .01, 1, 7.] # x_ee, z_ee, x_tray, z_tray, θ_tray
+
+# u_scale = 1e-1
+# u_vec = [.5, .5]
 
 print("creating objective\n")
 obj = TrackingVelocityObjective(model, env, H_mpc,
