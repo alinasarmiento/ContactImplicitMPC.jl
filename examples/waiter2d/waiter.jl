@@ -83,7 +83,7 @@ N_sample = 2
 H_mpc = 10
 h_sim = h / N_sample
 H_sim = 200
-κ_mpc = 1.0e-5
+κ_mpc = 1.0e-4
 
 ## Cost
 q_scale = 1e-0
