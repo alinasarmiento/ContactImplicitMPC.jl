@@ -31,7 +31,7 @@ qref = [0.5; 0.485;
 #         0.65; 0.483; 0.0;]
 
 ur = ones(model.nu).*[0.0, 0.37*9.81*h] #zeros(model.nu) 
-γr = zeros(model.nc)
+γr = ones(model.nc).*[9.81*h/2, 9.81*h/2, 0.0, 0.0, 0.0, 0.0] #zeros(model.nc)
 br = zeros(model.nc * friction_dim(env))
 ψr = zeros(model.nc)
 ηr = zeros(model.nc * friction_dim(env))
@@ -43,6 +43,7 @@ for t = 1:H
     ref_traj.θ[t] = pack_θ(model, qref, qref, ur, wr, model.μ_world, ref_traj.h)
     ref_traj.q[t] = qref
     ref_traj.u[t] = ur
+    ref_traj.γ[t] = γr
 end
 ref_traj.q[H+1] = qref
 ref_traj.q[H+2] = qref
@@ -113,7 +114,7 @@ obj = TrackingVelocityObjective(model, env, H_mpc,
 	q = [Diagonal(q_vec) .* (t/H_mpc) for t = 1:H_mpc-0],
 	v = [Diagonal(v_vec) .* (t/H_mpc)^2 for t = 1:H_mpc-0],
 	u = [Diagonal(u_vec) for t = 1:H_mpc-0],
-	γ = [Diagonal(1.0e-100 * ones(model.nc)) for t = 1:H_mpc-0],
+	γ = [Diagonal(1.0e-10 * ones(model.nc)) for t = 1:H_mpc-0],
 	b = [Diagonal(1.0e-100 * ones(model.nc * friction_dim(env))) for t = 1:H_mpc]);
 
 # ## Policy
