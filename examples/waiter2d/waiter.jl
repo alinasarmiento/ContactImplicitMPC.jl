@@ -31,7 +31,8 @@ qref = [0.5; 0.485;
 #         0.65; 0.483; 0.0;]
 
 ur = ones(model.nu).*[0.0, 0.37*9.81*h] #zeros(model.nu) 
-γr = ones(model.nc).*[9.81*h/2, 9.81*h/2, 0.0, 0.0, 0.0, 0.0] #zeros(model.nc)
+γr = zeros(model.nc)
+# γr = ones(model.nc).*[9.81*h/2, 9.81*h/2, 0.0, 0.0, 0.0, 0.0] #zeros(model.nc)
 br = zeros(model.nc * friction_dim(env))
 ψr = zeros(model.nc)
 ηr = zeros(model.nc * friction_dim(env))
@@ -43,17 +44,15 @@ for t = 1:H
     ref_traj.θ[t] = pack_θ(model, qref, qref, ur, wr, model.μ_world, ref_traj.h)
     ref_traj.q[t] = qref
     ref_traj.u[t] = ur
-    ref_traj.γ[t] = γr
+    # ref_traj.γ[t] = γr
 end
 ref_traj.q[H+1] = qref
 ref_traj.q[H+2] = qref
 update_friction_coefficient!(ref_traj, model, env)
 
 # ## Initial conditions
-# q0 = ContactImplicitMPC.SVector{2}([0.0 * π, 0.0])
-# for instantiation BEFORE controller created
 
-q1 = [0.5; 0.4;
+q1 = [0.5; 0.42;
       0.65; 0.4831; 0.0;] #0.483
 # q1 = [0.5; 0.6;
 #         0.5; 0.616; 0.0;]
@@ -89,7 +88,7 @@ cost_terms = YAML.load_file(joinpath(@__DIR__,"waiter_costs.yaml"))
 N_sample = 2
 H_mpc = cost_terms["H_mpc"]
 h_sim = h / N_sample
-H_sim = 1500
+H_sim = 200
 κ_mpc = 1.0e-4
 
 ## Cost
@@ -107,15 +106,17 @@ u_vec = u_scale .* cost_terms["u_vec"]
 # v_vec = v_scale .* [.2, 5., .01, 1, 7.] # x_ee, z_ee, x_tray, z_tray, θ_tray
 
 # u_scale = 1e-1
-# u_vec = [.5, .5]
+# u_vec = [.5, .5]p
 
 print("creating objective\n")
 obj = TrackingVelocityObjective(model, env, H_mpc,
-	q = [Diagonal(q_vec) .* (t/H_mpc) for t = 1:H_mpc-0],
-	v = [Diagonal(v_vec) .* (t/H_mpc)^2 for t = 1:H_mpc-0],
-	u = [Diagonal(u_vec) for t = 1:H_mpc-0],
-	γ = [Diagonal(1.0e-10 * ones(model.nc)) for t = 1:H_mpc-0],
-	b = [Diagonal(1.0e-100 * ones(model.nc * friction_dim(env))) for t = 1:H_mpc]);
+                                q = [Diagonal(q_vec) .* (t/H_mpc) for t = 1:H_mpc-0],
+                         	v = [Diagonal(v_vec) .* (t/H_mpc)^2 for t = 1:H_mpc-0],
+                                # q = [Diagonal(q_vec) for t = 1:H_mpc-0],
+	                        # v = [Diagonal(v_vec) for t = 1:H_mpc-0],
+	                        u = [Diagonal(u_vec) for t = 1:H_mpc-0],
+	                        γ = [Diagonal(1.0e-100 * ones(model.nc)) for t = 1:H_mpc-0],
+	                        b = [Diagonal(1.0e-100 * ones(model.nc * friction_dim(env))) for t = 1:H_mpc]);
 
 # ## Policy
 print("policy\n")

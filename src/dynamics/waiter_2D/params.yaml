@@ -15,7 +15,7 @@ supp_xdim: 0.4
 supp_ydim: 0.8
 supp_zdim: 0.05
 
-ee_init: [0.5, 0.43]
-ee_des: [0.5, 0.484]
+ee_init: [0.5, 0.42]
+ee_des: [0.5, 0.485]
 
-tray_init: [0.65, 0.485]
+tray_init: [0.65, 0.4831]

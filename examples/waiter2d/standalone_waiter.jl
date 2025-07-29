@@ -27,10 +27,10 @@ ref_traj = contact_trajectory(model, env, H, h)
 ref_traj.h
 qref = [0.5; 0.485;
         0.5; 0.5; 0.0;]
-# qref = [0.5; 0.42;
+# qref = [0.5; 0.3;
 #         0.65; 0.483; 0.0;]
 
-ur = ones(model.nu).*[0.0, 0.37*9.81*h] #zeros(model.nu)
+ur = ones(model.nu).*[0.0, 1.37*9.81*h] #zeros(model.nu)
 γr = zeros(model.nc)
 br = zeros(model.nc * friction_dim(env))
 ψr = zeros(model.nc)
@@ -49,7 +49,7 @@ ref_traj.q[H+2] = qref
 update_friction_coefficient!(ref_traj, model, env)
 
 ## Initial conditions
-q1 = [0.5; 0.42;
+q1 = [0.5; 0.43;
         0.65; 0.4831; 0.0;]
 v1 = [0.0; 0.0;
       0.0; 0.0; 0.0;]

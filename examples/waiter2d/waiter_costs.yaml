@@ -1,25 +1,52 @@
 ### for mu = 0.6
 # q_scale: 1e-2
-# q_vec: [5.0, 20.0, 35.0, 30.0, 10.0]
+# q_vec: [30.0, 15.0, 35.0, 30.0, 15.0]
 
 # v_scale: 1e-3
-# v_vec: [0.01, 20.0, 0.01, 10.0, 25.0]
+# v_vec: [0.1, 20.0, 0.01, 10.0, 25.0]
 
 # u_scale: 1e-1
-# u_vec: [2.0, 4.0]
+# u_vec: [2.0, 3.0]
 
-# H_mpc: 11
+# H_mpc: 10
 
 
 
 ### for mu = 1.0
+## with time varying q, vel cost
+# q_scale: 1e-2
+# q_vec: [20.0, 7.0, 35.0, 4.0, 1]
+# v_scale: 1e-3
+# v_vec: [0.1, 7.0, 1e-3, 2.0, 7.0]
+
+# q_scale: 1e-2
+# q_vec: [10.0, 5.0, 16.0, 4.0, 1.5]
+# v_scale: 1e-3
+# v_vec: [0.2, 5.0, 1e-2, 2.0, 7.0]
+
+# u_scale: 1e-1
+# u_vec: [.7, .5]
+
+
+### new u ref
+# q_scale: 1e-2
+# q_vec: [18.0, 15.0, 20.0, 4.0, 1.5]
+# v_scale: 1e-3
+# v_vec: [0.2, 7.0, 1e-2, 2.0, 7.0]
+
+# u_scale: 1e-1
+# u_vec: [.7, .5]
+
+
+### quals presentation
 q_scale: 1e-2
 q_vec: [7.0, 3.0, 15.0, 4.0, 1.0]
-
 v_scale: 1e-3
-v_vec: [0.2, 5.0, 0.01, 2.0, 7.0]
+v_vec: [7.0, 3.0, 15.0, 4.0, 1.0]
 
 u_scale: 1e-1
 u_vec: [1.0, .5]
+
+
 
 H_mpc: 10
