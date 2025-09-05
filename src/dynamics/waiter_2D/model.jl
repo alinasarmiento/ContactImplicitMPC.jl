@@ -36,7 +36,6 @@ mutable struct Waiter2D{T} <: Model{T}
     joint_friction::SVector
     u_min::SVector
     u_max::SVector
-    u_vio_weight::T
     q_min::SVector
     q_max::SVector
     
@@ -269,9 +268,11 @@ waiter_2D = Waiter2D(5, 2, 2, 6,
                      SVector{2}(supp1), SVector{2}(supp2),
 	             BaseMethods(), DynamicsMethods(),
 	             SVector{5}(zeros(5)),
-                     SVector{2}([-20, -20]),
-                     SVector{2}([20, 20]),
-                     1.0)
+                     SVector{2}([-20, -20]), # u min
+                     SVector{2}([20, 20]),   # u max
+                     SVector{2}([0.1, 0.15, 1,1,1]), # q min
+                     SVector{2}([0.6, 0.9, 1,1,1]),   # q max
+)
 
 function friction_coefficients(model::Waiter2D) 
 	return [model.μ_world]
