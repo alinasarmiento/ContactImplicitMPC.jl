@@ -90,28 +90,28 @@ function policy(p::CIMPC{T,NQ,NU,NW,NC}, traj::Trajectory{T}, t::Int) where {T,N
 	end
 
     if p.cnt[1] == p.N_sample
-		# altitude_update
-		(p.opts.altitude_update && t > 1) && (update_altitude!(p.altitude, p.ϕ, p.s,
-									traj, t, NC, p.N_sample,
-									threshold = p.opts.altitude_impact_threshold,
-									verbose = p.opts.altitude_verbose))
-		set_altitude!(p.im_traj, p.altitude) 
+	# altitude_update
+	(p.opts.altitude_update && t > 1) && (update_altitude!(p.altitude, p.ϕ, p.s,
+							       traj, t, NC, p.N_sample,
+							       threshold = p.opts.altitude_impact_threshold,
+							       verbose = p.opts.altitude_verbose))
+	set_altitude!(p.im_traj, p.altitude) 
 
-		# # optimize
-		q1 = traj.q[t+1]
-		newton_solve!(p.newton, p.s, p.q0, q1,
-			p.im_traj, p.traj, warm_start = t > 1)
-		update!(p.im_traj, p.traj, p.s, p.altitude, p.κ[1], p.traj.H) 
+	# # optimize
+	q1 = traj.q[t+1]
+	newton_solve!(p.newton, p.s, p.q0, q1,
+		      p.im_traj, p.traj, warm_start = t > 1)
+	update!(p.im_traj, p.traj, p.s, p.altitude, p.κ[1], p.traj.H) 
 
-		# visualize
-		# p.opts.live_plotting && live_plotting(p.s.model, p.traj, traj, p.newton, p.q0, traj.q[t+1], t)
+	# visualize
+	# p.opts.live_plotting && live_plotting(p.s.model, p.traj, traj, p.newton, p.q0, traj.q[t+1], t)
 
-		# shift trajectory
-		rot_n_stride!(p.traj, p.traj_cache, p.stride)
-		p.q0 .= q1
+	# shift trajectory
+	rot_n_stride!(p.traj, p.traj_cache, p.stride)
+	p.q0 .= q1
 
-		# reset count
-		p.cnt[1] = 0
+	# reset count
+	p.cnt[1] = 0
     end
 
     p.cnt[1] += 1
