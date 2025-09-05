@@ -10,6 +10,9 @@ struct NewtonJacobianConfigurationForce{T,Vq,Vu,Vγ,Vb,VI,VIT,Vq0,Vq0T,Vq1,Vq1T,
     obj_q1q2::Vector{Vq}
     obj_q2q1::Vector{Vq}
 
+    # obj_qlim::Vector{Vq}
+    # obj_ulim::Vector{Vu}
+
     IV::Vector{VI}                          # dynamics -I views [q2, γ1, b1]
     ITV::Vector{VIT}                        # dynamics -I views [q2, γ1, b1] transposed
     q0::Vector{Vq0}                         # dynamics q0 views
@@ -60,8 +63,8 @@ function NewtonJacobianConfigurationForce(model::Model, env::Environment, H::Int
     obj_q2q1  = [view(R, t * nr .+ iq, (t - 1) * nr .+ iq) for t = 1:H-1]
     
     # Objective Hessians for q and u limits wrt u1, q2
-    obj_qlim  = [view(R, (t - 1) * nr .+ iqlim, (t - 1) * nr .+ iq) for t = 1:H]
-    obj_ulim  = [view(R, (t - 1) * nr .+ iulim, (t - 1) * nr .+ iu) for t = 1:H]
+    # obj_qlim  = [view(R, (t - 1) * nr .+ iqlim, (t - 1) * nr .+ iq) for t = 1:H]
+    # obj_ulim  = [view(R, (t - 1) * nr .+ iulim, (t - 1) * nr .+ iu) for t = 1:H]
 
     ## Dynamics constraints Jacobians
     IV  = [view(R, CartesianIndex.((t - 1) * nr .+ iz, H * nr + (t - 1) * nd .+ iν)) for t = 1:H] # dg/dz for constr g
@@ -81,7 +84,7 @@ function NewtonJacobianConfigurationForce(model::Model, env::Environment, H::Int
 
     return NewtonJacobianConfigurationForce(
         R, obj_q2, obj_u1, obj_γ1, obj_b1,
-        obj_q1q2, obj_q2q1,
+        obj_q1q2, obj_q2q1, #obj_qlim, obj_ulim,
         IV, ITV, q0, q0T, q1, q1T, u1, u1T, reg_pr, reg_du)
 end
 
@@ -227,8 +230,8 @@ function hessian!(hess::NewtonJacobianConfigurationForce, obj::TrackingObjective
         hess.obj_b1[t] .+= obj.b[t]
 
         # limits
-        hess.obj_qlim[t] .+= obj.qlim[t]
-        hess.obj_ulim[t] .+= obj.ulim[t]
+        # hess.obj_qlim[t] .+= obj.qlim[t]
+        # hess.obj_ulim[t] .+= obj.ulim[t]
     end
 end
 
@@ -256,8 +259,8 @@ function hessian!(hess::NewtonJacobianConfigurationForce, obj::TrackingVelocityO
         hess.obj_q2q1[t-1] .-= obj.v[t]
 
         # limits
-        hess.obj_qlim[t] .+= obj.qlim[t]
-        hess.obj_ulim[t] .+= obj.ulim[t]
+        # hess.obj_qlim[t] .+= obj.qlim[t]
+        # hess.obj_ulim[t] .+= obj.ulim[t]
     end
 end
 

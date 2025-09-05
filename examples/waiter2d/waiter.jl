@@ -114,7 +114,7 @@ obj = TrackingVelocityObjective(model, env, H_mpc,
 	                        # v = [Diagonal(v_vec) for t = 1:H_mpc-0],
 	                        u = [Diagonal(u_vec) for t = 1:H_mpc-0],
 	                        γ = [Diagonal(1.0e-100 * ones(model.nc)) for t = 1:H_mpc-0],
-	                        b = [Diagonal(1.0e-100 * ones(model.nc * friction_dim(env))) for t = 1:H_mpc]
+	                        b = [Diagonal(1.0e-100 * ones(model.nc * friction_dim(env))) for t = 1:H_mpc],
                                 qlim = [Diagonal(qlim_vec) for t = 1:H_mpc-0],
                          	ulim = [Diagonal(ulim_vec) for t = 1:H_mpc-0] );
 
