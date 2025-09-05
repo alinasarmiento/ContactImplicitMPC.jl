@@ -202,9 +202,6 @@ function newton_solve!(
             jacobian!(core.jac, im_traj, core.obj, core.traj.H, core.β)
 
             # Compute Search Direction
-            print(size(core.Δ.r))
-            print(size(core.jac.R))
-            print(size(core.res.r))
             linear_solve!(core.solver, core.Δ.r, core.jac.R, core.res.r)
 
             # compute step direction Delta y = Delta (q, u, force, v)

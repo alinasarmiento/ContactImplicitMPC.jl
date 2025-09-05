@@ -76,6 +76,7 @@ function hessian!(hess, obj::TrackingVelocityObjective)
         hess.obj_q2[t] .+= obj.q[t]
         hess.obj_u1[t] .+= obj.u[t]
 
+        print("hessian in objective_configuration.jl")
         # velocity
         hess.obj_q2[t] .+= obj.v[t]
         t == 1 && continue
