@@ -55,7 +55,7 @@ function NewtonResidualConfigurationForce(model::Model, env::Environment, H::Int
     # qlim = [view(r, (t - 1) * nr .+ iqlim) for t = 1:H]
     # ulim = [view(r, (t - 1) * nr .+ iulim) for t = 1:H]
 
-    rd  = [view(r, H * nr + (t - 1) * nd .+ iν_dyn) for t = 1:H]
+    rd  = [view(r, H * nr + (t - 1) * nd .+ iν) for t = 1:H]
 
     q0  = [view(r, (t - 3) * nr .+ iq) for t = 3:H]
     q1  = [view(r, (t - 2) * nr .+ iq) for t = 2:H]
@@ -148,7 +148,7 @@ function residual!(res::NewtonResidual, core::Newton,
     # offset += 2*H*nq
     # ν_ulim = view(ν, 1+offset : 2*H*nu + offset) # u box constraints for all t
 
-    for t in eachindex(ν_dyn)
+    for t in eachindex(ν)
         # Lagrangian (add dual term ∇g_dyn.T * v_dyn) (res_dual)
         t >= 3 && mul!(res.q2[t-2], transpose(im_traj.δq0[t]), ν[t], 1.0, 1.0)
         t >= 2 && mul!(res.q2[t-1], transpose(im_traj.δq1[t]), ν[t], 1.0, 1.0)
