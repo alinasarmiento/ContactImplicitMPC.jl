@@ -1,51 +1,56 @@
 struct ContactTraj{T,nq,nu,nw,nc,nb,nz,nθ}
-	H::Int
-	h::T
-	κ::Vector{T}
-	q::Vector{Vector{T}}   # trajectory of q's   length=H+2
-	u::Vector{Vector{T}}   # trajectory of u's   length=H
-	w::Vector{Vector{T}}   # trajectory of w's   length=H
-	γ::Vector{Vector{T}}   # trajectory of γ's   length=H
-	b::Vector{Vector{T}}   # trajectory of b's   length=H
-	z::Vector{Vector{T}}   # trajectory of z's   length=H
-	θ::Vector{Vector{T}}   # trajectory of θ's   length=H
-	iq0::SizedArray{Tuple{nq},Int,1,1,Vector{Int}}
-	iq1::SizedArray{Tuple{nq},Int,1,1,Vector{Int}}
-	iu1::SizedArray{Tuple{nu},Int,1,1,Vector{Int}}
-	iw1::SizedArray{Tuple{nw},Int,1,1,Vector{Int}}
-	iq2::SizedArray{Tuple{nq},Int,1,1,Vector{Int}}
-	iγ1::SizedArray{Tuple{nc},Int,1,1,Vector{Int}}
-	ib1::SizedArray{Tuple{nb},Int,1,1,Vector{Int}}
+    H::Int
+    h::T
+    κ::Vector{T}
+    q::Vector{Vector{T}}   # trajectory of q's   length=H+2
+    u::Vector{Vector{T}}   # trajectory of u's   length=H
+    w::Vector{Vector{T}}   # trajectory of w's   length=H
+    γ::Vector{Vector{T}}   # trajectory of γ's   length=H
+    b::Vector{Vector{T}}   # trajectory of b's   length=H
+    z::Vector{Vector{T}}   # trajectory of z's   length=H
+    θ::Vector{Vector{T}}   # trajectory of θ's   length=H
+    qlim::Vector{Vector{T}} # box constraints q, [[min nq],[max nq]]
+    ulim::Vector{Vector{T}} # box constraints u, [[min nu],[max nu]]
+    iq0::SizedArray{Tuple{nq},Int,1,1,Vector{Int}}
+    iq1::SizedArray{Tuple{nq},Int,1,1,Vector{Int}}
+    iu1::SizedArray{Tuple{nu},Int,1,1,Vector{Int}}
+    iw1::SizedArray{Tuple{nw},Int,1,1,Vector{Int}}
+    iq2::SizedArray{Tuple{nq},Int,1,1,Vector{Int}}
+    iγ1::SizedArray{Tuple{nc},Int,1,1,Vector{Int}}
+    ib1::SizedArray{Tuple{nb},Int,1,1,Vector{Int}}
 end
 
 function contact_trajectory(model::Model, env::Environment, H::Int, h::T; κ::T=0.0) where {T}
-	nq = model.nq
+    nq = model.nq
     nu = model.nu
     nw = model.nw
     nc = model.nc
     nb = nc * friction_dim(env)
-	nz = num_var(model, env)
-	nθ = num_data(model)
+    nz = num_var(model, env)
+    nθ = num_data(model)
 
-	q = [zeros(nq) for k=1:H+2]
-	u = [zeros(nu) for k=1:H]
-	w = [zeros(nw) for k=1:H]
-	γ = [zeros(nc) for k=1:H]
-	b = [zeros(nb) for k=1:H]
-	z = [zeros(nz) for k=1:H]
-	θ = [[zeros(nθ-1); copy(h)] for k=1:H]
-	κ = [κ]
-	off = 0
-	iq0 = SizedVector{nq}(off .+ (1:nq)); off += nq # index of the configuration q0
-	iq1 = SizedVector{nq}(off .+ (1:nq)); off += nq # index of the configuration q1
-	iu1 = SizedVector{nu}(off .+ (1:nu)); off += nu # index of the control u1
+    q = [zeros(nq) for k=1:H+2]
+    u = [zeros(nu) for k=1:H]
+    w = [zeros(nw) for k=1:H]
+    γ = [zeros(nc) for k=1:H]
+    b = [zeros(nb) for k=1:H]
+    z = [zeros(nz) for k=1:H]
+    θ = [[zeros(nθ-1); copy(h)] for k=1:H]
+    qlim = [model.q_min, model.q_max]
+    ulim = [model.u_min, model.u_max]
+    
+    κ = [κ]
+    off = 0
+    iq0 = SizedVector{nq}(off .+ (1:nq)); off += nq # index of the configuration q0
+    iq1 = SizedVector{nq}(off .+ (1:nq)); off += nq # index of the configuration q1
+    iu1 = SizedVector{nu}(off .+ (1:nu)); off += nu # index of the control u1
     iw1 = SizedVector{nw}(off .+ (1:nw)); off += nw # index of the disturbance w1
-	off = 0
-	iq2 = SizedVector{nq}(off .+ (1:nq)); off += nq # index of the configuration q2
+    off = 0
+    iq2 = SizedVector{nq}(off .+ (1:nq)); off += nq # index of the configuration q2
     iγ1 = SizedVector{nc}(off .+ (1:nc)); off += nc # index of the impact γ1
     ib1 = SizedVector{nb}(off .+ (1:nb)); off += nb # index of the linear friction b1
 
-	return ContactTraj{T,nq,nu,nw,nc,nb,nz,nθ}(H,h,κ,q,u,w,γ,b,z,θ,iq0,iq1,iu1,iw1,iq2,iγ1,ib1)
+    return ContactTraj{T,nq,nu,nw,nc,nb,nz,nθ}(H,h,κ,q,u,w,γ,b,z,θ, qlim,ulim, iq0,iq1,iu1,iw1,iq2,iγ1,ib1)
 end
 
 function update_z!(traj::ContactTraj{T,nq,nu,nw,nc,nb,nz,nθ}, t::Int) where {T,nq,nu,nw,nc,nb,nz,nθ}

@@ -25,8 +25,8 @@ H = 100
 ref_traj = contact_trajectory(model, env, H, h)
 ref_traj.h
 
-qref = [0.5; 0.485;
-        0.5; 0.5; 0.0;]
+qref = [0.3; 0.485;
+        0.3; 0.5; 0.0;]
 # qref = [0.5; 0.4;
 #         0.65; 0.483; 0.0;]
 
@@ -88,7 +88,7 @@ cost_terms = YAML.load_file(joinpath(@__DIR__,"waiter_costs.yaml"))
 N_sample = 2
 H_mpc = cost_terms["H_mpc"]
 h_sim = h / N_sample
-H_sim = 200
+H_sim = 1000
 κ_mpc = 1.0e-4
 
 ## Cost
@@ -99,16 +99,14 @@ v_vec = v_scale .* cost_terms["v_vec"]
 u_scale = deepcopy(cost_terms["u_scale"])
 u_vec = u_scale .* cost_terms["u_vec"]
 
-# q_scale = 1e-2
-# q_vec = q_scale .* [70., 75., 60., 70., 10.] # x_ee, z_ee, x_tray, z_tray, θ_tray
+qlim_scale = deepcopy(cost_terms["qlim_scale"])
+qlim_vec = qlim_scale .* cost_terms["qlim_vec"]
+ulim_scale = deepcopy(cost_terms["ulim_scale"])
+ulim_vec = ulim_scale .* cost_terms["ulim_vec"]
 
-# v_scale = 1e-3
-# v_vec = v_scale .* [.2, 5., .01, 1, 7.] # x_ee, z_ee, x_tray, z_tray, θ_tray
-
-# u_scale = 1e-1
-# u_vec = [.5, .5]p
 
 print("creating objective\n")
+print("q: ", q_vec)
 obj = TrackingVelocityObjective(model, env, H_mpc,
                                 q = [Diagonal(q_vec) .* (t/H_mpc) for t = 1:H_mpc-0],
                          	v = [Diagonal(v_vec) .* (t/H_mpc)^2 for t = 1:H_mpc-0],
@@ -116,7 +114,9 @@ obj = TrackingVelocityObjective(model, env, H_mpc,
 	                        # v = [Diagonal(v_vec) for t = 1:H_mpc-0],
 	                        u = [Diagonal(u_vec) for t = 1:H_mpc-0],
 	                        γ = [Diagonal(1.0e-100 * ones(model.nc)) for t = 1:H_mpc-0],
-	                        b = [Diagonal(1.0e-100 * ones(model.nc * friction_dim(env))) for t = 1:H_mpc]);
+	                        b = [Diagonal(1.0e-100 * ones(model.nc * friction_dim(env))) for t = 1:H_mpc]
+                                qlim = [Diagonal(qlim_vec) for t = 1:H_mpc-0],
+                         	ulim = [Diagonal(ulim_vec) for t = 1:H_mpc-0] );
 
 # ## Policy
 print("policy\n")

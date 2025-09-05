@@ -29,13 +29,16 @@ function NewtonJacobianConfigurationForce(model::Model, env::Environment, H::Int
     nc = model.nc # contact
     nb = nc * friction_dim(env) # linear friction
     nd = nq + nc + nb # implicit dynamics constraint
-    nr = nq + nu + nc + nb# + nd # size of a one-time-step block
+    # nr = nq + nu + nc + nb# + nd # size of a one-time-step block
+    nr = 3*nq + 3*nu + nc + nb# + nd # size of a one-time-step block with q and u limits
 
     off = 0
     iu = SizedVector{nu}(off .+ (1:nu)); off += nu # index of the control u1
     iγ = SizedVector{nc}(off .+ (1:nc)); off += nc # index of the impact γ1
     ib = SizedVector{nb}(off .+ (1:nb)); off += nb # index of the linear friction b1
     iq = SizedVector{nq}(off .+ (1:nq)); off += nq # index of the configuration q2
+    iqlim = SizedVector{2*nq}(off .+ (1:2*nq)); off += 2*nq # index of q limits
+    iulim = SizedVector{2*nu}(off .+ (1:2*nu)); off += 2*nu # index of u limits
 
     iz = vcat(iq, iγ, ib) # index of the IP solver solution [q2, γ1, b1]
     iθ = vcat(iq .- 2nr, iq .- nr, iu) # index of the IP solver data [q0, q1, u1]
@@ -46,21 +49,33 @@ function NewtonJacobianConfigurationForce(model::Model, env::Environment, H::Int
     R = spzeros(H * (nr + nd), H * (nr + nd))
     # R = zeros(H * (nr + nd), H * (nr + nd))
 
+    ## Objective Hessians wrt u1, q2, force terms
     obj_u1  = [view(R, (t - 1) * nr .+ iu, (t - 1) * nr .+ iu) for t = 1:H]
     obj_γ1  = [view(R, (t - 1) * nr .+ iγ, (t - 1) * nr .+ iγ) for t = 1:H]
     obj_b1  = [view(R, (t - 1) * nr .+ ib, (t - 1) * nr .+ ib) for t = 1:H]
     obj_q2  = [view(R, (t - 1) * nr .+ iq, (t - 1) * nr .+ iq) for t = 1:H]
+
+    ## Coupling Hessians (between timesteps)
     obj_q1q2  = [view(R, (t - 1) * nr .+ iq, t * nr .+ iq) for t = 1:H-1]
     obj_q2q1  = [view(R, t * nr .+ iq, (t - 1) * nr .+ iq) for t = 1:H-1]
+    
+    # Objective Hessians for q and u limits wrt u1, q2
+    obj_qlim  = [view(R, (t - 1) * nr .+ iqlim, (t - 1) * nr .+ iq) for t = 1:H]
+    obj_ulim  = [view(R, (t - 1) * nr .+ iulim, (t - 1) * nr .+ iu) for t = 1:H]
 
-    IV  = [view(R, CartesianIndex.((t - 1) * nr .+ iz, H * nr + (t - 1) * nd .+ iν)) for t = 1:H]
-    ITV = [view(R, CartesianIndex.(H * nr + (t - 1) * nd .+ iν, (t - 1) * nr .+ iz)) for t = 1:H]
+    ## Dynamics constraints Jacobians
+    IV  = [view(R, CartesianIndex.((t - 1) * nr .+ iz, H * nr + (t - 1) * nd .+ iν)) for t = 1:H] # dg/dz for constr g
+    ITV = [view(R, CartesianIndex.(H * nr + (t - 1) * nd .+ iν, (t - 1) * nr .+ iz)) for t = 1:H] # transpose of IV
+    ## finite difference constraints for second ord dynamics
+    ### q_t+1 - 2q_t + q_t-1 = f(q_t, u_t)
     q0  = [view(R, H * nr + (t - 1) * nd .+ iν, (t - 3) * nr .+ iq) for t = 3:H]
     q0T = [view(R, (t - 3) * nr .+ iq, H * nr + (t - 1) * nd .+ iν) for t = 3:H]
     q1  = [view(R, H * nr + (t - 1) * nd .+ iν, (t - 2) * nr .+ iq) for t = 2:H]
     q1T = [view(R, (t - 2) * nr .+ iq, H * nr + (t - 1) * nd .+ iν) for t = 2:H]
+    ## ddynamics / du
     u1  = [view(R, collect(H * nr + (t - 1) * nd .+ iν), collect((t - 1) * nr .+ iu)) for t = 1:H]
     u1T = [view(R, collect((t - 1) * nr .+ iu), collect(H * nr + (t - 1) * nd .+ iν)) for t = 1:H]
+    # diagonal regularization for stability
     reg_pr = view(R, CartesianIndex.(1:H*nr, 1:H*nr))
     reg_du = view(R, CartesianIndex.(H * nr .+ (1:H * nd), H * nr .+ (1:H * nd)))
 
@@ -112,20 +127,27 @@ function NewtonJacobianConfiguration(model::Model, env::Environment, H::Int)
     R = spzeros(H * (nr + nd), H * (nr + nd))
     # R = zeros(H * (nr + nd), H * (nr + nd))
 
+    ## Objective Hessians wrt u1 and q2
     obj_u1  = [view(R, (t - 1) * nr .+ iu, (t - 1) * nr .+ iu) for t = 1:H]
     obj_q2  = [view(R, (t - 1) * nr .+ iq, (t - 1) * nr .+ iq) for t = 1:H]
 
+    ## Coupling Hessians (between timesteps)
     obj_q1q2  = [view(R, (t - 1) * nr .+ iq, t * nr .+ iq) for t = 1:H-1]
     obj_q2q1  = [view(R, t * nr .+ iq, (t - 1) * nr .+ iq) for t = 1:H-1]
 
-    IV  = [view(R, CartesianIndex.((t - 1) * nr .+ iz, H * nr + (t - 1) * nd .+ iν)) for t = 1:H]
-    ITV = [view(R, CartesianIndex.(H * nr + (t - 1) * nd .+ iν, (t - 1) * nr .+ iz)) for t = 1:H]
+    ## Dynamics constraints Jacobians
+    IV  = [view(R, CartesianIndex.((t - 1) * nr .+ iz, H * nr + (t - 1) * nd .+ iν)) for t = 1:H] # dg/dz - primal(row) to dual(col)
+    ITV = [view(R, CartesianIndex.(H * nr + (t - 1) * nd .+ iν, (t - 1) * nr .+ iz)) for t = 1:H] # transpose of IV
+    ## finite difference constraints for second ord dynamics
+    ### q_t+1 - 2q_t + q_t-1 = f(q_t, u_t)
     q0  = [view(R, H * nr + (t - 1) * nd .+ iν, (t - 3) * nr .+ iq) for t = 3:H]
     q0T = [view(R, (t - 3) * nr .+ iq, H * nr + (t - 1) * nd .+ iν) for t = 3:H]
     q1  = [view(R, H * nr + (t - 1) * nd .+ iν, (t - 2) * nr .+ iq) for t = 2:H]
     q1T = [view(R, (t - 2) * nr .+ iq, H * nr + (t - 1) * nd .+ iν) for t = 2:H]
+    ## ddynamics / du
     u1  = [view(R, collect(H * nr + (t - 1) * nd .+ iν), collect((t - 1) * nr .+ iu)) for t = 1:H]
     u1T = [view(R, collect((t - 1) * nr .+ iu), collect(H * nr + (t - 1) * nd .+ iν)) for t = 1:H]
+    ## diagonal regularization for stability
     reg_pr = view(R, CartesianIndex.(1:H*nr, 1:H*nr))
     reg_du = view(R, CartesianIndex.(H * nr .+ (1:H * nd), H * nr .+ (1:H * nd)))
 
@@ -203,6 +225,10 @@ function hessian!(hess::NewtonJacobianConfigurationForce, obj::TrackingObjective
         hess.obj_u1[t] .+= obj.u[t]
         hess.obj_γ1[t] .+= obj.γ[t]
         hess.obj_b1[t] .+= obj.b[t]
+
+        # limits
+        hess.obj_qlim[t] .+= obj.qlim[t]
+        hess.obj_ulim[t] .+= obj.ulim[t]
     end
 end
 
@@ -228,6 +254,10 @@ function hessian!(hess::NewtonJacobianConfigurationForce, obj::TrackingVelocityO
         hess.obj_q2[t-1] .+= obj.v[t]
         hess.obj_q1q2[t-1] .-= obj.v[t]
         hess.obj_q2q1[t-1] .-= obj.v[t]
+
+        # limits
+        hess.obj_qlim[t] .+= obj.qlim[t]
+        hess.obj_ulim[t] .+= obj.ulim[t]
     end
 end
 

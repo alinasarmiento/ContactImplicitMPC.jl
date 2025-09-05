@@ -37,6 +37,9 @@ mutable struct Waiter2D{T} <: Model{T}
     u_min::SVector
     u_max::SVector
     u_vio_weight::T
+    q_min::SVector
+    q_max::SVector
+    
 end
 
 function lagrangian(model::Waiter2D, q, q̇)

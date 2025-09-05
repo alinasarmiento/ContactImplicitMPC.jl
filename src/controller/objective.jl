@@ -21,6 +21,8 @@ mutable struct TrackingVelocityObjective{Q,V,U,C,B} <: Objective
     u::Vector{U}
     γ::Vector{C}
     b::Vector{B}
+    qlim::Vector{QLim}
+    ulim::Vector{ULim}
 end
 
 function TrackingVelocityObjective(model, env, H::Int;
@@ -28,8 +30,10 @@ function TrackingVelocityObjective(model, env, H::Int;
     v = [Diagonal(zeros(SizedVector{model.nq})) for t = 1:H],
     u = [Diagonal(zeros(SizedVector{model.nu})) for t = 1:H],
     γ = [Diagonal(zeros(SizedVector{model.nc})) for t = 1:H],
-    b = [Diagonal(zeros(SizedVector{model.nc * friction_dim(env)})) for t = 1:H])
-    return TrackingVelocityObjective(q, v, u, γ, b)
+    b = [Diagonal(zeros(SizedVector{model.nc * friction_dim(env)})) for t = 1:H],
+    qlim = [Diagonal(zeros(SizedVector{model.nq})) for t = 1:H],
+    ulim = [Diagonal(zeros(SizedVector{model.nu})) for t = 1:H])
+    return TrackingVelocityObjective(q, v, u, γ, b, qlim, ulim)
 end
 
 function eval_obj(model, env, z, q1, p, obj::Objective)

@@ -52,6 +52,17 @@ function gradient!(res, obj::TrackingVelocityObjective, core, traj, ref_traj)
         res.q2[t] .+= obj.q[t] * core.Δq[t]
         res.u1[t] .+= obj.u[t] * core.Δu[t]
 
+        # limits (new) : qlim / ulim in format [[min], [max]] Vector{Vector{T}}
+        nq = size(traj.qlim[1])
+        nu = size(traj.ulim[1])
+        q_vio_min = max.(zeros(nq), traj.qlim[1] - traj.q[t+2])
+        q_vio_max = max.(zeros(nq), traj.q[t+2] - traj.qlim[2])
+        u_vio_min = max.(zeros(nu), traj.ulim[1] - traj.u[t])
+        u_vio_max = max.(zeros(nu), traj.u[t] - traj.ulim[2])
+
+        res.q2[t] .+= obj.qlim[t] * (q_vio_min + q_vio_max)
+        res.u1[t] .+= obj.ulim[t] * (u_vio_min + u_vio_max)
+
         # velocity
         res.q2[t] .+= obj.v[t] * (traj.q[t+2] - traj.q[t+1])
         t == 1 && continue

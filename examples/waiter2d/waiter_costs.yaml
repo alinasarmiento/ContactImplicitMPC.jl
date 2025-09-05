@@ -40,13 +40,17 @@
 
 ### quals presentation
 q_scale: 1e-2
-q_vec: [7.0, 3.0, 15.0, 4.0, 1.0]
+q_vec: [3, 3.0, 10.0, 4.0, 1.0]
 v_scale: 1e-3
-v_vec: [7.0, 3.0, 15.0, 4.0, 1.0]
+v_vec: [8.0, 4.0, 15.0, 4.0, 1.0]
 
 u_scale: 1e-1
-u_vec: [1.0, .5]
+u_vec: [0.9, .5]
 
+qlim_scale: .5
+qlim_vec: [1.0, 1.0, 0.0, 0.0, 0.0]
+ulim_scale: .5
+ulim_vec: [1.0, 1.0]
 
 
 H_mpc: 10

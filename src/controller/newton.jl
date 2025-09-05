@@ -61,10 +61,12 @@ function Newton(s::Simulation{T}, H::Int, h::T,
 
     jacobian!(jac, im_traj, obj, H, opts.β_init)
 
-    res = NewtonResidual(model, env, H, mode = mode)
-    res_cand = NewtonResidual(model, env, H, mode = mode)
+    # ql = [model.q_min, model.q_max]
+    # ul = [model.u_min, model.u_max]
+    res = NewtonResidual(model, env, H, mode = mode) #, qlimits=ql, ulimits=ul)
+    res_cand = NewtonResidual(model, env, H, mode = mode) #, qlimits=ql, ulimits=ul)
 
-    Δ = NewtonResidual(model, env, H, mode = mode)
+    Δ = NewtonResidual(model, env, H, mode = mode) #, qlmitis=ql, ulimits=ul)
 
     ν = [zeros(SizedVector{ind.nd,T}) for t = 1:H]
     ν_cand = deepcopy(ν)
@@ -191,67 +193,60 @@ function newton_solve!(
     # print("MAX ITER:")
     # print(core.opts.max_iter)
     for l = 1:core.opts.max_iter
-            elapsed_time >= core.opts.max_time && break
-            elapsed_time += @elapsed begin
+        elapsed_time >= core.opts.max_time && break
+        elapsed_time += @elapsed begin
             # check convergence
             r_norm / length(core.res.r) < core.opts.r_tol && break
 
             # Compute NewtonJacobian
-            # print("\n jacobian\n")    
             jacobian!(core.jac, im_traj, core.obj, core.traj.H, core.β)
 
             # Compute Search Direction
-                # print("\n linear solve\n")
-                # print(l)
-                # print("\n core.jac.R shape: ")
-                # print(sizeof(core.jac.R))
             linear_solve!(core.solver, core.Δ.r, core.jac.R, core.res.r)
 
-            # line search the step direction
-	        α = 1.0
-	        iter = 0
+            # compute step direction Delta y = Delta (q, u, force, v)
+	    α = 1.0
+	    iter = 0
 
-	        # candidate step
-                # print("\n update traj\n")
-	        update_traj!(core.traj_cand, core.traj, core.ν_cand, core.ν, core.Δ, α)
+	    # candidate step -- modifies core.traj_cand, core.ν_cand
+	    update_traj!(core.traj_cand, core.traj, core.ν_cand, core.ν, core.Δ, α)
 
-	        # Compute implicit dynamics for candidate
-                # print("\n implicit dynamics\n")
-		implicit_dynamics!(im_traj, core.traj_cand)
+	    # Compute implicit dynamics for candidate -- modifies im_traj
+	    implicit_dynamics!(im_traj, core.traj_cand)
 
-	        # Compute residual for candidate
-                # print("\n residual\n")
-	        residual!(core.res_cand, core, core.ν_cand, im_traj, core.traj_cand, ref_traj)
-	        r_cand_norm = norm(core.res_cand.r, 1)
+	    # Compute residual for candidate -- modifies core.res_cand (populates)
+	    residual!(core.res_cand, core, core.ν_cand, im_traj, core.traj_cand, ref_traj)
+	    r_cand_norm = norm(core.res_cand.r, 1)
 
+            # line search the step size \alpha
             while r_cand_norm^2.0 >= (1.0 - 0.001 * α) * r_norm^2.0
-	            α = 0.5 * α
+	        α = 0.5 * α
 
-	            iter += 1
-	            if iter > 6
-	                break
-	            end
-
-	            update_traj!(core.traj_cand, core.traj, core.ν_cand, core.ν, core.Δ, α)
-
-	            # Compute implicit dynamics about trial_traj
-				implicit_dynamics!(im_traj, core.traj_cand)
-
-	            residual!(core.res_cand, core, core.ν_cand, im_traj, core.traj_cand, ref_traj)
-	            r_cand_norm = norm(core.res_cand.r, 1)
+	        iter += 1
+	        if iter > 6
+	            break
 	        end
 
-	        # update
-	        update_traj!(core.traj, core.traj, core.ν, core.ν, core.Δ, α)
-	        core.res.r .= core.res_cand.r
-	        r_norm = r_cand_norm
+	        update_traj!(core.traj_cand, core.traj, core.ν_cand, core.ν, core.Δ, α)
 
-	        # regularization update
-	        iter > 6 ? (core.β = min(core.β * 1.3, 1.0e2)) : (core.β = max(1.0e1, core.β / 1.3))
+	        # Compute implicit dynamics about trial_traj
+		implicit_dynamics!(im_traj, core.traj_cand)
+
+	        residual!(core.res_cand, core, core.ν_cand, im_traj, core.traj_cand, ref_traj)
+	        r_cand_norm = norm(core.res_cand.r, 1)
+	    end
+
+	    # update
+	    update_traj!(core.traj, core.traj, core.ν, core.ν, core.Δ, α)
+	    core.res.r .= core.res_cand.r
+	    r_norm = r_cand_norm
+
+	    # regularization update
+	    iter > 6 ? (core.β = min(core.β * 1.3, 1.0e2)) : (core.β = max(1.0e1, core.β / 1.3))
 
             # print 
             core.opts.verbose && print_status(core, elapsed_time, α)
-		end
+	end
     end
     # print("\n")
     # print(sizeof(core.jac.R))
