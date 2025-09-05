@@ -64,7 +64,7 @@ function NewtonResidualConfigurationForce(model::Model, env::Environment, H::Int
     
     # return NewtonResidualConfigurationForce{T, eltype.((q2, u1, γ1, b1))...,eltype.((rd, rI, q0, q1))...,eltype.((qlim, ulim)), T, T}(
             # r, q2, u1, γ1, b1, rd, rI, q0, q1, qlim, ulim, qlimits, ulimits)
-    return NewtonResidualConfigurationForce{T, eltype.((q2, u1, γ1, b1))...,eltype.((rd, rI, q0, q1))}(
+    return NewtonResidualConfigurationForce{T, eltype.((q2, u1, γ1, b1))...,eltype.((rd, rI, q0, q1))...}(
         r, q2, u1, γ1, b1, rd, rI, q0, q1)
 end
 
