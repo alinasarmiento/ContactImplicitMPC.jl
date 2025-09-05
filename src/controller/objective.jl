@@ -15,7 +15,7 @@ function TrackingObjective(model, env, H::Int;
     return TrackingObjective(q, u, γ, b)
 end
 
-mutable struct TrackingVelocityObjective{Q,V,U,C,B} <: Objective
+mutable struct TrackingVelocityObjective{Q,V,U,C,B, QLim,ULim} <: Objective
     q::Vector{Q}
     v::Vector{V}
     u::Vector{U}
