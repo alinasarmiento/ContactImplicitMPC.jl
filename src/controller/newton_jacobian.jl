@@ -32,8 +32,8 @@ function NewtonJacobianConfigurationForce(model::Model, env::Environment, H::Int
     nc = model.nc # contact
     nb = nc * friction_dim(env) # linear friction
     nd = nq + nc + nb # implicit dynamics constraint
-    # nr = nq + nu + nc + nb# + nd # size of a one-time-step block
-    nr = 3*nq + 3*nu + nc + nb# + nd # size of a one-time-step block with q and u limits
+    nr = nq + nu + nc + nb# + nd # size of a one-time-step block
+    # nr = 3*nq + 3*nu + nc + nb# + nd # size of a one-time-step block with q and u limits
 
     off = 0
     iu = SizedVector{nu}(off .+ (1:nu)); off += nu # index of the control u1
