@@ -239,7 +239,7 @@ end
 function update_jacobian!(jac::NewtonJacobian, im_traj::ImplicitTrajectory, obj::Objective,
     H::Int, β::T) where T
 
-
+    print("calling update_jac in newton_configuration.jl \n")
     # reset
     for t = 1:H
         if t >= 3

@@ -40,8 +40,8 @@ function NewtonJacobianConfigurationForce(model::Model, env::Environment, H::Int
     iγ = SizedVector{nc}(off .+ (1:nc)); off += nc # index of the impact γ1
     ib = SizedVector{nb}(off .+ (1:nb)); off += nb # index of the linear friction b1
     iq = SizedVector{nq}(off .+ (1:nq)); off += nq # index of the configuration q2
-    iqlim = SizedVector{2*nq}(off .+ (1:2*nq)); off += 2*nq # index of q limits
-    iulim = SizedVector{2*nu}(off .+ (1:2*nu)); off += 2*nu # index of u limits
+    # iqlim = SizedVector{2*nq}(off .+ (1:2*nq)); off += 2*nq # index of q limits
+    # iulim = SizedVector{2*nu}(off .+ (1:2*nu)); off += 2*nu # index of u limits
 
     iz = vcat(iq, iγ, ib) # index of the IP solver solution [q2, γ1, b1]
     iθ = vcat(iq .- 2nr, iq .- nr, iu) # index of the IP solver data [q0, q1, u1]
@@ -190,7 +190,7 @@ end
 
 function update_jacobian!(jac::NewtonJacobian, im_traj::ImplicitTrajectory, obj::Objective,
     H::Int, β::T) where T
-
+    print("calling update_jac in newton_jacobian.jl \n")
     for t = 1:H
         if t >= 3
             jac.q0[t-2]  .+= im_traj.δq0[t]
@@ -243,7 +243,7 @@ function hessian!(hess::NewtonJacobianConfiguration, obj::TrackingObjective)
     end
 end
 
-function hessian!(hess::NewtonJacobianConfigurationForce, obj::TrackingVelocityObjective)
+function hessian!(hess::NewtonJacobianConfigurationForce, obj::TrackingVelocityObjective) # used
     for t = 1:length(obj.u)
         # Cost function
         hess.obj_q2[t] .+= obj.q[t]
@@ -258,9 +258,8 @@ function hessian!(hess::NewtonJacobianConfigurationForce, obj::TrackingVelocityO
         hess.obj_q1q2[t-1] .-= obj.v[t]
         hess.obj_q2q1[t-1] .-= obj.v[t]
 
-        
-        print("hessian in newton_jacobian.jl")
         # limits
+        hess.obj_q2[t] .+= obj.qlim[t] * hess
         # hess.obj_qlim[t] .+= obj.qlim[t]
         # hess.obj_ulim[t] .+= obj.ulim[t]
     end

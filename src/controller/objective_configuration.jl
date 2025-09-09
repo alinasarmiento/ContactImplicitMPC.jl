@@ -70,13 +70,12 @@ function gradient!(res, obj::TrackingVelocityObjective, core, traj, ref_traj)
     end
 end
 
-function hessian!(hess, obj::TrackingVelocityObjective)
+function hessian!(hess, obj::TrackingVelocityObjective) # not used afaik
     for t = 1:length(obj.u)
         # Cost function
         hess.obj_q2[t] .+= obj.q[t]
         hess.obj_u1[t] .+= obj.u[t]
 
-        print("hessian in objective_configuration.jl")
         # velocity
         hess.obj_q2[t] .+= obj.v[t]
         t == 1 && continue
