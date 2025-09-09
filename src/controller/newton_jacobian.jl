@@ -259,7 +259,7 @@ function hessian!(hess::NewtonJacobianConfigurationForce, obj::TrackingVelocityO
         hess.obj_q2q1[t-1] .-= obj.v[t]
 
         # limits
-        hess.obj_q2[t] .+= obj.qlim[t] * hess
+        # hess.obj_q2[t] .+= obj.qlim[t] * hess
         # hess.obj_qlim[t] .+= obj.qlim[t]
         # hess.obj_ulim[t] .+= obj.ulim[t]
     end
