@@ -44,6 +44,7 @@ function TrackingVelocityObjective(model, env, H::Int;
 end
 
 function gradient!(res, obj::TrackingVelocityObjective, core, traj, ref_traj)
+    print("calling gradient! in obj_conf.jl")
     for t = 1:traj.H
         # Cost function
         delta!(core.Δq[t], traj.q[t+2], ref_traj.q[t+2])

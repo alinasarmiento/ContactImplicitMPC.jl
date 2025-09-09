@@ -252,6 +252,7 @@ function gradient!(res::NewtonResidualConfiguration{T,vq2,vu1,vd,vI,vq0,vq1}, ob
 end
 
 function gradient!(res::NewtonResidualConfigurationForce{T,vq2,vu1,vγ1,vb1,vd,vI,vq0,vq1}, obj::TrackingVelocityObjective{Q,V,U,C,B}, core::Newton{T,nq,nu,nw,nc,nb,nz,nθ,nν,NJ,NR,NI,O,LS}, traj::ContactTraj{T,nq,nu,nw,nc,nb,nz,nθ}, ref_traj::ContactTraj{T,nq,nu,nw,nc,nb,nz,nθ}) where {T,vq2,vu1,vγ1,vb1,vd,vI,vq0,vq1,Q,V,U,C,B,nq,nu,nw,nc,nb,nz,nθ,nν,NJ,NR,NI,O,LS}
+    print("calling gradient! in newton_residual.jl")
     for t = 1:traj.H
         # Cost function
         delta!(core.Δq[t], traj.q[t+2], ref_traj.q[t+2])
