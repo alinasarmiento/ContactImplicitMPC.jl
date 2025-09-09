@@ -251,8 +251,7 @@ function gradient!(res::NewtonResidualConfiguration{T,vq2,vu1,vd,vI,vq0,vq1}, ob
     end
 end
 
-function gradient!(res::NewtonResidualConfigurationForce{T,vq2,vu1,vγ1,vb1,vd,vI,vq0,vq1}, obj::TrackingVelocityObjective{Q,V,U,C,B}, core::Newton{T,nq,nu,nw,nc,nb,nz,nθ,nν,NJ,NR,NI,O,LS}, traj::ContactTraj{T,nq,nu,nw,nc,nb,nz,nθ}, ref_traj::ContactTraj{T,nq,nu,nw,nc,nb,nz,nθ}) where {T,vq2,vu1,vγ1,vb1,vd,vI,vq0,vq1,Q,V,U,C,B,nq,nu,nw,nc,nb,nz,nθ,nν,NJ,NR,NI,O,LS}
-    print("calling gradient! in newton_residual.jl")
+function gradient!(res::NewtonResidualConfigurationForce{T,vq2,vu1,vγ1,vb1,vd,vI,vq0,vq1}, obj::TrackingVelocityObjective{Q,V,U,C,B}, core::Newton{T,nq,nu,nw,nc,nb,nz,nθ,nν,NJ,NR,NI,O,LS}, traj::ContactTraj{T,nq,nu,nw,nc,nb,nz,nθ}, ref_traj::ContactTraj{T,nq,nu,nw,nc,nb,nz,nθ}) where {T,vq2,vu1,vγ1,vb1,vd,vI,vq0,vq1,Q,V,U,C,B,nq,nu,nw,nc,nb,nz,nθ,nν,NJ,NR,NI,O,LS} ## USED
     for t = 1:traj.H
         # Cost function
         delta!(core.Δq[t], traj.q[t+2], ref_traj.q[t+2])
@@ -269,6 +268,17 @@ function gradient!(res::NewtonResidualConfigurationForce{T,vq2,vu1,vγ1,vb1,vd,v
         # res.b1[t] .+= obj.b[t] * core.Δb[t]
         mul!(res.b1[t], obj.b[t], core.Δb[t], 1.0, 1.0)
 
+        # limits (new) : qlim / ulim in format [[min],[max]] Vector{Vector{T}}
+        nq = size(traj.qlim[1])
+        nu = size(traj.ulim[1])
+        q_vio_min = max.(zeros(nq), traj.qlim[1] - traj.q[t+2])
+        q_vio_max = max.(zeros(nq), traj.q[t+2] - traj.qlim[2])
+        u_vio_min = max.(zeros(nu), traj.ulim[1] - traj.u[t+2])
+        u_vio_max = max.(zeros(nu), traj.u[t+2] - traj.ulim[2])
+
+        res.q2[t] .+= obj.qlim[t] * (q_vio_min .+ q_vio_max)
+        res.u1[t] .+= obj.ulim[t] * (u_vio_min .+ u_vio_max)
+        
         # velocity
         # res.q2[t] .+= obj.v[t] * (traj.q[t+2] - traj.q[t+1])
         mul!(res.q2[t], obj.v[t], traj.q[t+2], 1.0, 1.0) 
