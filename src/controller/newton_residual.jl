@@ -273,8 +273,8 @@ function gradient!(res::NewtonResidualConfigurationForce{T,vq2,vu1,vγ1,vb1,vd,v
         # nu = size(traj.ulim[1])
         q_vio_min = max.(zeros(nq), traj.qlim[1] - traj.q[t+2])
         q_vio_max = max.(zeros(nq), traj.q[t+2] - traj.qlim[2])
-        u_vio_min = max.(zeros(nu), traj.ulim[1] - traj.u[t+2])
-        u_vio_max = max.(zeros(nu), traj.u[t+2] - traj.ulim[2])
+        u_vio_min = max.(zeros(nu), traj.ulim[1] - traj.u[t])
+        u_vio_max = max.(zeros(nu), traj.u[t] - traj.ulim[2])
 
         res.q2[t] .+= obj.qlim[t] * (q_vio_min .+ q_vio_max)
         res.u1[t] .+= obj.ulim[t] * (u_vio_min .+ u_vio_max)
