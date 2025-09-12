@@ -181,8 +181,8 @@ function implicit_dynamics!(im_traj::ImplicitTrajectory, traj::ContactTraj)
         nu = size(traj.ulim[1])[1]
         im_traj.qlim_vio[t][1:nq] .= max.(zeros(nq), -traj.q[t] .+ traj.qlim[1])
         im_traj.qlim_vio[t][nq+1:2*nq] .= max.(zeros(nq), traj.q[t] .- traj.qlim[2])
-        im_traj.ulim_vio[t][1:nu] .= max.(zeros(nu), -traj.u[t] .+ traj.ulim[1])
-        im_traj.ulim_vio[t][nu+1:2*nu] .= max.(zeros(nu), traj.u[t] .- traj.ulim[2])
+        im_traj.ulim_vio[t][1:nu] .= max.(zeros(nu), -(traj.u[t]./traj.h) .+ traj.ulim[1])
+        im_traj.ulim_vio[t][nu+1:2*nu] .= max.(zeros(nu), (traj.u[t]./traj.h) .- traj.ulim[2])
 	
 	if im_traj.mode == :configurationforce
 	    im_traj.dγ1[t] .-= traj.γ[t]
