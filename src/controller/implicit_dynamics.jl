@@ -7,6 +7,8 @@ mutable struct ImplicitTrajectory{T,R,RZ,Rθ,NQ}
     H::Int
     lin::Vector{LinearizedStep{T}}
     d::Vector{SubArray{T,1,Array{T,1},Tuple{UnitRange{Int}},true}} # dynamics violation
+    qlim_vio::Vector{T} # TODO 9/9. size H*NQ*2 ?
+    ulim_vio::Vector{T}
     dq2::Vector{SubArray{T,1,Array{T,1},Tuple{UnitRange{Int}},true}}
     dγ1::Vector{SubArray{T,1,Array{T,1},Tuple{UnitRange{Int}},true}}
     db1::Vector{SubArray{T,1,Array{T,1},Tuple{UnitRange{Int}},true}}
@@ -87,7 +89,11 @@ function ImplicitTrajectory(ref_traj::ContactTraj, s::Simulation;
     δu1 = [view(ip[t].δz, 1:nd, off .+ (1:nu)) for t = 1:H]; off += nu
     # δz gets modified in differentiate_solution! (mapping!) in RoDo interior_point.jl
 
-    return ImplicitTrajectory{typeof.([ip[1].z[1], ip[1].r, ip[1].rz, ip[1].rθ])...,nq2}(H, lin, d, dq2, dγ1, db1, δq0, δq1, δu1, ip, mode, 
+    qlim_vio = zeros(2*nq*H) # (min_vio_t, max_vio_t, ...)
+    ulim_vio = zeros(2*nu*H)
+
+    return ImplicitTrajectory{typeof.([ip[1].z[1], ip[1].r, ip[1].rz, qlim_vio,ulim_vio, ip[1].rθ])...,nq2}(H, lin, d, dq2, dγ1, db1, δq0, δq1, δu1, ip, mode,
+                                                                                         qlim_vio, ulim_vio,
 		                                                                         SVector{nq2,Int}(iq2))
 end
 
@@ -169,6 +175,14 @@ function implicit_dynamics!(im_traj::ImplicitTrajectory, traj::ContactTraj)
 
 	# compute dynamics violation
 	im_traj.dq2[t] .-= traj.q[t+2] # im_traj.dq2 is a view of im_traj.ip.z
+
+        # compute limits violation
+        nq = size(traj.qlim[1])
+        nu = size(traj.ulim[1])
+        im_traj.qlim_vio[2*t-1] = max.(zeros(nq), traj.qlim[1] - traj.q[t])
+        im_traj.qlim_vio[2*t]   = max.(zeros(nq), traj.q[t] - traj.qlim[2])
+        im_traj.ulim_vio[2*t-1] = max.(zeros(nu), traj.ulim[1] - traj.u[t])
+        im_traj.ulim_vio[2*t]   = max.(zeros(nu), traj.u[t] - traj.ulim[2])
 	
 	if im_traj.mode == :configurationforce
 	    im_traj.dγ1[t] .-= traj.γ[t]

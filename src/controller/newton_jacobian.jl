@@ -195,7 +195,6 @@ function update_jacobian!(jac::NewtonJacobian, im_traj::ImplicitTrajectory, obj:
         if t >= 3
             jac.q0[t-2]  .+= im_traj.δq0[t]
             jac.q0T[t-2] .+= transpose(im_traj.δq0[t])
-            # jac.q0[t-2] .+= obj.qlim[t] .* 
         end
 
         if t >= 2
@@ -205,11 +204,17 @@ function update_jacobian!(jac::NewtonJacobian, im_traj::ImplicitTrajectory, obj:
 
         jac.u1[t]  .+= im_traj.δu1[t]
         jac.u1T[t] .+= transpose(im_traj.δu1[t])
-        # jac.u1[t] .+= obj.ulim[t] .* 
 
         # Dual regularization
         # jac.reg_pr .+= 1.0 * β * im_traj.ip[t].κ[1] 
-        jac.reg_du .-= β * im_traj.ip[t].κ[1] 
+        jac.reg_du .-= β * im_traj.ip[t].κ[1]
+
+        # Add u/q limit violations
+        q_lim_vio = im_traj.qlim_vio[2*t-1] .+ im_traj.qlim_vio[2*t]
+        jac.obj_q2[t] .+= obj.qlim[t] * q_lim_vio
+        u_lim_vio = im_traj.ulim_vio[2*t - 1] .+ im_traj.ulim_vio[2*t]
+        jac.obj_u1[t] .+= obj.ulim[t] * u_lim_vio
+        
     end
 
     return nothing
@@ -255,6 +260,10 @@ function hessian!(hess::NewtonJacobianConfigurationForce, obj::TrackingVelocityO
         hess.obj_q2[t-1] .+= obj.v[t]
         hess.obj_q1q2[t-1] .-= obj.v[t]
         hess.obj_q2q1[t-1] .-= obj.v[t]
+
+        # limits (new)
+        # hess.obj_q2[t] .+= obj.qlim[t] *
+        # hess.obj_u1[t] .+= obj.ulim[t] * 
     end
 end
 
