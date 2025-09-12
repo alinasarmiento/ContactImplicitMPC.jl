@@ -92,7 +92,7 @@ function ImplicitTrajectory(ref_traj::ContactTraj, s::Simulation;
     qlim_vio = zeros(2*nq*H) # (min_vio_t, max_vio_t, ...)
     ulim_vio = zeros(2*nu*H)
 
-    return ImplicitTrajectory{typeof.([ip[1].z[1], ip[1].r, ip[1].rz, qlim_vio,ulim_vio, ip[1].rθ])...,nq2}(H, lin, d, dq2, dγ1, db1, δq0, δq1, δu1, ip, mode,
+    return ImplicitTrajectory{typeof.([ip[1].z[1], ip[1].r, ip[1].rz, ip[1].rθ])...,nq2}(H, lin, d, dq2, dγ1, db1, δq0, δq1, δu1, ip, mode,
                                                                                          qlim_vio, ulim_vio,
 		                                                                         SVector{nq2,Int}(iq2))
 end
