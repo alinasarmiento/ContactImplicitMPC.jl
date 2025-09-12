@@ -210,9 +210,12 @@ function update_jacobian!(jac::NewtonJacobian, im_traj::ImplicitTrajectory, obj:
         jac.reg_du .-= β * im_traj.ip[t].κ[1]
 
         # Add u/q limit violations
-        q_lim_vio = im_traj.qlim_vio[2*t-1] .+ im_traj.qlim_vio[2*t]
+        nq = Int(im_traj.qlim_vio[1][1]/2)
+        nu = Int(im_traj.ulim_vio[1][1]/2)        
+        q_lim_vio = im_traj.qlim_vio[t][1:nq] .+ im_traj.qlim_vio[t][nq+1:2*nq]
+        u_lim_vio = im_traj.ulim_vio[t][1:nu] .+ im_traj.ulim_vio[t][nu+1:2*nu]
+        
         jac.obj_q2[t] .+= obj.qlim[t] * q_lim_vio
-        u_lim_vio = im_traj.ulim_vio[2*t - 1] .+ im_traj.ulim_vio[2*t]
         jac.obj_u1[t] .+= obj.ulim[t] * u_lim_vio
         
     end
