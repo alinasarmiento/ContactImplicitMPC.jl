@@ -15,8 +15,8 @@ mutable struct ImplicitTrajectory{T,R,RZ,Rθ,NQ}
     δu1::Vector{SubArray{T,2,Array{T,2},Tuple{UnitRange{Int},UnitRange{Int}},false}}  # u1 solution gradient length=H
     ip::Vector{InteriorPoint{T,R,RZ,Rθ}}
     mode::Symbol
-    qlim_vio::Vector{T} # TODO 9/9. size H*NQ*2 ?
-    ulim_vio::Vector{T}
+    qlim_vio::Vector{Vector{Float64}} # TODO 9/9. size H*NQ*2 ?
+    ulim_vio::Vector{Vector{Float64}}
     iq2::SVector{NQ,Int}
 end
 
@@ -89,8 +89,8 @@ function ImplicitTrajectory(ref_traj::ContactTraj, s::Simulation;
     δu1 = [view(ip[t].δz, 1:nd, off .+ (1:nu)) for t = 1:H]; off += nu
     # δz gets modified in differentiate_solution! (mapping!) in RoDo interior_point.jl
 
-    qlim_vio = zeros(2*nq*H) # (min_vio_t, max_vio_t, ...)
-    ulim_vio = zeros(2*nu*H)
+    qlim_vio = [zeros(2*nq) for t=1:H]
+    ulim_vio = [zeros(2*nu) for t=1:H]
 
     return ImplicitTrajectory{typeof.([ip[1].z[1], ip[1].r, ip[1].rz, ip[1].rθ])...,nq2}(H, lin, d, dq2, dγ1, db1, δq0, δq1, δu1, ip, mode,
                                                                                          qlim_vio, ulim_vio,
