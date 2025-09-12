@@ -215,8 +215,10 @@ function update_jacobian!(jac::NewtonJacobian, im_traj::ImplicitTrajectory, obj:
         q_lim_vio = im_traj.qlim_vio[t+2][1:nq] .+ im_traj.qlim_vio[t+2][nq+1:2*nq]
         u_lim_vio = im_traj.ulim_vio[t][1:nu] .+ im_traj.ulim_vio[t][nu+1:2*nu]
 
-        print("t: ", t, " qlim vio: ", q_lim_vio, "\n")
-        print("t: ", t, " ulim vio: ", u_lim_vio, "\n")
+        print(Float.(q_lim_vio > 0), "\n")
+        print(obj.qlim[t])
+        # print("t: ", t, " qlim vio: ", q_lim_vio, "\n")
+        # print("t: ", t, " ulim vio: ", u_lim_vio, "\n")
         jac.obj_q2[t] .+= obj.qlim[t] .* Float.(q_lim_vio > 0)
         jac.obj_u1[t] .+= obj.ulim[t] .* Float.(u_lim_vio > 0)
         
