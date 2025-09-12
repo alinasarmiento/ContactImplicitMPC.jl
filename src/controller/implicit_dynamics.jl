@@ -7,8 +7,6 @@ mutable struct ImplicitTrajectory{T,R,RZ,Rθ,NQ}
     H::Int
     lin::Vector{LinearizedStep{T}}
     d::Vector{SubArray{T,1,Array{T,1},Tuple{UnitRange{Int}},true}} # dynamics violation
-    qlim_vio::Vector{T} # TODO 9/9. size H*NQ*2 ?
-    ulim_vio::Vector{T}
     dq2::Vector{SubArray{T,1,Array{T,1},Tuple{UnitRange{Int}},true}}
     dγ1::Vector{SubArray{T,1,Array{T,1},Tuple{UnitRange{Int}},true}}
     db1::Vector{SubArray{T,1,Array{T,1},Tuple{UnitRange{Int}},true}}
@@ -17,6 +15,8 @@ mutable struct ImplicitTrajectory{T,R,RZ,Rθ,NQ}
     δu1::Vector{SubArray{T,2,Array{T,2},Tuple{UnitRange{Int},UnitRange{Int}},false}}  # u1 solution gradient length=H
     ip::Vector{InteriorPoint{T,R,RZ,Rθ}}
     mode::Symbol
+    qlim_vio::Vector{T} # TODO 9/9. size H*NQ*2 ?
+    ulim_vio::Vector{T}
     iq2::SVector{NQ,Int}
 end
 
