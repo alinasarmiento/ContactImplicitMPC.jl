@@ -177,8 +177,8 @@ function implicit_dynamics!(im_traj::ImplicitTrajectory, traj::ContactTraj)
 	im_traj.dq2[t] .-= traj.q[t+2] # im_traj.dq2 is a view of im_traj.ip.z
 
         # compute limits violation
-        nq = size(traj.qlim[1])
-        nu = size(traj.ulim[1])
+        nq = size(traj.qlim[1])[1]
+        nu = size(traj.ulim[1])[1]
         print(im_traj.qlim_vio[t])
         print(nq)
         im_traj.qlim_vio[t][1:nq] .= zeros(nq) #max.(zeros(nq), -traj.q[t] .+ traj.qlim[1])
