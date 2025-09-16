@@ -271,7 +271,7 @@ waiter_2D = Waiter2D(5, 2, 2, 6,
                      SVector{2}([-20, -20]), # u min
                      SVector{2}([20, 20]),   # u max
                      SVector{5}([.1, .6, -1,-1,-1]), # q min (x,y,z, xtray,ytray,thtray)
-                     SVector{5}([.8, 1.5, 1,1,1]),   # q max
+                     SVector{5}([.6, 1.1, 1,1,1]),   # q max
 )
 
 function friction_coefficients(model::Waiter2D) 
