@@ -47,7 +47,7 @@ function build_robot!(vis::Visualizer, model::Block; name::Symbol=:Block, r=para
     setobject!(vis[name][:object]["block"],
                GeometryBasics.Rect3f(GeometryBasics.Point3f0(0,0,0),
                                        GeometryBasics.Vec3f0(params["xlen_block"], params["ylen_block"], params["zlen_block"]),
-               block_mat)    
+               block_mat))
     return nothing
 end
 

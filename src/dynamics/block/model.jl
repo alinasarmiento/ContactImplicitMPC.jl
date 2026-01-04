@@ -66,7 +66,7 @@ function kinematics(model::Block, q; mode=:contacts)
         ee = SVector{2}([q[1], q[2]])
         block1 = SVector{2}([q[3]+(model.xlen_block/2), q[4]-(model.zlen_block/2)])
         block2 = SVector{2}([q[3]-(model.xlen_block/2), q[4]-(model.zlen_block/2)])
-        return SVector{12}([ee1; ee2; block1; block2;])
+        return SVector{6}([ee; block1; block2;])
     elseif mode == :ee
         return q[1:2]
     elseif mode == :block
@@ -83,7 +83,7 @@ function M_func(model::Block, q)
     mb = model.m_block
     h_b = model.zlen_block
     w_b = model.xlen_block
-    I_b = (1/12)*mt*(h_t^2 + w_t^2)
+    I_b = (1/12)*mt*(h_b^2 + w_b^2)
 
     Diagonal(@SVector [m, m, mb, mb, I_b])
 end
@@ -130,12 +130,11 @@ function ϕ_func(model::Block, env::Environment, q)
     ee = cp[1:2]
     block1 = cp[3:4]
     block2 = cp[5:6]
-    block_q = q[4:5]    
+    block_q = q[3:5]    
 
     ee_block_dist = dist_block(model, ee, block_q)
     block1_dist = block_q[2]
     block2_dist = block_q[2]
-    ee_ground = cp[10]
     
     return SVector{3}([ee_block_dist; block1_dist; block2_dist])
 end
@@ -169,7 +168,7 @@ function _jacobian(model::Block, q; mode=:ee_b)
     #contacts: ee-b, b-g-front, b-g-back
     #x, z for each contact
     if mode == :ee_b
-        j = SMatrix{4,5}([-1.0 0.0 1.0 0.0 -(x_b-x_ee)*tan(th_b);
+        j = SMatrix{2,5}([-1.0 0.0 1.0 0.0 -(x_b-x_ee)*tan(th_b);
                           0.0 -1.0 0.0 1.0 (x_b-x_ee)])
         return j
         

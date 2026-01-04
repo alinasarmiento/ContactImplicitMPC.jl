@@ -61,6 +61,7 @@ include("dynamics/quaternions.jl")
 include("dynamics/mrp.jl")
 include("dynamics/euler.jl")
 
+include("dynamics/block/model.jl")
 include("dynamics/particle_2D/model.jl")
 include("dynamics/particle/model.jl")
 include("dynamics/hopper_2D/model.jl")
@@ -110,6 +111,7 @@ include("controller/lcm_py_utils.jl")
 include("dynamics/visuals.jl")
 include("dynamics/visual_utils.jl")
 
+include("dynamics/block/visuals.jl")
 include("dynamics/particle_2D/visuals.jl")
 include("dynamics/particle/visuals.jl")
 include("dynamics/hopper_2D/visuals.jl")
@@ -264,6 +266,7 @@ export
     flamingo,
     pushbot,
     waiter_2D,
+    block_system,
     walledcartpole,
     flat_3D_lc,
     flat_3D_nc,

@@ -34,6 +34,7 @@ include("dynamics/code_gen_dynamics.jl")
 include("dynamics/fast_methods_dynamics.jl")
 
 # # Models
+include("dynamics/block/model.jl")
 include("dynamics/particle_2D/model.jl")
 include("dynamics/particle/model.jl")
 include("dynamics/hopper_2D/model.jl")
