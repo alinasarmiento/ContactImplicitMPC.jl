@@ -6,6 +6,7 @@ using MeshCat, MeshIO, Meshing
 using Rotations
 using YAML
 
+print(@__DIR__)
 params = YAML.load_file(joinpath(@__DIR__,"params.yaml"))
 
 function plot_lines!(vis::Visualizer, model::Block, q::AbstractVector;
@@ -28,6 +29,7 @@ function plot_lines!(vis::Visualizer, model::Block, q::AbstractVector;
 end
 
 function build_robot!(vis::Visualizer, model::Block; name::Symbol=:Block, r=params["r_ee"], α=1.0)
+    print(params)
     nc = model.nc
     r = convert(Float32, r)
     
@@ -39,14 +41,12 @@ function build_robot!(vis::Visualizer, model::Block; name::Symbol=:Block, r=para
     default_background!(vis)
 
     setobject!(vis[name][:robot]["ee"],
-               GeometryBasics.Cylinder(GeometryBasics.Point3f0(0,0,-d/2),
-                                       GeometryBasics.Point3f0(0,0,d/2),
-                                       convert(Float32, r)),
+               GeometryBasics.Sphere(GeometryBasics.Point3f0(0,0,0), convert(Float32,r)),
 	       body_mat)
 
     setobject!(vis[name][:object]["block"],
-               GeometryBasics.Rect3f(GeometryBasics.Point3f0(0,0,0),
-                                       GeometryBasics.Vec3f0(params["xlen_block"], params["ylen_block"], params["zlen_block"]),
+               GeometryBasics.Rect3D(GeometryBasics.Point3f0(0,0,0),
+                                     GeometryBasics.Vec3f0(params["xlen_block"], params["ylen_block"], params["zlen_block"]),
                block_mat))
     return nothing
 end

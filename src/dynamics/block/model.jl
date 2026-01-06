@@ -1,9 +1,8 @@
-using Pkg; Pkg.activate(joinpath(@__DIR__, "../../../"))
-using ContactImplicitMPC
+# using Pkg; Pkg.activate(joinpath(@__DIR__, "../../../"))
 using YAML
 using Rotations
-using StaticArrays
-using RoboDojo
+# using StaticArrays
+# using RoboDojo
 
 """
     - 2D plate subject to contact forces
@@ -24,7 +23,7 @@ mutable struct Block{T} <: Model{T}
     m::T # mass
     g::T # gravity
     m_block::T # block mass
-    μ_ground::T # friction coefficient
+    μ_world::T # friction coefficient
     μ_block::T
     r::T # radius of EE
     xlen_block::T
@@ -231,7 +230,7 @@ end
 # Working Parameters
 params = YAML.load_file(joinpath(@__DIR__,"params.yaml"))
 
-# nq, nu, nw, nc, m, g, m_block, μ_ground, μ_block, r_ee, xlen_block, ylen_block, zlen_block
+# nq, nu, nw, nc, m, g, m_block, μ_world, μ_block, r_ee, xlen_block, ylen_block, zlen_block
                          
 block_system = Block(5, 2, 2, 3,
                      params["m_ee"], params["gravity"], params["m_block"],

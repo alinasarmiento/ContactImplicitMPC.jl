@@ -15,7 +15,7 @@ using YAML
 using Sockets
 
 # ## Simulation
-s = get_simulation("block", "flat_2D_lc", "flat");
+s = get_simulation("block", "flat_2D_lc", "flat", model_variable_name="block_system");
 model = s.model
 env = s.env
 
@@ -25,10 +25,16 @@ H = 100
 ref_traj = contact_trajectory(model, env, H, h)
 ref_traj.h
 
-qref = [0.3; 0.485;
-        0.3; 0.5; 0.0;]
+sim_params = YAML.load_file(joinpath(@__DIR__,"../../src/dynamics/block/params.yaml"))
+ee_init = deepcopy(sim_params["ee_init"])
+ee_des = deepcopy(sim_params["ee_des"])
+block_init = deepcopy(sim_params["block_init"])
+block_des = deepcopy(sim_params["block_des"])
 
-ur = ones(model.nu).*[0.0, 0.37*9.81*h] #zeros(model.nu) 
+qref = [ee_init[1]; ee_init[2];       # ee [x,z]
+        block_init[1]; block_init[2]; 0.0;] # block [x,z,th]
+
+ur = zeros(model.nu) #ones(model.nu).*[0.0, 0.37*9.81*h]
 γr = zeros(model.nc)
 # γr = ones(model.nc).*[9.81*h/2, 9.81*h/2, 0.0, 0.0, 0.0, 0.0] #zeros(model.nc)
 br = zeros(model.nc * friction_dim(env))
@@ -50,8 +56,8 @@ update_friction_coefficient!(ref_traj, model, env)
 
 # ## Initial conditions
 
-q1 = [0.5; 0.42;
-      0.65; 0.4831; 0.0;] #0.483
+q1 = [ee_init[1]; ee_init[2]+0.01;       # ee [x,z]
+        block_init[1]; block_init[2]+0.01; 0.0;] # block [x,z,th]
 v1 = [0.0; 0.0;
       0.0; 0.0; 0.0;]
 
@@ -78,7 +84,7 @@ status = simulate!(sim, q1, v1, verbose=true)
 # @infiltrate
 ##########################
 
-cost_terms = YAML.load_file(joinpath(@__DIR__,"waiter_costs.yaml"))
+cost_terms = YAML.load_file(joinpath(@__DIR__,"block_costs.yaml"))
 
 # ## MPC setup 
 N_sample = 2
