@@ -6,8 +6,12 @@ using MeshCat, MeshIO, Meshing
 using Rotations
 using YAML
 
-print(@__DIR__)
-params = YAML.load_file(joinpath(@__DIR__,"params.yaml"))
+function load_params()
+    params_path = abspath(joinpath(@__DIR__, "params.yaml"))
+    @info "params path" params_path
+    params = YAML.load_file(params_path)
+    return params
+end    
 
 function plot_lines!(vis::Visualizer, model::Block, q::AbstractVector;
 		r=0.05, size=10, name::Symbol=:waiter_2D, col::Bool=true)
@@ -29,6 +33,7 @@ function plot_lines!(vis::Visualizer, model::Block, q::AbstractVector;
 end
 
 function build_robot!(vis::Visualizer, model::Block; name::Symbol=:Block, r=params["r_ee"], α=1.0)
+    params = load_params()
     print(params)
     nc = model.nc
     r = convert(Float32, r)
@@ -38,6 +43,10 @@ function build_robot!(vis::Visualizer, model::Block; name::Symbol=:Block, r=para
     block_mat = MeshPhongMaterial(color = RGBA(99/255, 97/255, 93/255, 1.0))
     support_mat = MeshPhongMaterial(color = RGBA(0.7, 0.7, 0.7, 1.0))
 
+    xdim = params["xlen_block"]
+    ydim = params["ylen_block"]
+    zdim = params["zlen_block"]
+    
     default_background!(vis)
 
     setobject!(vis[name][:robot]["ee"],
@@ -45,9 +54,9 @@ function build_robot!(vis::Visualizer, model::Block; name::Symbol=:Block, r=para
 	       body_mat)
 
     setobject!(vis[name][:object]["block"],
-               GeometryBasics.Rect3D(GeometryBasics.Point3f0(0,0,0),
-                                     GeometryBasics.Vec3f0(params["xlen_block"], params["ylen_block"], params["zlen_block"]),
-               block_mat))
+               GeometryBasics.Rect3D(GeometryBasics.Point3f0(-xdim/2,-ydim/2,-zdim/2),
+                                     GeometryBasics.Vec3f0(xdim,ydim,zdim)),
+               block_mat)
     return nothing
 end
 

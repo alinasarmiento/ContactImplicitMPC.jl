@@ -5,13 +5,13 @@ mu_block: 0.4615
 m_ee: 0.1
 m_block: 0.5
 
-r_ee: 0.02
+r_ee: 0.01
 xlen_block: 0.5
 ylen_block: 0.16
 zlen_block: 0.1
 
-ee_init: [-0.1, 0.9]
+ee_init: [0.0, 0.5]
 ee_des: [-0.3, 0.2]
 
-block_init: [0.0, 0.05]
+block_init: [0.0, 0.2]
 block_des: [1.0, 0.05]

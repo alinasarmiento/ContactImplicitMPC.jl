@@ -56,8 +56,8 @@ update_friction_coefficient!(ref_traj, model, env)
 
 # ## Initial conditions
 
-q1 = [ee_init[1]; ee_init[2]+0.01;       # ee [x,z]
-        block_init[1]; block_init[2]+0.01; 0.0;] # block [x,z,th]
+q1 = [ee_init[1]; ee_init[2];       # ee [x,z]
+        block_init[1]; block_init[2]; 0.0;] # block [x,z,th]
 v1 = [0.0; 0.0;
       0.0; 0.0; 0.0;]
 
@@ -68,127 +68,129 @@ sim = simulator(s, H, h=0.005) #h)
 status = simulate!(sim, q1, v1, verbose=true)
 
 ##########################
-# Visualizer
+#Visualizer
+H = 1000
+vis = ContactImplicitMPC.Visualizer()
+ContactImplicitMPC.render(vis)
+
+## Visualize
+vis_traj = contact_trajectory(s.model, s.env, H, h)
+anim = visualize_robot!(vis, model, sim.traj, sample = 1, h=h)
+# u_mat = mapreduce(permutedims, vcat, sim.traj.u)
+v_mat = mapreduce(permutedims, vcat, sim.traj.v)
+q_mat = mapreduce(permutedims, vcat, sim.traj.q)
+force_mat = mapreduce(permutedims, vcat, sim.traj.γ)
+tanf_mat = mapreduce(permutedims, vcat, sim.traj.b)
+
+@infiltrate
+##########################
+
+# cost_terms = YAML.load_file(joinpath(@__DIR__,"block_costs.yaml"))
+
+# # ## MPC setup 
+# N_sample = 2
+# H_mpc = cost_terms["H_mpc"]
+# h_sim = h / N_sample
+# H_sim = 1000
+# κ_mpc = 1.0e-4
+
+# ## Cost
+# q_scale = deepcopy(cost_terms["q_scale"])
+# q_vec = q_scale .* cost_terms["q_vec"]
+# v_scale = deepcopy(cost_terms["v_scale"])
+# v_vec = v_scale .* cost_terms["v_vec"]
+# u_scale = deepcopy(cost_terms["u_scale"])
+# u_vec = u_scale .* cost_terms["u_vec"]
+
+# qlim_scale = deepcopy(cost_terms["qlim_scale"])
+# qlim_vec = qlim_scale .* cost_terms["qlim_vec"]
+# ulim_scale = deepcopy(cost_terms["ulim_scale"])
+# ulim_vec = ulim_scale .* cost_terms["ulim_vec"]
+
+
+# print("creating objective\n")
+# print("q: ", q_vec)
+# obj = TrackingVelocityObjective(model, env, H_mpc,
+#                                 q = [Diagonal(q_vec) .* (t/H_mpc) for t = 1:H_mpc-0],
+#                          	v = [Diagonal(v_vec) .* (t/H_mpc)^2 for t = 1:H_mpc-0],
+#                                 # q = [Diagonal(q_vec) for t = 1:H_mpc-0],
+# 	                        # v = [Diagonal(v_vec) for t = 1:H_mpc-0],
+# 	                        u = [Diagonal(u_vec) for t = 1:H_mpc-0],
+# 	                        γ = [Diagonal(1.0e-100 * ones(model.nc)) for t = 1:H_mpc-0],
+# 	                        b = [Diagonal(1.0e-100 * ones(model.nc * friction_dim(env))) for t = 1:H_mpc],
+#                                 qlim = [Diagonal(qlim_vec) for t = 1:H_mpc-0],
+#                          	ulim = [Diagonal(ulim_vec) for t = 1:H_mpc-0] );
+
+# # ## Policy
+# print("policy\n")
+# p = ci_mpc_policy(ref_traj, s, obj,
+#     H_mpc = H_mpc,
+#     N_sample = N_sample,
+#     κ_mpc = κ_mpc,
+#     # ip_opts = InteriorPointOptions(
+#     #                       undercut = 1.0,
+#     #                       κ_tol = κ_mpc,
+#     #                       r_tol = 1.0e-8,
+#     #                       diff_sol = true,
+#     #                       solver = :empty_solver,
+#     #                       max_time = 1e5,),
+#     n_opts = NewtonOptions(
+# 		r_tol = 3e-4,
+# 		max_iter = 10,
+# 		max_time = ref_traj.h/2, # HARD REAL TIME
+# 		),
+#                   mpc_opts = CIMPCOptions());
+
+
+# # ## Initial Conditions
+# q1_sim = q1
+# v1_sim = v1
+
+# print("simulation\n")
+
+# # ## Simulator
+# sim_ip_opts = InteriorPointOptions(
+#     undercut = 1.0,
+#     κ_tol = κ_mpc,
+#     r_tol = 1.0e-8,
+#     diff_sol = true,
+#     max_time = 1e5,)
+
+# sim = simulator(s, H_sim, h=h_sim, policy=p)
+# # sim = simulator(s, H_sim, h=h_sim, policy=p, solver_opts=sim_ip_opts) #, dist=d)
+
+# # ## Simulate
+# status = simulate!(sim, q1_sim, v1_sim, verbose=true)
+
+# # ## Visualizer
 # vis = ContactImplicitMPC.Visualizer()
 # ContactImplicitMPC.render(vis)
 
 # # ## Visualize
-# vis_traj = contact_trajectory(s.model, s.env, H, h)
-# anim = visualize_robot!(vis, model, sim.traj, sample = 1, h=h)
+# vis_traj = contact_trajectory(s.model, s.env, H_sim, h_sim)
+# anim = visualize_robot!(vis, model, sim.traj, sample = 1, h=h_sim)
+# # @infiltrate
+
+# using StaticArrays
+# function find_JTf(mod, envi, q, f, b, idx)
+#     cf = []
+#     for i in 1:6
+#         cf = push!(cf, b[idx, 2*i-1]+b[idx, 2*i])
+#         cf = push!(cf, f[idx,i])
+#     end
+#     ff = SVector{12}(cf)
+#     return transpose(ContactImplicitMPC.J_func(mod, envi, q[idx-1,1:end])) * ff
+# end
+
+# # ## Timing result
+
+# # Julia is [JIT-ed](https://en.wikipedia.org/wiki/Just-in-time_compilation) so re-run the MPC setup through Simulate for correct timing results.
+# process!(sim.stats, N_sample) # Time budget
+# H_sim * h_sim / sum(sim.stats.policy_time) # Speed ratio
+
 # u_mat = mapreduce(permutedims, vcat, sim.traj.u)
 # v_mat = mapreduce(permutedims, vcat, sim.traj.v)
 # q_mat = mapreduce(permutedims, vcat, sim.traj.q)
 # force_mat = mapreduce(permutedims, vcat, sim.traj.γ)
 # tanf_mat = mapreduce(permutedims, vcat, sim.traj.b)
-
-# @infiltrate
-##########################
-
-cost_terms = YAML.load_file(joinpath(@__DIR__,"block_costs.yaml"))
-
-# ## MPC setup 
-N_sample = 2
-H_mpc = cost_terms["H_mpc"]
-h_sim = h / N_sample
-H_sim = 1000
-κ_mpc = 1.0e-4
-
-## Cost
-q_scale = deepcopy(cost_terms["q_scale"])
-q_vec = q_scale .* cost_terms["q_vec"]
-v_scale = deepcopy(cost_terms["v_scale"])
-v_vec = v_scale .* cost_terms["v_vec"]
-u_scale = deepcopy(cost_terms["u_scale"])
-u_vec = u_scale .* cost_terms["u_vec"]
-
-qlim_scale = deepcopy(cost_terms["qlim_scale"])
-qlim_vec = qlim_scale .* cost_terms["qlim_vec"]
-ulim_scale = deepcopy(cost_terms["ulim_scale"])
-ulim_vec = ulim_scale .* cost_terms["ulim_vec"]
-
-
-print("creating objective\n")
-print("q: ", q_vec)
-obj = TrackingVelocityObjective(model, env, H_mpc,
-                                q = [Diagonal(q_vec) .* (t/H_mpc) for t = 1:H_mpc-0],
-                         	v = [Diagonal(v_vec) .* (t/H_mpc)^2 for t = 1:H_mpc-0],
-                                # q = [Diagonal(q_vec) for t = 1:H_mpc-0],
-	                        # v = [Diagonal(v_vec) for t = 1:H_mpc-0],
-	                        u = [Diagonal(u_vec) for t = 1:H_mpc-0],
-	                        γ = [Diagonal(1.0e-100 * ones(model.nc)) for t = 1:H_mpc-0],
-	                        b = [Diagonal(1.0e-100 * ones(model.nc * friction_dim(env))) for t = 1:H_mpc],
-                                qlim = [Diagonal(qlim_vec) for t = 1:H_mpc-0],
-                         	ulim = [Diagonal(ulim_vec) for t = 1:H_mpc-0] );
-
-# ## Policy
-print("policy\n")
-p = ci_mpc_policy(ref_traj, s, obj,
-    H_mpc = H_mpc,
-    N_sample = N_sample,
-    κ_mpc = κ_mpc,
-    # ip_opts = InteriorPointOptions(
-    #                       undercut = 1.0,
-    #                       κ_tol = κ_mpc,
-    #                       r_tol = 1.0e-8,
-    #                       diff_sol = true,
-    #                       solver = :empty_solver,
-    #                       max_time = 1e5,),
-    n_opts = NewtonOptions(
-		r_tol = 3e-4,
-		max_iter = 10,
-		max_time = ref_traj.h/2, # HARD REAL TIME
-		),
-                  mpc_opts = CIMPCOptions());
-
-
-# ## Initial Conditions
-q1_sim = q1
-v1_sim = v1
-
-print("simulation\n")
-# ## Simulator
-sim_ip_opts = InteriorPointOptions(
-    undercut = 1.0,
-    κ_tol = κ_mpc,
-    r_tol = 1.0e-8,
-    diff_sol = true,
-    max_time = 1e5,)
-
-sim = simulator(s, H_sim, h=h_sim, policy=p)
-# sim = simulator(s, H_sim, h=h_sim, policy=p, solver_opts=sim_ip_opts) #, dist=d)
-
-# ## Simulate
-status = simulate!(sim, q1_sim, v1_sim, verbose=true)
-
-# ## Visualizer
-vis = ContactImplicitMPC.Visualizer()
-ContactImplicitMPC.render(vis)
-
-# ## Visualize
-vis_traj = contact_trajectory(s.model, s.env, H_sim, h_sim)
-anim = visualize_robot!(vis, model, sim.traj, sample = 1, h=h_sim)
-# @infiltrate
-
-using StaticArrays
-function find_JTf(mod, envi, q, f, b, idx)
-    cf = []
-    for i in 1:6
-        cf = push!(cf, b[idx, 2*i-1]+b[idx, 2*i])
-        cf = push!(cf, f[idx,i])
-    end
-    ff = SVector{12}(cf)
-    return transpose(ContactImplicitMPC.J_func(mod, envi, q[idx-1,1:end])) * ff
-end
-
-# ## Timing result
-
-# Julia is [JIT-ed](https://en.wikipedia.org/wiki/Just-in-time_compilation) so re-run the MPC setup through Simulate for correct timing results.
-process!(sim.stats, N_sample) # Time budget
-H_sim * h_sim / sum(sim.stats.policy_time) # Speed ratio
-
-u_mat = mapreduce(permutedims, vcat, sim.traj.u)
-v_mat = mapreduce(permutedims, vcat, sim.traj.v)
-q_mat = mapreduce(permutedims, vcat, sim.traj.q)
-force_mat = mapreduce(permutedims, vcat, sim.traj.γ)
-tanf_mat = mapreduce(permutedims, vcat, sim.traj.b)
 

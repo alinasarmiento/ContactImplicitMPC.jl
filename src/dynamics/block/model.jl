@@ -52,7 +52,7 @@ function lagrangian(model::Block, q, q̇)
     L += 0.5 * model.m_block * transpose(q̇[3:4]) * q̇[3:4]
     # I_b = (1/12) * model.m_block * model.zlen_block * (model.xlen_block^3)
     I_b = (1/12) * model.m_block * (model.zlen_block^2) * (model.xlen_block^2)
-    L += 0.5*I_b*q̇[5]^2
+    L += 0.5*I_b*(q̇[5]^2)
     L -= model.m_block * model.g * q[4]
 
     return L
@@ -65,7 +65,9 @@ function kinematics(model::Block, q; mode=:contacts)
         ee = SVector{2}([q[1], q[2]])
         block1 = SVector{2}([q[3]+(model.xlen_block/2), q[4]-(model.zlen_block/2)])
         block2 = SVector{2}([q[3]-(model.xlen_block/2), q[4]-(model.zlen_block/2)])
-        return SVector{6}([ee; block1; block2;])
+        ee_g = SVector{2}([q[1], q[2]-model.r])
+        # return SVector{8}([ee; block1; block2; ee_g])
+        return SVector{6}([ee; block1; block2])
     elseif mode == :ee
         return q[1:2]
     elseif mode == :block
@@ -105,7 +107,7 @@ function dist_block(model::Block, p, pt)
     xdiff,zdiff = R*(differ)
 
     ## just halfplane
-    zdist = -zdiff - model.zlen_block/2
+    zdist = zdiff - model.zlen_block/2
     
     ## full
     # xdiff = abs(xdiff)
@@ -132,9 +134,12 @@ function ϕ_func(model::Block, env::Environment, q)
     block_q = q[3:5]    
 
     ee_block_dist = dist_block(model, ee, block_q)
-    block1_dist = block_q[2]
-    block2_dist = block_q[2]
+    block1_dist = block1[2] - (model.zlen_block/2)
+    block2_dist = block2[2]- (model.zlen_block/2)
+
+    ee_g_dist = ee[2] - model.r
     
+    # return SVector{4}([ee_block_dist; block1_dist; block2_dist; ee_g_dist])
     return SVector{3}([ee_block_dist; block1_dist; block2_dist])
 end
 
@@ -163,26 +168,27 @@ function _jacobian(model::Block, q; mode=:ee_b)
     # ee_g := EE-ground contact
 
     x_ee, z_ee, x_b, z_b, th_b = q
+    rot_th = [cos(th_b) sin(th_b);
+              -sin(th_b) cos(th_b)]
+    x_ee_b, z_ee_b = rot_th * [(x_ee-x_b); (z_ee-z_b)]
 
     #contacts: ee-b, b-g-front, b-g-back
     #x, z for each contact
     if mode == :ee_b
-        j = SMatrix{2,5}([-1.0 0.0 1.0 0.0 -(x_b-x_ee)*tan(th_b);
-                          0.0 -1.0 0.0 1.0 (x_b-x_ee)])
+        j = SMatrix{2,5}([-1.0 0.0 1.0 0.0 -(model.zlen_block/2);
+                          0.0 1.0 0.0 -1.0 -x_ee_b])
         return j
         
     elseif mode == :b_g
-        j = SMatrix{4,5}([0.0 0.0 1.0 0.0 -(x_b-(model.xlen_block/2))*tan(th_b);
-                          0.0 0.0 0.0 1.0 (x_b-(model.xlen_block/2));
-                          0.0 0.0 1.0 0.0 -(x_b+(model.xlen_block/2))*tan(th_b);
-                          0.0 0.0 0.0 1.0 (x_b-(model.xlen_block/2))])
+        j = SMatrix{4,5}([0.0 0.0 -1.0 0.0 -(model.zlen_block/2)*cos(th_b);
+                          0.0 0.0 0.0 1.0 (model.xlen_block/2)*cos(th_b);
+                          0.0 0.0 -1.0 0.0 -(model.zlen_block/2)*cos(th_b);
+                          0.0 0.0 0.0 1.0 -(model.xlen_block/2)*cos(th_b)])
         return j
-    # elseif mode == :ee_g
-    #     j = SMatrix{4,5}([1.0 0.0 0.0 0.0 0.0;
-    #                       0.0 1.0 0.0 0.0 0.0;
-    #                       1.0 0.0 0.0 0.0 0.0;
-    #                       0.0 1.0 0.0 0.0 0.0])
-    #     return j
+    elseif mode == :ee_g
+        j = SMatrix{2,5}([1.0 0.0 0.0 0.0 0.0;
+                          0.0 1.0 0.0 0.0 0.0])
+        return j
 
     end
 end
@@ -191,7 +197,7 @@ end
 function J_func(model::Block, env::Environment, q)
     return SMatrix{6, 5}([_jacobian(model, q, mode=:ee_b);
                           _jacobian(model, q, mode=:b_g);])
-                          # _jacobian(model, q, mode=:ground);])
+                          # _jacobian(model, q, mode=:ee_g);])
 end
 
 # translates the two variables normal force (γ) and tangential forces (b) into a single vector for jacobian
@@ -201,12 +207,13 @@ function contact_forces(model::Block, env::Environment{<:World, LinearizedCone},
     # k: also size 2*num contacts
     
     m = friction_mapping(env) # what is this
+    # SVector{8}([transpose(rotation(env, k[1:1])) * [m * b1[1:2]; γ1[1]];
+    #              transpose(rotation(env, k[3:3])) * [m * b1[3:4]; γ1[2]];
+    #              transpose(rotation(env, k[5:5])) * [m * b1[5:6]; γ1[3]];
+    #              transpose(rotation(env, k[7:7])) * [m * b1[7:8]; γ1[4]];])
     SVector{6}([transpose(rotation(env, k[1:1])) * [m * b1[1:2]; γ1[1]];
                  transpose(rotation(env, k[3:3])) * [m * b1[3:4]; γ1[2]];
                  transpose(rotation(env, k[5:5])) * [m * b1[5:6]; γ1[3]];])
-                 # transpose(rotation(env, k[7:7])) * [m * b1[7:8]; γ1[4]];
-                 # transpose(rotation(env, k[9:9])) * [m * b1[9:10]; γ1[5]];
-                 # transpose(rotation(env, k[11:11])) * [m * b1[11:12]; γ1[6]];])
 end
 
 function velocity_stack(model::Block, env::Environment{<:World, LinearizedCone}, q1, q2, k, h)
@@ -215,15 +222,14 @@ function velocity_stack(model::Block, env::Environment{<:World, LinearizedCone},
     v2_surf = rotation(env, k[3:3]) * v[3:4]
     v3_surf = rotation(env, k[5:5]) * v[5:6]
     # v4_surf = rotation(env, k[7:7]) * v[7:8]
-    # v5_surf = rotation(env, k[9:9]) * v[9:10]
-    # v6_surf = rotation(env, k[11:11]) * v[11:12]
     
+    # SVector{8}([transpose(friction_mapping(env)) * v1_surf[1];
+    #             transpose(friction_mapping(env)) * v2_surf[1];
+    #             transpose(friction_mapping(env)) * v3_surf[1];
+    #             transpose(friction_mapping(env)) * v4_surf[1];])
     SVector{6}([transpose(friction_mapping(env)) * v1_surf[1];
                 transpose(friction_mapping(env)) * v2_surf[1];
                 transpose(friction_mapping(env)) * v3_surf[1];])
-                # transpose(friction_mapping(env)) * v4_surf[1];
-                # transpose(friction_mapping(env)) * v5_surf[1];
-                # transpose(friction_mapping(env)) * v6_surf[1];])
 end
 
 
@@ -232,7 +238,7 @@ params = YAML.load_file(joinpath(@__DIR__,"params.yaml"))
 
 # nq, nu, nw, nc, m, g, m_block, μ_world, μ_block, r_ee, xlen_block, ylen_block, zlen_block
                          
-block_system = Block(5, 2, 2, 3,
+block_system = Block(5, 2, 2, 3, #4,
                      params["m_ee"], params["gravity"], params["m_block"],
                      params["mu_ground"], params["mu_block"],
                      params["r_ee"], params["xlen_block"], params["ylen_block"], params["zlen_block"],
@@ -240,8 +246,8 @@ block_system = Block(5, 2, 2, 3,
 	             SVector{5}(zeros(5)), # joint friction
                      SVector{2}([-10, -10]), # u min
                      SVector{2}([10, 10]),   # u max
-                     SVector{5}([-1,0, 0,-5,-5]), # q min (x,y,z, xtray,ytray,thtray)
-                     SVector{5}([1,1.5, 5,5,5]),   # q max
+                     SVector{5}([-1,0, -5,-5,-5]), # q min (x,z, xblock,zblock,thblock)
+                     SVector{5}([1,2, 5,5,5]),   # q max
 )
 
 function friction_coefficients(model::Block) 
