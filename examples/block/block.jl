@@ -21,7 +21,7 @@ env = s.env
 
 # ## Reference Trajectory
 h = 0.005
-H = 100
+H = 100 #100
 ref_traj = contact_trajectory(model, env, H, h)
 ref_traj.h
 
@@ -69,7 +69,6 @@ status = simulate!(sim, q1, v1, verbose=true)
 
 ##########################
 #Visualizer
-H = 1000
 vis = ContactImplicitMPC.Visualizer()
 ContactImplicitMPC.render(vis)
 

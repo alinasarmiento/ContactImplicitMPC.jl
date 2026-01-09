@@ -62,9 +62,30 @@ function kinematics(model::Block, q; mode=:contacts)
     # supposed to return pose of each contact point
     # (why also defined in visuals.jl??)
     if mode == :contacts
-        ee = SVector{2}([q[1], q[2]])
-        block1 = SVector{2}([q[3]+(model.xlen_block/2), q[4]-(model.zlen_block/2)])
-        block2 = SVector{2}([q[3]-(model.xlen_block/2), q[4]-(model.zlen_block/2)])
+        # option 1: EE location
+        # ee = SVector{2}([q[1], q[2]-model.r])
+
+        # option 2: project EE in -Z-world to block
+        # solve for projected point from EE to block surface
+        # thb = q[5]
+        # d = model.zlen_block/2
+        # l = (1/cos(thb)) * (q[1]-q[3]+(d*sin(thb)))
+        # ee_projx = q[1] #q[3] - (d*sin(thb)) + (l*cos(thb))
+        # ee_projz = q[4] + (d*cos(thb)) - (l*sin(thb))
+        # ee = SVector{2}([ee_projx, ee_projz])
+
+        # option 3: closest point to block plane
+        d = model.zlen_block/2
+        w = model.xlen_block/2
+        xe, ze, xb, zb, thb = q
+        thb = -thb
+        l = (cos(thb))*(ze-zb) - (sin(thb))*(xe-xb) - d
+        ee = SVector{2}([xe,ze]+[(l*sin(thb)),(-l*cos(thb))])
+
+        ## block contact points
+        block1 = SVector{2}([xb,zb] + d*[sin(thb),-cos(thb)] + w*[cos(thb),sin(thb)])
+        block2 = SVector{2}([xb,zb] + d*[sin(thb),-cos(thb)] - w*[cos(thb),sin(thb)])
+        
         ee_g = SVector{2}([q[1], q[2]-model.r])
         # return SVector{8}([ee; block1; block2; ee_g])
         return SVector{6}([ee; block1; block2])
@@ -107,20 +128,20 @@ function dist_block(model::Block, p, pt)
     xdiff,zdiff = R*(differ)
 
     ## just halfplane
-    zdist = zdiff - model.zlen_block/2
+    # zdist = zdiff - model.zlen_block/2 - model.r
     
     ## full
-    # xdiff = abs(xdiff)
-    # zdiff = abs(zdiff)        
-    # zdist = zdiff-(model.d_tray/2)
-    # xdist = xdiff-model.r_tray
+    xdiff = abs(xdiff)
+    zdiff = abs(zdiff)        
+    zdist = zdiff-(model.zlen_block/2)
+    xdist = xdiff-(model.xlen_block/2)
 
-    # dist_neg = min(0, max(xdist, zdist))
+    dist_neg = min(0, max(xdist, zdist))
     
-    # zdist = max(0, zdist)
-    # xdist = max(0, xdist)
+    zdist = max(0, zdist)
+    xdist = max(0, xdist)
     
-    # return norm([xdist, zdist]) + dist_neg
+    return norm([xdist, zdist]) + dist_neg
    return zdist
 end
 
@@ -128,14 +149,14 @@ end
 function ϕ_func(model::Block, env::Environment, q)
     # ee-block, block_front-ground, block_back-ground
     cp = kinematics(model, q, mode=:contacts)
-    ee = cp[1:2]
+    ee = q[1:2]
     block1 = cp[3:4]
     block2 = cp[5:6]
     block_q = q[3:5]    
 
     ee_block_dist = dist_block(model, ee, block_q)
-    block1_dist = block1[2] - (model.zlen_block/2)
-    block2_dist = block2[2]- (model.zlen_block/2)
+    block1_dist = block1[2] #- (model.zlen_block/2)
+    block2_dist = block2[2] #- (model.zlen_block/2)
 
     ee_g_dist = ee[2] - model.r
     
@@ -161,7 +182,7 @@ function A_func(model::Block, q)
     return A
 end
 
-function _jacobian(model::Block, q; mode=:ee_b)
+function _jacobian(model::Block, q, dists; mode=:ee_b)
     # J'λ = \tau
     # ee_b := EE-block contact
     # b_g := block-ground contact
@@ -173,17 +194,19 @@ function _jacobian(model::Block, q; mode=:ee_b)
     x_ee_b, z_ee_b = rot_th * [(x_ee-x_b); (z_ee-z_b)]
 
     #contacts: ee-b, b-g-front, b-g-back
-    #x, z for each contact
+    # tangent, normal for each contact
+    # remember Y axis is FLIPPED! so CW is positive theta
     if mode == :ee_b
-        j = SMatrix{2,5}([-1.0 0.0 1.0 0.0 -(model.zlen_block/2);
-                          0.0 1.0 0.0 -1.0 -x_ee_b])
+        j = SMatrix{2,5}([-cos(th_b) sin(th_b) cos(th_b) -sin(th_b) (model.zlen_block/2);
+                          sin(th_b) cos(th_b) -sin(th_b) -cos(th_b) x_ee_b])
         return j
         
     elseif mode == :b_g
-        j = SMatrix{4,5}([0.0 0.0 -1.0 0.0 -(model.zlen_block/2)*cos(th_b);
-                          0.0 0.0 0.0 1.0 (model.xlen_block/2)*cos(th_b);
-                          0.0 0.0 -1.0 0.0 -(model.zlen_block/2)*cos(th_b);
-                          0.0 0.0 0.0 1.0 -(model.xlen_block/2)*cos(th_b)])
+        
+        j = SMatrix{4,5}([0.0 0.0 1.0 0.0 -(model.zlen_block/2)*cos(th_b);
+                          0.0 0.0 0.0 1.0 -(model.xlen_block/2)*cos(th_b);
+                          0.0 0.0 1.0 0.0 -(model.zlen_block/2)*cos(th_b);
+                          0.0 0.0 0.0 1.0 (model.xlen_block/2)*cos(th_b)])
         return j
     elseif mode == :ee_g
         j = SMatrix{2,5}([1.0 0.0 0.0 0.0 0.0;
@@ -195,8 +218,9 @@ end
 
 # contact Jacobian
 function J_func(model::Block, env::Environment, q)
-    return SMatrix{6, 5}([_jacobian(model, q, mode=:ee_b);
-                          _jacobian(model, q, mode=:b_g);])
+    dists = ϕ_func(model::Block, env::Environment, q)
+    return SMatrix{6, 5}([_jacobian(model, q, dists, mode=:ee_b);
+                          _jacobian(model, q, dists, mode=:b_g);])
                           # _jacobian(model, q, mode=:ee_g);])
 end
 

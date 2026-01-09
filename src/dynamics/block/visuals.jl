@@ -8,8 +8,8 @@ using YAML
 
 function load_params()
     params_path = abspath(joinpath(@__DIR__, "params.yaml"))
-    @info "params path" params_path
     params = YAML.load_file(params_path)
+    @info params
     return params
 end    
 
@@ -32,7 +32,7 @@ function plot_lines!(vis::Visualizer, model::Block, q::AbstractVector;
 	return nothing
 end
 
-function build_robot!(vis::Visualizer, model::Block; name::Symbol=:Block, r=params["r_ee"], α=1.0)
+function build_robot!(vis::Visualizer, model::Block; name::Symbol=:Block, r=0.02, α=1.0)
     params = load_params()
     print(params)
     nc = model.nc
