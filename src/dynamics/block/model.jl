@@ -142,7 +142,7 @@ function dist_block(model::Block, p, pt)
     xdist = max(0, xdist)
     
     return norm([xdist, zdist]) + dist_neg
-   return zdist
+   # return zdist
 end
 
 # signed distance function
@@ -154,7 +154,7 @@ function ϕ_func(model::Block, env::Environment, q)
     block2 = cp[5:6]
     block_q = q[3:5]    
 
-    ee_block_dist = dist_block(model, ee, block_q)
+    ee_block_dist = dist_block(model, ee, block_q) - model.r
     block1_dist = block1[2] #- (model.zlen_block/2)
     block2_dist = block2[2] #- (model.zlen_block/2)
 
@@ -256,9 +256,14 @@ function velocity_stack(model::Block, env::Environment{<:World, LinearizedCone},
                 transpose(friction_mapping(env)) * v3_surf[1];])
 end
 
+function load_params()
+    params_path = abspath(joinpath(@__DIR__,"params.yaml"))
+    params = YAML.load_file(params_path)
+    return params
+end
 
 # Working Parameters
-params = YAML.load_file(joinpath(@__DIR__,"params.yaml"))
+params = load_params()
 
 # nq, nu, nw, nc, m, g, m_block, μ_world, μ_block, r_ee, xlen_block, ylen_block, zlen_block
                          

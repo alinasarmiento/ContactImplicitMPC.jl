@@ -36,6 +36,7 @@ function build_robot!(vis::Visualizer, model::Block; name::Symbol=:Block, r=0.02
     params = load_params()
     print(params)
     nc = model.nc
+    r = params["r_ee"]
     r = convert(Float32, r)
     
     body_mat = MeshPhongMaterial(color = RGBA(13/255, 152/255, 186/255, α))
