@@ -21,7 +21,7 @@ env = s.env
 
 # ## Reference Trajectory
 h = 0.005
-H = 1000 #100
+H = 100 #100
 ref_traj = contact_trajectory(model, env, H, h)
 ref_traj.h
 
@@ -51,12 +51,11 @@ br = ones(model.nc*friction_dim(env)).*fric_ref*h
 wr = zeros(model.nw)
 
 # ## Set Reference
-block_xvel = 0.1;
+block_xvel = 0.05;
 for t = 1:H
     ref_traj.z[t] = pack_z(model, env, qref, γr, br, ψr, ηr)
     ref_traj.θ[t] = pack_θ(model, qref, qref, ur, wr, model.μ_world, ref_traj.h)
-    ref_traj.q[t] = qref + [t*h*block_xvel; 0; 0; 0; 0]
-    println(ref_traj.q[t][3])
+    ref_traj.q[t] = qref + [t*h*block_xvel; 0; t*h*block_xvel; 0; 0]
     ref_traj.u[t] = ur
     ref_traj.γ[t] = γr
     ref_traj.b[t] = br

@@ -62,6 +62,7 @@ include("dynamics/mrp.jl")
 include("dynamics/euler.jl")
 
 include("dynamics/block/model.jl")
+include("dynamics/block_1D/model.jl")
 include("dynamics/particle_2D/model.jl")
 include("dynamics/particle/model.jl")
 include("dynamics/hopper_2D/model.jl")
@@ -112,6 +113,7 @@ include("dynamics/visuals.jl")
 include("dynamics/visual_utils.jl")
 
 include("dynamics/block/visuals.jl")
+include("dynamics/block_1D/visuals.jl")
 include("dynamics/particle_2D/visuals.jl")
 include("dynamics/particle/visuals.jl")
 include("dynamics/hopper_2D/visuals.jl")
@@ -267,6 +269,7 @@ export
     pushbot,
     waiter_2D,
     block_system,
+    block_system_1D,
     walledcartpole,
     flat_3D_lc,
     flat_3D_nc,

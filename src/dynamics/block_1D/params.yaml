@@ -10,8 +10,8 @@ xlen_block: 0.5 #0.5
 ylen_block: 0.16
 zlen_block: 0.1
 
-ee_init: [-0.1, 0.111]
-ee_des: [-0.3, 0.2]
+ee_init: [-0.27]
+ee_des: [-0.27]
 
 block_init: [0.0, 0.055]
 block_des: [.1, 0.05]

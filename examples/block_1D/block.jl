@@ -15,7 +15,7 @@ using YAML
 using Sockets
 
 # ## Simulation
-s = get_simulation("block", "flat_2D_lc", "flat", model_variable_name="block_system");
+s = get_simulation("block_1D", "flat_2D_lc", "flat", model_variable_name="block_system_1D");
 model = s.model
 env = s.env
 
@@ -25,20 +25,20 @@ H = 1000 #100
 ref_traj = contact_trajectory(model, env, H, h)
 ref_traj.h
 
-sim_params = YAML.load_file(joinpath(@__DIR__,"../../src/dynamics/block/params.yaml"))
+sim_params = YAML.load_file(joinpath(@__DIR__,"../../src/dynamics/block_1D/params.yaml"))
 ee_init = deepcopy(sim_params["ee_init"])
 ee_des = deepcopy(sim_params["ee_des"])
 block_init = deepcopy(sim_params["block_init"])
 block_des = deepcopy(sim_params["block_des"])
 
-qref = [ee_init[1]; ee_init[2];       # ee [x,z]
+qref = [ee_init[1];       # ee [x,z]
         block_init[1]; block_init[2]; 0.0;] # block [x,z,th]
 
-uref = [1.2, -3.0];
-f_Nee = -uref[2] + (model.m*9.81)
+uref = [0];
+f_Nee = -uref[1]
 f_Ng = f_Nee + (model.m_block*9.81)
 normal_ref = [f_Nee, f_Ng/2, f_Ng/2];
-fric_ref = [f_Nee*model.μ_block, 0, -(f_Ng/2)*model.μ_world, 0, -(f_Ng/2)*model.μ_world,0]
+fric_ref = [0, 0, -(f_Ng/2)*model.μ_world, 0, -(f_Ng/2)*model.μ_world,0]
 
 # ur = zeros(model.nu) #ones(model.nu)
 # γr = zeros(model.nc)
@@ -55,8 +55,7 @@ block_xvel = 0.1;
 for t = 1:H
     ref_traj.z[t] = pack_z(model, env, qref, γr, br, ψr, ηr)
     ref_traj.θ[t] = pack_θ(model, qref, qref, ur, wr, model.μ_world, ref_traj.h)
-    ref_traj.q[t] = qref + [t*h*block_xvel; 0; 0; 0; 0]
-    println(ref_traj.q[t][3])
+    ref_traj.q[t] = qref + [t*h*block_xvel; t*h*block_xvel; 0; 0]
     ref_traj.u[t] = ur
     ref_traj.γ[t] = γr
     ref_traj.b[t] = br
@@ -67,9 +66,9 @@ update_friction_coefficient!(ref_traj, model, env)
 
 # ## Initial conditions
 
-q1 = [ee_init[1]; ee_init[2];       # ee [x,z]
+q1 = [ee_init[1];       # ee [x,z]
         block_init[1]; block_init[2]; 0.0;] # block [x,z,th]
-v1 = [0.0; 0.0;
+v1 = [0.0;
       0.0; 0.0; 0.0;]
 
 # ## Simulator
@@ -184,11 +183,11 @@ anim = visualize_robot!(vis, model, sim.traj, sample = 1, h=h_sim)
 using StaticArrays
 function find_JTf(mod, envi, q, f, b, idx)
     cf = []
-    for i in 1:6
+    for i in 1:3
         cf = push!(cf, b[idx, 2*i-1]+b[idx, 2*i])
         cf = push!(cf, f[idx,i])
     end
-    ff = SVector{12}(cf)
+    ff = SVector{6}(cf)
     return transpose(ContactImplicitMPC.J_func(mod, envi, q[idx-1,1:end])) * ff
 end
 

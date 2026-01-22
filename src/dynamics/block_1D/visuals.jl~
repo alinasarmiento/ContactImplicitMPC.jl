@@ -13,8 +13,8 @@ function load_params()
     return params
 end    
 
-function plot_lines!(vis::Visualizer, model::Block, q::AbstractVector;
-		r=0.05, size=10, name::Symbol=:block, col::Bool=true)
+function plot_lines!(vis::Visualizer, model::Block1D, q::AbstractVector;
+		r=0.05, size=10, name::Symbol=:block_1D, col::Bool=true)
 	# Point Traj
 	com_point = Vector{Point{3,Float64}}()
 
@@ -32,7 +32,7 @@ function plot_lines!(vis::Visualizer, model::Block, q::AbstractVector;
 	return nothing
 end
 
-function build_robot!(vis::Visualizer, model::Block; name::Symbol=:Block, r=0.02, α=1.0)
+function build_robot!(vis::Visualizer, model::Block1D; name::Symbol=:Block1D, r=0.02, α=1.0)
     params = load_params()
     print(params)
     nc = model.nc
@@ -61,12 +61,12 @@ function build_robot!(vis::Visualizer, model::Block; name::Symbol=:Block, r=0.02
     return nothing
 end
 
-function set_robot!(vis::Visualizer, model::Block, q::AbstractVector; name::Symbol=:Block, r=params["r_ee"])
+function set_robot!(vis::Visualizer, model::Block1D, q::AbstractVector; name::Symbol=:Block1D, r=params["r_ee"])
     r = convert(Float32, r)
     
-    settransform!(vis[name][:robot]["ee"], Translation(q[1], 0.0, q[2]))
+    settransform!(vis[name][:robot]["ee"], Translation(q[1], 0.0, 0.05))
 
-    block_pos = Translation(q[3], 0.0, q[4])
+    block_pos = Translation(q[2], 0.0, q[3])
     block_rot = LinearMap(RotY(q[5]))
     block_tf = compose(block_pos, block_rot)
     settransform!(vis[name][:object]["block"], block_tf)
@@ -74,14 +74,14 @@ function set_robot!(vis::Visualizer, model::Block, q::AbstractVector; name::Symb
     return nothing
 end
 
-function contact_point(model::Block, q::AbstractVector; r=params["r_ee"])
+function contact_point(model::Block1D, q::AbstractVector; r=params["r_ee"])
     xlen = params["xlen_block"]
     zlen = params["zlen_block"]
                
-    pt_ee = [q[1], 0.0, q[2]]
+    pt_ee = [q[1], 0.0, 0.05]
 
-    pt_block1 = [q[3]+(xlen/2), 0.0, q[4]-(zlen/2)]
-    pt_block2 = [q[3]-(xlen/2), 0.0, q[4]-(zlen/2)]
+    pt_block1 = [q[2]+(xlen/2), 0.0, q[3]-(zlen/2)]
+    pt_block2 = [q[2]-(xlen/2), 0.0, q[3]-(zlen/2)]
 
     pc = [pt_ee, pt_block1, pt_block2]
     

@@ -1,0 +1,15 @@
+q_scale: 2e-2
+q_vec: [.01, 10.0, 4.0, 1.0]
+v_scale: 1e-3
+v_vec: [.1, .1, 4.0, 1.0]
+
+u_scale: 1e-7
+u_vec: [0.5]
+
+qlim_scale: .007
+qlim_vec: [1.0, 0.0, 0.0, 0.0]
+ulim_scale: 1e-4
+ulim_vec: [1.0]
+
+
+H_mpc: 10

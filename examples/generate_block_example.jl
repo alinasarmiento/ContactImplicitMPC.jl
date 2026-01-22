@@ -13,3 +13,4 @@ include(joinpath(dynamicsdir, "generate_block_dynamics.jl"))
 # Generate simulation
 simulationdir = joinpath(dirname(pathof(ContactImplicitMPC)), "..", "src", "simulation")
 include(joinpath(simulationdir, "generate_block_simulation.jl"))
+

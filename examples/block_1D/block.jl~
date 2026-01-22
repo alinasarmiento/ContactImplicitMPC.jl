@@ -15,7 +15,7 @@ using YAML
 using Sockets
 
 # ## Simulation
-s = get_simulation("block", "flat_2D_lc", "flat", model_variable_name="block_system");
+s = get_simulation("block_1D", "flat_2D_lc", "flat", model_variable_name="block_system");
 model = s.model
 env = s.env
 
@@ -25,17 +25,17 @@ H = 1000 #100
 ref_traj = contact_trajectory(model, env, H, h)
 ref_traj.h
 
-sim_params = YAML.load_file(joinpath(@__DIR__,"../../src/dynamics/block/params.yaml"))
+sim_params = YAML.load_file(joinpath(@__DIR__,"../../src/dynamics/block_1D/params.yaml"))
 ee_init = deepcopy(sim_params["ee_init"])
 ee_des = deepcopy(sim_params["ee_des"])
 block_init = deepcopy(sim_params["block_init"])
 block_des = deepcopy(sim_params["block_des"])
 
-qref = [ee_init[1]; ee_init[2];       # ee [x,z]
+qref = [ee_init[1];       # ee [x,z]
         block_init[1]; block_init[2]; 0.0;] # block [x,z,th]
 
-uref = [1.2, -3.0];
-f_Nee = -uref[2] + (model.m*9.81)
+uref = [1.2];
+f_Nee = -uref[2]
 f_Ng = f_Nee + (model.m_block*9.81)
 normal_ref = [f_Nee, f_Ng/2, f_Ng/2];
 fric_ref = [f_Nee*model.μ_block, 0, -(f_Ng/2)*model.μ_world, 0, -(f_Ng/2)*model.μ_world,0]
