@@ -1,15 +1,22 @@
-q_scale: 2e-2
-q_vec: [.0, .0, .0, .0]
+q_scale: 1e-4
+q_vec: [0., .0, .0, .0]
 v_scale: 1e-2
-v_vec: [.1, 1, .0, .0]
-
-u_scale: 1e-5
+v_vec: [0, 1., .0, .0]
+u_scale: 1e-4
 u_vec: [0.5]
 
-qlim_scale: .007
-qlim_vec: [1.0, 0.0, 0.0, 0.0]
-ulim_scale: 1e-4
-ulim_vec: [1.0]
-
-
+kappa: 0.7e-3
+kappa_sim: 0.7e-3
 H_mpc: 10
+ctrl_dt: 0.001
+
+ee_init: [-0.02]
+ee_des: [-0.02]
+block_init: [0.25, 0.055]
+block_des: [0.5, 0.055]
+block_vel_des: 0.1
+
+qlim_scale: .00
+qlim_vec: [1.0, 0.0, 0.0, 0.0]
+ulim_scale: .1
+ulim_vec: [1.0]

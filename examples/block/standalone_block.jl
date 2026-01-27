@@ -28,11 +28,11 @@ H = 100 #100
 ref_traj = contact_trajectory(model, env, H, h)
 ref_traj.h
 
-sim_params = YAML.load_file(joinpath(@__DIR__,"../../src/dynamics/block/params.yaml"))
-ee_init = deepcopy(sim_params["ee_init"])
-ee_des = deepcopy(sim_params["ee_des"])
-block_init = deepcopy(sim_params["block_init"])
-block_des = deepcopy(sim_params["block_des"])
+ctrl_params = YAML.load_file(joinpath(@__DIR__,"block_costs.yaml"))
+ee_init = deepcopy(ctrl_params["ee_init"])
+ee_des = deepcopy(ctrl_params["ee_des"])
+block_init = deepcopy(ctrl_params["block_init"])
+block_des = deepcopy(ctrl_params["block_des"])
 
 qref = [ee_init[1]; ee_init[2];       # ee [x,z]
         block_init[1]; block_init[2]; 0.0;] # block [x,z,th]
@@ -81,27 +81,26 @@ sim = simulator(s, H, h=0.005) #h)
 status = simulate!(sim, q1, v1, verbose=true)
 
 # ## MPC setup
-cost_terms = YAML.load_file(joinpath(@__DIR__,"block_costs.yaml"))
 N_sample = 2
-H_mpc = cost_terms["H_mpc"]
+H_mpc = ctrl_params["H_mpc"]
 h_sim = h / N_sample
 H_sim = 1000
 κ_mpc = 1.0e-5
 
 ## Cost
-q_scale = deepcopy(cost_terms["q_scale"])
-q_vec = q_scale .* cost_terms["q_vec"]
+q_scale = deepcopy(ctrl_params["q_scale"])
+q_vec = q_scale .* ctrl_params["q_vec"]
 
-v_scale = deepcopy(cost_terms["v_scale"])
-v_vec = v_scale .* cost_terms["v_vec"]
+v_scale = deepcopy(ctrl_params["v_scale"])
+v_vec = v_scale .* ctrl_params["v_vec"]
 
-u_scale = deepcopy(cost_terms["u_scale"])
-u_vec = u_scale .* cost_terms["u_vec"]
+u_scale = deepcopy(ctrl_params["u_scale"])
+u_vec = u_scale .* ctrl_params["u_vec"]
 
-qlim_scale = deepcopy(cost_terms["qlim_scale"])
-qlim_vec = qlim_scale .* cost_terms["qlim_vec"]
-ulim_scale = deepcopy(cost_terms["ulim_scale"])
-ulim_vec = ulim_scale .* cost_terms["ulim_vec"]
+qlim_scale = deepcopy(ctrl_params["qlim_scale"])
+qlim_vec = qlim_scale .* ctrl_params["qlim_vec"]
+ulim_scale = deepcopy(ctrl_params["ulim_scale"])
+ulim_vec = ulim_scale .* ctrl_params["ulim_vec"]
 
 print("creating objective\n")
 print("q: ", q_vec)

@@ -1,6 +1,6 @@
 gravity: 9.81
-mu_ground: 0.01
-mu_block: 0.4615
+mu_ground: 0.8 #1.0 #0.01
+mu_block: 1.0 #0.4615
 
 m_ee: 0.1
 m_block: 0.5
@@ -9,9 +9,3 @@ r_ee: 0.02
 xlen_block: 0.5 #0.5
 ylen_block: 0.16
 zlen_block: 0.1
-
-ee_init: [-0.27]
-ee_des: [-0.27]
-
-block_init: [0.0, 0.055]
-block_des: [.1, 0.05]

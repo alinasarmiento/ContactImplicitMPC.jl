@@ -390,8 +390,9 @@ end
 function num_data(model::Model)
 	nq = model.nq
 	nu = model.nu
-	nw = model.nw
-	nq + nq + nu + nw + 1 + 1
+        nw = model.nw
+        nf = length(friction_coefficients(model))
+	nq + nq + nu + nw + nf + 1
 end
 
 function num_bilinear(model::Model, env::Environment)

@@ -227,7 +227,7 @@ end
 # translates the two variables normal force (γ) and tangential forces (b) into a single vector for jacobian
 function contact_forces(model::Block, env::Environment{<:World, LinearizedCone}, γ1, b1, q2, k)
     # γ1: force vector (size num contacts)
-    # b1: idk but size 2*num contacts
+    # b1: tangent force vector (size 2*num contacts)
     # k: also size 2*num contacts
     
     m = friction_mapping(env) # what is this
@@ -280,7 +280,7 @@ block_system = Block(5, 2, 2, 3, #4,
 )
 
 function friction_coefficients(model::Block) 
-	return [model.μ_world]
+	return [model.μ_block, model.μ_world, model.μ_world]
 end
 
 function initialize_z!(z, model::Block, idx::RoboDojo.IndicesZ, q)

@@ -158,3 +158,43 @@ def py_handler_block(lc, sim, model, env, u_lcm_channel, q0_sim=[0,0], hp=0.005)
         lc.publish(u_lcm_channel, u_lcm.encode())
 
     return handler
+
+def py_handler_block_1D(lc, sim, model, env, u_lcm_channel, q0_sim=[0], hp=0.005):
+    def handler(channel, msg):
+        msg = lcmt_object_state.decode(msg)
+        p = sim.policy
+        q_ee = list(msg.position[0:1])
+        b_xz = [msg.position[-3], msg.position[-1]]
+        b_euler = euler_from_quaternion(*msg.position[1:5])
+        b_th = [b_euler[2]]
+        # xee, qwb, qxb, qyb, qzb, xb, zb
+
+        q1 = q_ee + b_xz + b_th
+        q1 = jlconvert(Main.Vector, list(q1))
+
+        # check if utime is next h
+        t_now = msg.utime/1e6
+        t_ctrl = int(t_now / hp)
+        
+        if t_now%hp <= 0.0101:
+            cimpc.newton_solve_b(p.newton, p.s, p.q0, q1,
+                                 p.im_traj, p.traj, warm_start=t_ctrl>0)
+            cimpc.update_b(p.im_traj, p.traj, p.s, p.altitude, p.κ[0], p.traj.H)
+            cimpc.rot_n_stride_b(p.traj, p.traj_cache, p.stride)
+            cimpc.update_q0_u_b(p, q1)
+        
+        # lcm broadcast p.u
+        u_lcm = lcmt_robot_input()
+        u_lcm.utime = msg.utime
+        u_lcm.num_efforts = 1
+        u_lcm.effort_names = ["x_motor"]
+
+        u_lcm.efforts = p.u /  sim.h#(hp/p.N_sample)
+        print("u:",u_lcm.efforts,"h:", sim.h, "t:", t_now)
+        if np.isnan(u_lcm.efforts[0]):
+            u_lcm.efforts = [0.0]
+            raise Exception
+    
+        lc.publish(u_lcm_channel, u_lcm.encode())
+
+    return handler

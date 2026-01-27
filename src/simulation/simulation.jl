@@ -152,11 +152,17 @@ function residual(model::Model, env::Environment{<:World,LinearizedCone}, z, θ,
     # u_vio_weight = model.u_vio_weight
     # ru = max.(0.0, u1 .- u_max) + max.(0.0, u_min .- u1)
 
+    if length(μ) == 1
+        s2_diff = μ[1] * γ1 .- E_func(model, env) * b1;
+    else
+        s2_diff = μ .* γ1 .- E_func(model, env) * b1;
+    end
+    
     # @warn "define residual order"
     [model.dyn.d(h, q0, q1, u1, w1, Λ1, q2);
      s1 - ϕ;
      η1 - vT_stack - ψ_stack;
-     s2 .- (μ[1] * γ1 .- E_func(model, env) * b1);
+     s2 .- s2_diff;
      γ1 .* s1 .- κ[1];
      b1 .* η1 .- κ[1];
      ψ1 .* s2 .- κ[1]]

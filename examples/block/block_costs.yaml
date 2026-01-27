@@ -1,10 +1,27 @@
-q_scale: 2e-2
-q_vec: [.01, .01, 10.0, 4.0, 1.0]
-v_scale: 1e-3
-v_vec: [.1, .1, .1, 4.0, 1.0]
+# q_scale: 3e-4
+# q_vec: [0, .1, .0, .0]
+# v_scale: 1e-2
+# v_vec: [.1, .5, .0, .0]
 
-u_scale: 1e-7
-u_vec: [0.9, .5]
+# u_scale: 1e-5
+# u_vec: [0.5]
+
+# qlim_scale: .00
+# qlim_vec: [1.0, 0.0, 0.0, 0.0]
+# ulim_scale: 4e-4
+# ulim_vec: [1.0]
+
+q_scale: 1e-2
+# xee, zee, xb, zb, thb
+q_vec: [3, 0, 3, 0, 0]
+v_scale: 1e-3
+v_vec: [.1, .0, 4.0, 0, 0]
+
+ctrl_dt: 0.005
+kappa: 2.0e-4
+
+u_scale: 1e-2
+u_vec: [0.9, 0.9]
 
 qlim_scale: .007
 qlim_vec: [1.0, 1.0, 0.0, 0.0, 0.0]
@@ -13,3 +30,11 @@ ulim_vec: [1.0, 1.0]
 
 
 H_mpc: 10
+
+ee_init: [-0.1, 0.111]
+ee_des: [-0.3, 0.2]
+
+block_init: [0.0, 0.055]
+block_des: [0.1, 0.055]
+
+block_vel_des: 0.1

@@ -14,22 +14,27 @@ using MeshCat
 using YAML
 using Sockets
 
+function get_yaml()
+    ctrl_params = YAML.load_file(joinpath(@__DIR__,"block_costs.yaml"))
+    return ctrl_params
+end
+
 # ## Simulation
 s = get_simulation("block", "flat_2D_lc", "flat", model_variable_name="block_system");
 model = s.model
 env = s.env
 
 # ## Reference Trajectory
-h = 0.005
-H = 1000 #100
+ctrl_params = get_yaml()
+h = ctrl_params["ctrl_dt"]
+H = 100 #100
 ref_traj = contact_trajectory(model, env, H, h)
 ref_traj.h
 
-sim_params = YAML.load_file(joinpath(@__DIR__,"../../src/dynamics/block/params.yaml"))
-ee_init = deepcopy(sim_params["ee_init"])
-ee_des = deepcopy(sim_params["ee_des"])
-block_init = deepcopy(sim_params["block_init"])
-block_des = deepcopy(sim_params["block_des"])
+ee_init = deepcopy(ctrl_params["ee_init"])
+ee_des = deepcopy(ctrl_params["ee_des"])
+block_init = deepcopy(ctrl_params["block_init"])
+block_des = deepcopy(ctrl_params["block_des"])
 
 qref = [ee_init[1]; ee_init[2];       # ee [x,z]
         block_init[1]; block_init[2]; 0.0;] # block [x,z,th]
@@ -40,29 +45,41 @@ f_Ng = f_Nee + (model.m_block*9.81)
 normal_ref = [f_Nee, f_Ng/2, f_Ng/2];
 fric_ref = [f_Nee*model.μ_block, 0, -(f_Ng/2)*model.μ_world, 0, -(f_Ng/2)*model.μ_world,0]
 
-# ur = zeros(model.nu) #ones(model.nu)
-# γr = zeros(model.nc)
-# br = zeros(model.nc * friction_dim(env))
-ur = ones(model.nu).*uref*h
-γr = ones(model.nc).*normal_ref*h
-br = ones(model.nc*friction_dim(env)).*fric_ref*h
+ur = zeros(model.nu) #ones(model.nu)
+γr = zeros(model.nc)
+br = zeros(model.nc * friction_dim(env))
+# ur = ones(model.nu).*uref*h
+# γr = ones(model.nc).*normal_ref*h
+# br = ones(model.nc*friction_dim(env)).*fric_ref*h
 ψr = zeros(model.nc)
 ηr = zeros(model.nc * friction_dim(env))
 wr = zeros(model.nw)
 
+function create_block_slide_ref(vel, q_init, dt, T)
+    q_traj = []
+    push!(q_traj, q_init)
+    q_t = q_init
+    for i=1:T-1
+        push!(q_traj, q_t + [dt*vel; 0; dt*vel; 0; 0])
+        q_t = q_traj[end]
+    end
+    return q_traj
+end
+
 # ## Set Reference
 block_xvel = 0.1;
+qref_traj = create_block_slide_ref(block_xvel, qref, h, H+2)
+
 for t = 1:H
     ref_traj.z[t] = pack_z(model, env, qref, γr, br, ψr, ηr)
-    ref_traj.θ[t] = pack_θ(model, qref, qref, ur, wr, model.μ_world, ref_traj.h)
-    ref_traj.q[t] = qref + [t*h*block_xvel; 0; 0; 0; 0]
-    println(ref_traj.q[t][3])
+    ref_traj.θ[t] = pack_θ(model, qref, qref, ur, wr, friction_coefficients(model), ref_traj.h)
+    ref_traj.q[t] = qref_traj[t]
     ref_traj.u[t] = ur
     ref_traj.γ[t] = γr
     ref_traj.b[t] = br
 end
-ref_traj.q[H+1] = qref
-ref_traj.q[H+2] = qref
+ref_traj.q[H+1] = qref_traj[H+1]
+ref_traj.q[H+2] = qref_traj[H+2]
 update_friction_coefficient!(ref_traj, model, env)
 
 # ## Initial conditions
@@ -95,27 +112,26 @@ status = simulate!(sim, q1, v1, verbose=true)
 # @infiltrate
 ##########################
 
-cost_terms = YAML.load_file(joinpath(@__DIR__,"block_costs.yaml"))
 
 # ## MPC setup 
 N_sample = 2
-H_mpc = cost_terms["H_mpc"]
+H_mpc = ctrl_params["H_mpc"]
 h_sim = h / N_sample
 H_sim = 1000
-κ_mpc = 1.0e-5
+κ_mpc = ctrl_params["kappa"]
 
 ## Cost
-q_scale = deepcopy(cost_terms["q_scale"])
-q_vec = q_scale .* cost_terms["q_vec"]
-v_scale = deepcopy(cost_terms["v_scale"])
-v_vec = v_scale .* cost_terms["v_vec"]
-u_scale = deepcopy(cost_terms["u_scale"])
-u_vec = u_scale .* cost_terms["u_vec"]
+q_scale = deepcopy(ctrl_params["q_scale"])
+q_vec = q_scale .* ctrl_params["q_vec"]
+v_scale = deepcopy(ctrl_params["v_scale"])
+v_vec = v_scale .* ctrl_params["v_vec"]
+u_scale = deepcopy(ctrl_params["u_scale"])
+u_vec = u_scale .* ctrl_params["u_vec"]
 
-qlim_scale = deepcopy(cost_terms["qlim_scale"])
-qlim_vec = qlim_scale .* cost_terms["qlim_vec"]
-ulim_scale = deepcopy(cost_terms["ulim_scale"])
-ulim_vec = ulim_scale .* cost_terms["ulim_vec"]
+qlim_scale = deepcopy(ctrl_params["qlim_scale"])
+qlim_vec = qlim_scale .* ctrl_params["qlim_vec"]
+ulim_scale = deepcopy(ctrl_params["ulim_scale"])
+ulim_vec = ulim_scale .* ctrl_params["ulim_vec"]
 
 
 print("creating objective\n")
