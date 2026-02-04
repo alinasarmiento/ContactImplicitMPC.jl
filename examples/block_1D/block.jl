@@ -80,12 +80,13 @@ end
 
 block_xvel = ctrl_params["block_vel_des"];
 q_t = [ee_init[1]; block_init[1]; block_des[2]; 0.0;]
+q_goal = [ee_init[1]; block_des[1]; block_des[2]; 0.0;]
 qref_traj, uref_traj= create_block_push_ref(((model.xlen_block/2)+model.r), block_xvel, q_t, h, H+2)
     
 for t = 1:H
     ref_traj.z[t] = pack_z(model, env, qref, γr, br, ψr, ηr)
     ref_traj.θ[t] = pack_θ(model, qref, qref, ur, wr, model.μ_world, ref_traj.h)
-    ref_traj.q[t] = qref_traj[t] #qref + [t*h*block_xvel; t*h*block_xvel; 0; 0]
+    ref_traj.q[t] = q_goal #qref_traj[t] #qref + [t*h*block_xvel; t*h*block_xvel; 0; 0]
     ref_traj.u[t] = [0] #uref_traj[t]  #ur
     ref_traj.γ[t] = [0, γr[2], γr[3]] #[-uref_traj[t][1], γr[2], γr[3]] #γr
     ref_traj.b[t] = br
@@ -142,9 +143,13 @@ function obj_policy(model, env, ctrl_params, N_sample)
     ulim_scale = deepcopy(ctrl_params["ulim_scale"])
     ulim_vec = ulim_scale .* ctrl_params["ulim_vec"]
     print("creating objective\n")
-    print("q: ", q_vec)
+    q_obj_vec = [(t/H_mpc)^2 for t=1:H_mpc-0]
+    q_obj_vec[H_mpc] = 1
+    println(q_obj_vec)
+    q_obj = [Diagonal(q_vec) .* q_obj_vec[t] for t=1:H_mpc-0]
+    println(q_obj)
     obj = TrackingVelocityObjective(model, env, H_mpc,
-                                    q = [Diagonal(q_vec) .* (t/H_mpc) for t = 1:H_mpc-0],
+                                    q = q_obj, #[Diagonal(q_vec) .* (t/H_mpc) for t = 1:H_mpc-0],
                                     v = [Diagonal(v_vec) .* (t/H_mpc) for t = 1:H_mpc-0],
                                     # q = [Diagonal(q_vec) for t = 1:H_mpc-0],
                                     # v = [Diagonal(v_vec) for t = 1:H_mpc-0],

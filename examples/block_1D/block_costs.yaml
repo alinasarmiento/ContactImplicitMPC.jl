@@ -1,6 +1,6 @@
-q_scale: 1e-4
-q_vec: [0., .0, .0, .0]
-v_scale: 1e-2
+q_scale: 1e-2
+q_vec: [0., 1, .0, .0]
+v_scale: 0 #1e-2
 v_vec: [0, 1., .0, .0]
 u_scale: 1e-4
 u_vec: [0.5]
