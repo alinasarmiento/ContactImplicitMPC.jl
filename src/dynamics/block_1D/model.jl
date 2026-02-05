@@ -200,7 +200,7 @@ function _jacobian(model::Block1D, q, dists; mode=:ee_b)
         # convention: tangent faces up (+z) and normal faces back (-x)
         # j = SMatrix{2,4}([-sin(th_b) sin(th_b) cos(th_b) 0; #(model.xlen_block/2);
         #                   -cos(th_b) cos(th_b) -sin(th_b) 0;]) #-z_ee_b;])
-        j = SMatrix{2,3}([0 0 1;
+        j = SMatrix{2,3}([0 0 0;
                           -1 1 0;])
         return j
         

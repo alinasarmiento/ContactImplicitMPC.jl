@@ -73,7 +73,7 @@ function create_block_push_ref(dist, vel, q_init, dt, T)
     q_t = q_init
     for i=1:T-1
         bc = (q_t[2] - q_t[1] <= dist)
-        push!(q_traj, q_t + [dt*vel; bc*dt*vel; 0; 0])
+        push!(q_traj, q_t + [dt*vel; bc*dt*vel; 0;])
         mb = model.m_block*bc
         ux = [(block_xvel*(mb+model.m)/(i*dt)) + (model.μ_world*mb*9.81)] * dt
         push!(u_traj, ux)
@@ -83,8 +83,8 @@ function create_block_push_ref(dist, vel, q_init, dt, T)
 end
 
 block_xvel = ctrl_params["block_vel_des"];
-q_t = [ee_init[1]; block_init[1]; block_des[2]; 0.0;]
-q_goal = [ee_init[1]; block_des[1]; block_des[2]; 0.0;]
+q_t = [ee_init[1]; block_init[1]; block_des[2];]
+q_goal = [ee_init[1]; block_des[1]; block_des[2];]
 qref_traj, uref_traj= create_block_push_ref(((model.xlen_block/2)+model.r), block_xvel, q_t, h, H+2)
     
 for t = 1:H
@@ -187,7 +187,7 @@ end
 
 # ## MPC setup 
 N_sample = 5
-# obj, p = obj_policy(model, env, ctrl_params, N_sample)
+obj, p = obj_policy(model, env, ctrl_params, N_sample)
 κ_sim = ctrl_params["kappa_sim"] #0.7e-3
 h_sim = ctrl_params["ctrl_dt"] / N_sample
 H_sim = 1000
@@ -205,9 +205,10 @@ sim_ip_opts = InteriorPointOptions(
     diff_sol = true,
     max_time = 1e5,)
 
-const_u = [0.001]
+const_u = [0.01]
 const_p = ContactImplicitMPC.open_loop_policy(Vector{Vector{Float64}}([copy(const_u) for _ in 1:H_sim]), N_sample=N_sample)
-sim = simulator(s, H_sim, h=h_sim, policy=const_p)#p)
+# sim = simulator(s, H_sim, h=h_sim, policy=const_p)#p)
+sim = simulator(s, H_sim, h=h_sim, policy=p)
 # sim = simulator(s, H_sim, h=h_sim, policy=p, solver_opts=sim_ip_opts) #, dist=d)
 
 # ## Simulate

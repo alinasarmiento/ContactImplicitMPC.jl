@@ -1,7 +1,7 @@
 q_scale: 1e-2
-q_vec: [0., 1, .0, .0]
+q_vec: [0., 1, .0]
 v_scale: 1e-4
-v_vec: [0, 1., .0, .0]
+v_vec: [0, 1., .0]
 u_scale: 1e-4
 u_vec: [0.5]
 
@@ -17,6 +17,6 @@ block_des: [0.5, 0.05]
 block_vel_des: 0.1
 
 qlim_scale: .00
-qlim_vec: [1.0, 0.0, 0.0, 0.0]
+qlim_vec: [1.0, 0.0, 0.0]
 ulim_scale: .1
 ulim_vec: [1.0]
