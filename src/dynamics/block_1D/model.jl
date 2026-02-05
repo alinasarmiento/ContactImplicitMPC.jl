@@ -49,8 +49,8 @@ function lagrangian(model::Block1D, q, q̇)
 
     # block
     L += 0.5 * model.m_block * transpose(q̇[2:3]) * q̇[2:3]
-    I_b = (1/12) * model.m_block * (model.zlen_block^2) * (model.xlen_block^2)
-    L += 0.5*I_b*(q̇[4]^2)
+    # I_b = (1/12) * model.m_block * (model.zlen_block^2) * (model.xlen_block^2)
+    # L += 0.5*I_b*(q̇[4]^2)
     L -= model.m_block * model.g * q[3]
 
     return L
@@ -82,10 +82,11 @@ function kinematics(model::Block1D, q; mode=:contacts)
         ee = SVector{2}([xe,ze]+[(l*cos(thb)),(l*sin(thb))])
 
         ## block contact points
-        block1 = SVector{2}([xb,zb] + d*[sin(thb),-cos(thb)] + w*[cos(thb),sin(thb)])
-        block2 = SVector{2}([xb,zb] + d*[sin(thb),-cos(thb)] - w*[cos(thb),sin(thb)])
+        # block1 = SVector{2}([xb,zb] + d*[sin(thb),-cos(thb)] + w*[cos(thb),sin(thb)])
+        # block2 = SVector{2}([xb,zb] + d*[sin(thb),-cos(thb)] - w*[cos(thb),sin(thb)])
+        block = SVector{2}([xb,zb] + d*[sin(thb),-cos(thb)])
         
-        return SVector{6}([ee; block1; block2])
+        return SVector{4}([ee; block;])
     elseif mode == :ee
         return q[1]
     elseif mode == :block
@@ -147,15 +148,16 @@ function ϕ_func(model::Block1D, env::Environment, q)
     # ee-block, block_front-ground, block_back-ground
     cp = kinematics(model, q, mode=:contacts)
     ee = [q[1], 0.05]
-    block1 = cp[3:4]
-    block2 = cp[5:6]
+    block = cp[3:4]
+    # block2 = cp[5:6]
     block_q = q[2:4]    
 
     ee_block_dist = dist_block(model, ee, block_q) - model.r
-    block1_dist = block1[2] #- (model.zlen_block/2)
-    block2_dist = block2[2] #- (model.zlen_block/2)
-
-    return SVector{3}([ee_block_dist; block1_dist; block2_dist])
+    # block1_dist = block1[2] #- (model.zlen_block/2)
+    # block2_dist = block2[2] #- (model.zlen_block/2)
+    block_dist = block[2]
+    
+    return SVector{2}([ee_block_dist; block_dist;])
 end
 
 # control Jacobian
@@ -191,54 +193,50 @@ function _jacobian(model::Block1D, q, dists; mode=:ee_b)
     # remember Y axis is FLIPPED! so CW is positive theta
     if mode == :ee_b
         # convention: tangent faces up (+z) and normal faces back (-x)
-        j = SMatrix{2,4}([-sin(th_b) sin(th_b) cos(th_b) (model.xlen_block/2);
-                          -cos(th_b) cos(th_b) -sin(th_b) -z_ee_b;]) 
+        # j = SMatrix{2,4}([-sin(th_b) sin(th_b) cos(th_b) 0; #(model.xlen_block/2);
+        #                   -cos(th_b) cos(th_b) -sin(th_b) 0;]) #-z_ee_b;])
+        j = SMatrix{2,4}([0 0 1 0;
+                          -1 1 0 0;])
         return j
         
     elseif mode == :b_g
         
-        j = SMatrix{4,4}([0.0 1.0 0.0 -(model.zlen_block/2)*cos(th_b);
-                          0.0 0.0 1.0 -(model.xlen_block/2)*cos(th_b);
-                          0.0 1.0 0.0 -(model.zlen_block/2)*cos(th_b);
-                          0.0 0.0 1.0 (model.xlen_block/2)*cos(th_b)])
+        j = SMatrix{2,4}([0.0 1.0 0.0 0;
+                          0.0 0.0 1.0 0;])
+                          # 0.0 1.0 0.0 -(model.zlen_block/2)*cos(th_b);
+                          # 0.0 0.0 1.0 (model.xlen_block/2)*cos(th_b)])
         return j
-    elseif mode == :ee_g
-        j = SMatrix{2,4}([1.0 0.0 0.0 0.0;
-                          0.0 0.0 0.0 0.0])
-        return j
-
     end
 end
 
 # contact Jacobian
 function J_func(model::Block1D, env::Environment, q)
     dists = ϕ_func(model::Block1D, env::Environment, q)
-    return SMatrix{6, 4}([_jacobian(model, q, dists, mode=:ee_b);
+    return SMatrix{4, 4}([_jacobian(model, q, dists, mode=:ee_b);
                           _jacobian(model, q, dists, mode=:b_g);])
-                          # _jacobian(model, q, mode=:ee_g);])
 end
 
 # translates the two variables normal force (γ) and tangential forces (b) into a single vector for jacobian
 function contact_forces(model::Block1D, env::Environment{<:World, LinearizedCone}, γ1, b1, q2, k)
-    # γ1: force vector (size num contacts)
-    # b1: idk but size 2*num contacts
-    # k: also size 2*num contacts
+    # γ1: normal force vector (size num contacts)
+    # b1: tangent force vector
+    # k: contact point coordinates from kinematics()
     
     m = friction_mapping(env) # what is this
-    SVector{6}([transpose(rotation(env, k[1:1])) * [m * b1[1:2]; γ1[1]];
-                  transpose(rotation(env, k[3:3])) * [m * b1[3:4]; γ1[2]];
-                 transpose(rotation(env, k[5:5])) * [m * b1[5:6]; γ1[3]];])
+    SVector{4}([transpose(rotation(env, k[1:1])) * [m * b1[1:2]; γ1[1]];
+                  transpose(rotation(env, k[3:3])) * [m * b1[3:4]; γ1[2]];])
+                 # transpose(rotation(env, k[5:5])) * [m * b1[5:6]; γ1[3]];])
 end
 
 function velocity_stack(model::Block1D, env::Environment{<:World, LinearizedCone}, q1, q2, k, h)
     v = J_func(model, env, q2) * (q2 - q1) / h[1]
     v1_surf = rotation(env, k[1:1]) * v[1:2]
     v2_surf = rotation(env, k[3:3]) * v[3:4]
-    v3_surf = rotation(env, k[5:5]) * v[5:6]
+    # v3_surf = rotation(env, k[5:5]) * v[5:6]
 
-    SVector{6}([transpose(friction_mapping(env)) * v1_surf[1];
-                transpose(friction_mapping(env)) * v2_surf[1];
-                transpose(friction_mapping(env)) * v3_surf[1];])
+    SVector{4}([transpose(friction_mapping(env)) * v1_surf[1];
+                transpose(friction_mapping(env)) * v2_surf[1];])
+                # transpose(friction_mapping(env)) * v3_surf[1];])
 end
 
 function load_params()
@@ -252,7 +250,7 @@ params = load_params()
 
 # nq, nu, nw, nc, m, g, m_block, μ_world, μ_block, r_ee, xlen_block, ylen_block, zlen_block
                          
-block_system_1D = Block1D(4, 1, 1, 3, #4,
+block_system_1D = Block1D(4, 1, 1, 2, #4,
                      params["m_ee"], params["gravity"], params["m_block"],
                      params["mu_ground"], params["mu_block"],
                      params["r_ee"], params["xlen_block"], params["ylen_block"], params["zlen_block"],

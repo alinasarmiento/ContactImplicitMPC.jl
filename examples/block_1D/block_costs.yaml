@@ -1,6 +1,6 @@
 q_scale: 1e-2
 q_vec: [0., 1, .0, .0]
-v_scale: 0 #1e-2
+v_scale: 1e-4
 v_vec: [0, 1., .0, .0]
 u_scale: 1e-4
 u_vec: [0.5]
@@ -10,10 +10,10 @@ kappa_sim: 0.7e-3
 H_mpc: 10
 ctrl_dt: 0.001
 
-ee_init: [-0.02]
-ee_des: [-0.02]
-block_init: [0.25, 0.055]
-block_des: [0.5, 0.055]
+ee_init: [-0.025]
+ee_des: [-0.025]
+block_init: [0.25, 0.05]
+block_des: [0.5, 0.05]
 block_vel_des: 0.1
 
 qlim_scale: .00

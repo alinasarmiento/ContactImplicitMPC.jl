@@ -1,5 +1,5 @@
 gravity: 9.81
-mu_ground: 0.8 #1.0 #0.01
+mu_ground: 0.4 #1.0 #0.01
 mu_block: 1.0 #0.4615
 
 m_ee: 0.1

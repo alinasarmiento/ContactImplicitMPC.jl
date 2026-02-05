@@ -27,7 +27,7 @@ env = s.env
 # ## Reference Trajectory
 ctrl_params = get_yaml()
 h = ctrl_params["ctrl_dt"]
-H = 100 #100
+H = 1000 #100
 ref_traj = contact_trajectory(model, env, H, h)
 ref_traj.h
 
@@ -42,8 +42,10 @@ qref = [ee_init[1];       # ee [x]
 uref = [0];
 f_Nee = -uref[1]
 f_Ng = (model.m_block*9.81)
-normal_ref = [f_Nee, f_Ng/2, f_Ng/2];
-fric_ref = [0, 0, -(f_Ng/2)*model.μ_world, 0, -(f_Ng/2)*model.μ_world,0]
+# normal_ref = [f_Nee, f_Ng/2, f_Ng/2];
+normal_ref = [f_Nee, f_Ng];
+# fric_ref = [0, 0, -(f_Ng/2)*model.μ_world, 0, -(f_Ng/2)*model.μ_world,0]
+fric_ref = [0, 0, -(f_Ng)*model.μ_world, 0]
 
 # ur = zeros(model.nu) #ones(model.nu)
 # γr = zeros(model.nc)
@@ -88,7 +90,7 @@ for t = 1:H
     ref_traj.θ[t] = pack_θ(model, qref, qref, ur, wr, model.μ_world, ref_traj.h)
     ref_traj.q[t] = q_goal #qref_traj[t] #qref + [t*h*block_xvel; t*h*block_xvel; 0; 0]
     ref_traj.u[t] = [0] #uref_traj[t]  #ur
-    ref_traj.γ[t] = [0, γr[2], γr[3]] #[-uref_traj[t][1], γr[2], γr[3]] #γr
+    ref_traj.γ[t] = [0, γr[2]] #, γr[3]] #[-uref_traj[t][1], γr[2], γr[3]] #γr
     ref_traj.b[t] = br
 end
 ref_traj.q[H+1] = qref_traj[H+1]
@@ -122,7 +124,7 @@ status = simulate!(sim, q1, v1, verbose=true)
 # force_mat = mapreduce(permutedims, vcat, sim.traj.γ)
 # tanf_mat = mapreduce(permutedims, vcat, sim.traj.b)
 
-# # @infiltrate
+# @infiltrate
 ##########################
 
 
@@ -201,7 +203,9 @@ sim_ip_opts = InteriorPointOptions(
     diff_sol = true,
     max_time = 1e5,)
 
-sim = simulator(s, H_sim, h=h_sim, policy=p)
+const_u = [0.001]
+const_p = ContactImplicitMPC.open_loop_policy(Vector{Vector{Float64}}([copy(const_u) for _ in 1:H_sim]), N_sample=N_sample)
+sim = simulator(s, H_sim, h=h_sim, policy=const_p)#p)
 # sim = simulator(s, H_sim, h=h_sim, policy=p, solver_opts=sim_ip_opts) #, dist=d)
 
 # ## Simulate
