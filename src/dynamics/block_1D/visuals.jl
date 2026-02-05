@@ -67,7 +67,7 @@ function set_robot!(vis::Visualizer, model::Block1D, q::AbstractVector; name::Sy
     settransform!(vis[name][:robot]["ee"], Translation(q[1], 0.0, 0.05))
 
     block_pos = Translation(q[2], 0.0, q[3])
-    block_rot = LinearMap(RotY(q[4]))
+    block_rot = LinearMap(RotY(0)) #q[4]))
     block_tf = compose(block_pos, block_rot)
     settransform!(vis[name][:object]["block"], block_tf)
     

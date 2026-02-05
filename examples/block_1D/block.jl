@@ -36,8 +36,10 @@ ee_des = deepcopy(ctrl_params["ee_des"])
 block_init = deepcopy(ctrl_params["block_init"])
 block_des = deepcopy(ctrl_params["block_des"])
 
+# qref = [ee_init[1];       # ee [x]
+#         block_init[1]; block_init[2]; 0.0;] # block [x,z,th]
 qref = [ee_init[1];       # ee [x]
-        block_init[1]; block_init[2]; 0.0;] # block [x,z,th]
+        block_init[1]; block_init[2];] # block [x,z,th]
 
 uref = [0];
 f_Nee = -uref[1]
@@ -100,9 +102,9 @@ update_friction_coefficient!(ref_traj, model, env)
 # ## Initial conditions
 
 q1 = [ee_init[1];       # ee [x,z]
-        block_init[1]; block_init[2]; 0.0;] # block [x,z,th]
+        block_init[1]; block_init[2];] # block [x,z,th]
 v1 = [0.0;
-      0.0; 0.0; 0.0;]
+      0.0; 0.0;]
 
 # ## Simulator
 sim = simulator(s, H, h=0.001)
@@ -185,7 +187,7 @@ end
 
 # ## MPC setup 
 N_sample = 5
-obj, p = obj_policy(model, env, ctrl_params, N_sample)
+# obj, p = obj_policy(model, env, ctrl_params, N_sample)
 κ_sim = ctrl_params["kappa_sim"] #0.7e-3
 h_sim = ctrl_params["ctrl_dt"] / N_sample
 H_sim = 1000

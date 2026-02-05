@@ -75,22 +75,27 @@ function kinematics(model::Block1D, q; mode=:contacts)
         # option 3: closest point to block (side) plane
         d = model.zlen_block/2
         w = model.xlen_block/2
-        xe, xb, zb, thb = q
+        xe, xb, zb = q
         ze = 0.05
-        thb = -thb
-        l = (-sin(thb))*(xe-xb) + (-cos(thb))*(ze-zb) - w
-        ee = SVector{2}([xe,ze]+[(l*cos(thb)),(l*sin(thb))])
+        # thb = -thb
+        # l = (-sin(thb))*(xe-xb) + (-cos(thb))*(ze-zb) - w
+        # ee = SVector{2}([xe,ze]+[(l*cos(thb)),(l*sin(thb))])
 
         ## block contact points
         # block1 = SVector{2}([xb,zb] + d*[sin(thb),-cos(thb)] + w*[cos(thb),sin(thb)])
         # block2 = SVector{2}([xb,zb] + d*[sin(thb),-cos(thb)] - w*[cos(thb),sin(thb)])
-        block = SVector{2}([xb,zb] + d*[sin(thb),-cos(thb)])
+        # block = SVector{2}([xb,zb] + d*[sin(thb),-cos(thb)])
+
+
+        ## NO ROTATION:
+        ee = SVector{2}([xb-w, zb])
+        block = SVector{2}([xb, zb-d])
         
         return SVector{4}([ee; block;])
     elseif mode == :ee
         return q[1]
     elseif mode == :block
-        return q[2:4]
+        return q[2:3] #4]
     else
         @error "incorrect mode"
         return
@@ -105,7 +110,7 @@ function M_func(model::Block1D, q)
     w_b = model.xlen_block
     I_b = (1/12)*mt*(h_b^2 + w_b^2)
 
-    Diagonal(@SVector [m, mb, mb, I_b])
+    Diagonal(@SVector [m, mb, mb]) #, I_b])
 end
 
 # gravity
@@ -114,7 +119,7 @@ function C_func(model::Block1D, q, q̇)
     mb = model.m_block
     g = model.g
 
-    @SVector [0.0, 0.0, mb*g, 0.0]
+    @SVector [0.0, 0.0, mb*g] #, 0.0]
 end
 
 function dist_block(model::Block1D, p, pt)
@@ -122,9 +127,9 @@ function dist_block(model::Block1D, p, pt)
 
     differ = p-pt[1:2]
     # beta = atan(diff[1]/diff[2]) + pt[3] # angle between vector and tray-vertical
-    R = [cos(pt[3]) -sin(pt[3]); sin(pt[3]) cos(pt[3])];
-    xdiff,zdiff = R*(differ)
-
+    # R = [cos(pt[3]) -sin(pt[3]); sin(pt[3]) cos(pt[3])];
+    # xdiff,zdiff = R*(differ)
+    xdiff, zdiff = differ
     ## just halfplane
     # zdist = zdiff - model.zlen_block/2 - model.r
     
@@ -150,7 +155,7 @@ function ϕ_func(model::Block1D, env::Environment, q)
     ee = [q[1], 0.05]
     block = cp[3:4]
     # block2 = cp[5:6]
-    block_q = q[2:4]    
+    block_q = q[2:3] #4]    
 
     ee_block_dist = dist_block(model, ee, block_q) - model.r
     # block1_dist = block1[2] #- (model.zlen_block/2)
@@ -162,17 +167,17 @@ end
 
 # control Jacobian
 function B_func(model::Block1D, q)
-    B = zeros(1,4)
+    B = zeros(1,model.nq)
     B[1,1] = 1
-    B = SMatrix{1,4}(B)
+    B = SMatrix{1,model.nq}(B)
     return B
 end
 
 # disturbance Jacobian
 function A_func(model::Block1D, q)
-    A = zeros(4,1)
+    A = zeros(model.nq,1)
     A[1,1] = 1
-    A = SMatrix{4,1}(A)
+    A = SMatrix{model.nq,1}(A)
     return A
 end
 
@@ -182,11 +187,11 @@ function _jacobian(model::Block1D, q, dists; mode=:ee_b)
     # b_g := block-ground contact
     # ee_g := EE-ground contact
 
-    x_ee, x_b, z_b, th_b = q
+    x_ee, x_b, z_b = q
     z_ee = 0.05
-    rot_th = [cos(th_b) sin(th_b);
-              -sin(th_b) cos(th_b)]
-    x_ee_b, z_ee_b = rot_th * [(x_ee-x_b); (z_ee-z_b)]
+    # rot_th = [cos(th_b) sin(th_b);
+    #           -sin(th_b) cos(th_b)]
+    # x_ee_b, z_ee_b = rot_th * [(x_ee-x_b); (z_ee-z_b)]
 
     #contacts: ee-b, b-g-front, b-g-back
     # tangent, normal for each contact
@@ -195,14 +200,14 @@ function _jacobian(model::Block1D, q, dists; mode=:ee_b)
         # convention: tangent faces up (+z) and normal faces back (-x)
         # j = SMatrix{2,4}([-sin(th_b) sin(th_b) cos(th_b) 0; #(model.xlen_block/2);
         #                   -cos(th_b) cos(th_b) -sin(th_b) 0;]) #-z_ee_b;])
-        j = SMatrix{2,4}([0 0 1 0;
-                          -1 1 0 0;])
+        j = SMatrix{2,3}([0 0 1;
+                          -1 1 0;])
         return j
         
     elseif mode == :b_g
         
-        j = SMatrix{2,4}([0.0 1.0 0.0 0;
-                          0.0 0.0 1.0 0;])
+        j = SMatrix{2,3}([0.0 1.0 0.0;
+                          0.0 0.0 1.0;])
                           # 0.0 1.0 0.0 -(model.zlen_block/2)*cos(th_b);
                           # 0.0 0.0 1.0 (model.xlen_block/2)*cos(th_b)])
         return j
@@ -212,7 +217,7 @@ end
 # contact Jacobian
 function J_func(model::Block1D, env::Environment, q)
     dists = ϕ_func(model::Block1D, env::Environment, q)
-    return SMatrix{4, 4}([_jacobian(model, q, dists, mode=:ee_b);
+    return SMatrix{4, 3}([_jacobian(model, q, dists, mode=:ee_b);
                           _jacobian(model, q, dists, mode=:b_g);])
 end
 
@@ -250,16 +255,16 @@ params = load_params()
 
 # nq, nu, nw, nc, m, g, m_block, μ_world, μ_block, r_ee, xlen_block, ylen_block, zlen_block
                          
-block_system_1D = Block1D(4, 1, 1, 2, #4,
+block_system_1D = Block1D(3, 1, 1, 2, #4,
                      params["m_ee"], params["gravity"], params["m_block"],
                      params["mu_ground"], params["mu_block"],
                      params["r_ee"], params["xlen_block"], params["ylen_block"], params["zlen_block"],
 	             BaseMethods(), DynamicsMethods(),
-	             SVector{4}(zeros(4)), # joint friction
+	             SVector{3}(zeros(3)), # joint friction
                      SVector{1}([-10]), # u min
                      SVector{1}([10]),   # u max
-                     SVector{4}([-1, -5,-5,-5]), # q min (x,z, xblock,zblock,thblock)
-                     SVector{4}([1, 5,5,5]),   # q max
+                     SVector{3}([-1, -5,-5]), # q min (x,z, xblock,zblock,thblock)
+                     SVector{3}([1, 5,5]),   # q max
 )
 
 function friction_coefficients(model::Block1D) 
